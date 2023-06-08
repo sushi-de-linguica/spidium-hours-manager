@@ -4,10 +4,12 @@ on:
   pull_request:
     types:
       - closed
+    branches:
+      - main
 
 jobs:
   release:
-    if: ${{ github.event.pull_request.merged && startsWith(github.event.pull_request.base.ref, 'refs/heads/release/v') }}
+    if: github.event.pull_request.merged == true
     runs-on: ${{ matrix.os }}
 
     strategy:
