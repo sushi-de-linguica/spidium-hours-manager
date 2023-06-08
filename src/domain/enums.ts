@@ -1,0 +1,21 @@
+export enum EWsEvents {
+  NEW_OBS = "NEW_OBS",
+  CONNECT_OBS = "CONNECT_OBS",
+  DISCONNECT_OBS = "DISCONNECT_OBS",
+  SEND_BATCH_EVENT_OBS = "SEND_BATCH_EVENT_OBS",
+}
+
+export enum EExportType {
+  RUN_SCREEN = "RUN_SCREEN",
+  SETUP_SCREEN = "SETUP_SCREEN",
+}
+
+export enum EIpcEvents {
+  FILE_SAVE = "IPC:FILE_SAVE",
+  FILE_REMOVE = "IPC:FILE_REMOVE",
+  COPY_FILE = "IPC:COPY_FILE",
+}
+
+export enum EProtocolEvents {
+  SHM_PROTOCOL_DATA = "SHM-PROTOCOL-DATA",
+}
