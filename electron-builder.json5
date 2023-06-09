@@ -28,10 +28,4 @@
     allowToChangeInstallationDirectory: true,
     deleteAppDataOnUninstall: false,
   },
-  publish: {
-    provider: "github",
-    owner: "SushiDeLinguiça",
-    releaseType: "release",
-    channel: "latest",
-  },
 }
