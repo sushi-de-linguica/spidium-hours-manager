@@ -14,6 +14,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "build:publish:always": "tsc && vite build && electron-builder --publish always",
+    "build:publish:tag": "tsc && vite build && electron-builder --publish onTag",
     "build:tsc": "tsc",
     "build:vite": "tsc && vite build",
     "preview": "vite preview",
