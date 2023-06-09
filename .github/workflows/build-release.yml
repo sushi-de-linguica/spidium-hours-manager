@@ -1,15 +1,9 @@
 name: Build/release
 
-on:
-  pull_request:
-    types:
-      - closed
-    branches:
-      - main
+on: workflow_dispatch
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -20,22 +14,12 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v1
 
-      - name: Get latest commit with tag
-        id: latest_commit
-        run: echo "::set-output name=commit::$(git rev-list --tags --max-count=1)"
-
-      - name: Get latest tag
-        id: latest_tag
-        run: echo "::set-output name=tag::$(git describe --tags ${{ steps.latest_commit.outputs.commit }})"
-
       - name: Install Node.js, NPM and Yarn
-        if: startsWith(steps.latest_tag.outputs.tag, 'v')
         uses: actions/setup-node@v1
         with:
           node-version: 16
 
       - name: Build/release Electron app
-        if: startsWith(steps.latest_tag.outputs.tag, 'v')
         uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.github_token }}
