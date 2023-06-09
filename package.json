@@ -2,7 +2,7 @@
   "name": "spidium-hours-manager",
   "version": "0.2.3",
   "main": "dist-electron/main/index.js",
-  "description": "spidium baby. lets go",
+  "description": "spidium baby",
   "author": "matheus azambuja (sushi de linguiça) <matheushenrique.ads@gmail.com>",
   "license": "MIT",
   "private": false,
