@@ -1,7 +1,13 @@
-import { test, expect, _electron as electron, Page } from "@playwright/test";
+import { test, expect, Page, ElectronApplication } from "@playwright/test";
 import { testId } from "../src/pages/manager/options";
 import { memberFormTestId } from "../src/pages/manager/components/member-form/options";
-import { getLocalStorage, removeLocalStorageItem } from "./utils";
+import { memberTabTestId } from "../src/pages/manager/tabs/member/options";
+import {
+  getLocalStorage,
+  resetMemberStore,
+  run,
+  setLocalStorageKey,
+} from "./utils";
 
 const STORAGE_NAME = "SPIDIUM_MEMBER_STORE_TEST";
 
@@ -22,37 +28,70 @@ const parseTestContentToExpectContent = (content: any) => ({
   link: content[memberFormTestId.SOCIALS_FIELD],
 });
 
-test("should be complete add a member with success", async () => {
-  const expectContent = parseTestContentToExpectContent(testContent);
+const expectContent = parseTestContentToExpectContent(testContent);
 
-  const app = await electron.launch({ args: [".", "--no-sandbox"] });
-  const page = await app.firstWindow();
+let app: ElectronApplication;
+let page: Page;
 
-  await removeLocalStorageItem(page, STORAGE_NAME);
+test.beforeAll(async () => {
+  const newApp = await run();
+  app = newApp;
+  page = await newApp.firstWindow();
+  await resetMemberStore(page, STORAGE_NAME);
+  await page.reload();
+  await page.waitForTimeout(1000);
+});
 
-  await page.getByTestId(testId.TAB_MEMBER_BUTTON).click();
+test.describe("Member tests", () => {
+  test("should create a new member with success", async () => {
+    await page.getByTestId(testId.TAB_MEMBER_BUTTON).click();
 
-  const newMemberButton = page.getByTestId(memberFormTestId.NEW_BUTTON);
-  const saveAndUpdateButton = page.getByTestId(
-    memberFormTestId.SAVE_AND_UPDATE_BUTTON
-  );
+    const newMemberButton = page.getByTestId(memberFormTestId.NEW_BUTTON);
+    const saveAndUpdateButton = page.getByTestId(
+      memberFormTestId.SAVE_AND_UPDATE_BUTTON
+    );
 
-  await newMemberButton.click();
+    await newMemberButton.click();
 
-  const dialogTitle = page.getByTestId(memberFormTestId.DIALOG_TITLE);
-  await expect(dialogTitle).toHaveText("Adicionar membro");
+    const dialogTitle = page.getByTestId(memberFormTestId.DIALOG_TITLE);
+    await expect(dialogTitle).toHaveText("Adicionar membro");
 
-  for (const testId of Object.keys(testContent)) {
-    const field = page.getByTestId(testId);
-    await field.click();
-    await field.type(testContent[testId]);
-  }
+    for (const testId of Object.keys(testContent)) {
+      const field = page.getByTestId(testId);
+      await field.click();
+      await field.type(testContent[testId]);
+    }
 
-  await saveAndUpdateButton.click();
-  const localStorage = await getLocalStorage(page);
+    await saveAndUpdateButton.click();
+    const localStorage = await getLocalStorage(page);
 
-  const [firstMember] = JSON.parse(localStorage.SPIDIUM_MEMBER_STORE_TEST).state
-    .state.members;
+    const [firstMember] = JSON.parse(localStorage.SPIDIUM_MEMBER_STORE_TEST)
+      .state.state.members;
 
-  expect(firstMember).toMatchObject(expectContent);
+    expect(firstMember).toMatchObject(expectContent);
+  });
+
+  test("should be show member at datagrid list", async () => {
+    const dataToMock =
+      '{"state":{"state":{"members":[{"gender":"ele/dele","name":"SushiDeLinguiça","primaryTwitch":"sushidelinguica","secondaryTwitch":"hotrolldelinguica","streamAt":"sushidelinguica","link":"linktr.ee/sushidelinguica","id":"e73f6151-d99b-42f6-b2ff-7a694d12f9a7"}]}},"version":0}';
+    await setLocalStorageKey(page, STORAGE_NAME, dataToMock);
+    await page.reload();
+    await page.getByTestId(testId.TAB_MEMBER_BUTTON).click();
+    await page.waitForTimeout(1000);
+
+    const datagridRow = page.getByTestId(memberTabTestId.DATAGRID_ROW).first();
+    const columns = datagridRow.getByRole("cell");
+
+    const contents = await columns.allTextContents();
+
+    const [_, name, pronoun, primaryTwitch, secondaryTwitch, streamAt, link] =
+      contents;
+
+    expect(name).toBe(expectContent.name);
+    expect(pronoun).toBe(expectContent.gender);
+    expect(primaryTwitch).toBe(expectContent.primaryTwitch);
+    expect(secondaryTwitch).toBe(expectContent.secondaryTwitch);
+    expect(streamAt).toBe(expectContent.streamAt);
+    expect(link).toBe(expectContent.link);
+  });
 });
