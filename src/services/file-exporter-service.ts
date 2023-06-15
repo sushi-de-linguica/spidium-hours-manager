@@ -1,5 +1,6 @@
 import { IExportFileRun, IRun } from "@/domain";
 import * as fs from "fs";
+import * as os from "os";
 
 const REGEX = {
   LOOP_REGEX: /<loop property='(.*?)' separator='(.*?)'>(.*?)<\/loop>/,
@@ -28,6 +29,13 @@ class TextGenerator {
 
     if (maxCharsPerLine && maxCharsPerLine > 0) {
       output = this.breakIntoLines(output, maxCharsPerLine);
+    }
+
+    try {
+      const outputWithBreakLines = this.breakLinesReplace(output);
+      output = outputWithBreakLines;
+    } catch (error) {
+      console.log("error at try apply break lines", error);
     }
 
     return output;
@@ -93,6 +101,13 @@ class TextGenerator {
     }
 
     return lines.join("\n");
+  }
+
+  private static breakLinesReplace(output: string) {
+    return output
+      .replaceAll("\\r\\n", "\\n")
+      .replaceAll("\\r", "\\n")
+      .replaceAll("\\n", os.EOL);
   }
 }
 
