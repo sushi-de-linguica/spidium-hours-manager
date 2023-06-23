@@ -13,6 +13,7 @@ import {
 import { IEvent } from "@/domain";
 import { useEventStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
+import { eventFormTestId } from "./options";
 
 const defaultData: IEvent = {
   id: "",
@@ -93,12 +94,21 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
                 label="Nome do evento"
                 value={currentData.name}
                 onChange={handleChange}
+                data-testid={eventFormTestId.NAME_FIELD}
                 fullWidth
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose}>Cancelar</Button>
-              <Button onClick={handleSubmit}>
+              <Button
+                onClick={handleClose}
+                data-testid={eventFormTestId.CANCEL_BUTTON}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                data-testid={eventFormTestId.SAVE_AND_UPDATE_BUTTON}
+              >
                 {showEditMode ? "Atualizar" : "Salvar"}
               </Button>
             </DialogActions>
