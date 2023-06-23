@@ -7,6 +7,7 @@ import {
 } from "@/stores";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { useMemo, useState, createRef } from "react";
+import { randomUUID } from "crypto";
 
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
@@ -51,7 +52,24 @@ const DataExportImportTab = () => {
   const handleImportDataFromText = () => {
     const handleSetStatesFromJson = (json: IExportedJsonFile) => {
       if (json.event && json.event?.events?.length > 0) {
-        eventStore.updateFullEventState(json.event.events);
+        const newEventData = json.event.events.map((event) => {
+          const { runs } = event;
+          const newRuns =
+            runs.length > 0
+              ? runs.map((run) => {
+                  return {
+                    ...run,
+                    id: run?.id ? run.id : randomUUID(),
+                  };
+                })
+              : [];
+          return {
+            ...event,
+            runs: newRuns,
+            id: event.id ? event.id : randomUUID(),
+          };
+        });
+        eventStore.updateFullEventState(newEventData);
       }
 
       if (json.configuration) {
