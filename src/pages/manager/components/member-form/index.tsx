@@ -20,6 +20,7 @@ import {
 import { IMember } from "@/domain";
 import { useMemberStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
+import { memberFormTestId } from "./options";
 
 const defaultData: IMember = {
   gender: "",
@@ -110,14 +111,19 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
 
   return (
     <FormControl>
-      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setOpen(true)}
+        data-testid={memberFormTestId.NEW_BUTTON}
+      >
         <AddIcon />
-        {showEditMode ? "Editar" : "Adicionar"} membro
+        Adicionar membro
       </Button>
       <Dialog open={open || showEditMode} onClose={handleClose} fullWidth>
         {(open || showEditMode) && (
           <>
-            <DialogTitle>
+            <DialogTitle data-testid={memberFormTestId.DIALOG_TITLE}>
               {showEditMode ? "Editar" : "Adicionar"} membro
             </DialogTitle>
             <DialogContent
@@ -126,6 +132,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                 flexDirection: "column",
                 gap: "8px",
               }}
+              data-testid={memberFormTestId.DIALOG_CONTENT}
             >
               <Grid gap="8px" display={"grid"} gridTemplateColumns={"1fr 2fr"}>
                 <Autocomplete
@@ -145,6 +152,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                       name="gender"
                       label="Pronomes"
                       placeholder="Pronomes"
+                      data-testid={memberFormTestId.PRONOUN_FIELD}
                     />
                   )}
                 />
@@ -155,6 +163,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                   value={currentMember.name}
                   onChange={handleChange}
                   fullWidth
+                  data-testid={memberFormTestId.NICKNAME_FIELD}
                 />
               </Grid>
 
@@ -173,6 +182,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                     ),
                   }}
                   fullWidth
+                  data-testid={memberFormTestId.PRIMARY_TWITCH}
                 />
 
                 <TextField
@@ -189,6 +199,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                     ),
                   }}
                   fullWidth
+                  data-testid={memberFormTestId.SECONDARY_TWITCH}
                 />
               </Grid>
 
@@ -200,6 +211,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                   name="streamAt"
                   value={currentMember?.streamAt}
                   onChange={handleChangeStreamAt}
+                  data-testid={memberFormTestId.STREAM_AT_FIELD}
                 >
                   {streamAtOption.map((option, index) => (
                     <MenuItem key={`${index}-${option}`} value={option}>
@@ -216,6 +228,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                 onChange={handleChange}
                 multiline
                 fullWidth
+                data-testid={memberFormTestId.SOCIALS_FIELD}
               />
               <Alert severity="info">
                 Caso o link do "Redes sociais" seja o mesmo da{" "}
@@ -224,8 +237,16 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
               </Alert>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose}>Cancelar</Button>
-              <Button onClick={handleSubmit}>
+              <Button
+                onClick={handleClose}
+                data-testid={memberFormTestId.CANCEL_BUTTON}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                data-testid={memberFormTestId.SAVE_AND_UPDATE_BUTTON}
+              >
                 {showEditMode ? "Atualizar" : "Salvar"}
               </Button>
             </DialogActions>

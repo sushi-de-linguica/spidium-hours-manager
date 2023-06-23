@@ -16,6 +16,7 @@ import { IMember } from "@/domain";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
+import { memberTabTestId } from "./options";
 
 const MembersTab = () => {
   const { members } = useMemberStore((store) => store.state);
@@ -122,6 +123,14 @@ const MembersTab = () => {
           columns={columns}
           autoHeight
           localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
+          forwardedProps={{
+            "data-testid": memberTabTestId.DATAGRID,
+          }}
+          slotProps={{
+            row: {
+              "data-testid": memberTabTestId.DATAGRID_ROW,
+            },
+          }}
         />
       </Box>
     </Box>

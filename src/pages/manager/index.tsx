@@ -25,6 +25,7 @@ import { EProtocolEvents } from "@/domain";
 import { NightbotApiService } from "@/services/nightbot-service";
 import { toast } from "react-toastify";
 import { EventsTab } from "./tabs/events";
+import { testId } from "./options";
 interface TabPanelProps {
   children?: ReactNode;
   index: number;
@@ -188,12 +189,36 @@ const RunManagerPage = () => {
           </Alert>
         )}
         <Tabs value={value} onChange={handleChange}>
-          <Tab label="Runs" icon={<SportsEsportsIcon />} />
-          <Tab label="Membros" icon={<PeopleIcon />} />
-          <Tab label="Eventos" icon={<SportsEsportsIcon />} />
-          <Tab label="Arquivos" icon={<FileCopyIcon />} />
-          <Tab label="Extensões" icon={<ExtensionIcon />} />
-          <Tab label="Avançado" icon={<UploadFileIcon />} />
+          <Tab
+            data-testid={testId.TAB_RUN_BUTTON}
+            label="Runs"
+            icon={<SportsEsportsIcon />}
+          />
+          <Tab
+            data-testid={testId.TAB_MEMBER_BUTTON}
+            label="Membros"
+            icon={<PeopleIcon />}
+          />
+          <Tab
+            data-testid={testId.TAB_EVENTS_BUTTON}
+            label="Eventos"
+            icon={<SportsEsportsIcon />}
+          />
+          <Tab
+            data-testid={testId.TAB_FILES_BUTTON}
+            label="Arquivos"
+            icon={<FileCopyIcon />}
+          />
+          <Tab
+            data-testid={testId.TAB_EXTENSIONS_BUTTON}
+            label="Extensões"
+            icon={<ExtensionIcon />}
+          />
+          <Tab
+            data-testid={testId.TAB_ADVANCED_BUTTON}
+            label="Avançado"
+            icon={<UploadFileIcon />}
+          />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>

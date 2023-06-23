@@ -1,0 +1,7 @@
+const memberTabTestId = {
+  DATAGRID: "MEMBER_DATAGRID",
+  DATAGRID_ROW: "MEMBER_DATAGRID_ROW",
+  DATAGRID_ACTIONS: "MEMBER_DATAGRID_ACTIONS",
+};
+
+export { memberTabTestId };

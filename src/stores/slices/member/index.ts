@@ -3,6 +3,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { randomUUID } from "crypto";
 import { useEventStore } from "@/stores";
+import { environment } from "@/application";
+
+let storageName = "SPIDIUM_MEMBER_STORE";
+if (environment.isTest) {
+  storageName = `${storageName}${environment.testSufix}`;
+}
 
 export interface IMemberStore {
   state: {
@@ -85,7 +91,7 @@ const useMemberStore = create<IMemberStore, any>(
         })),
     }),
     {
-      name: "SPIDIUM_MEMBER_STORE",
+      name: storageName,
     }
   )
 );
