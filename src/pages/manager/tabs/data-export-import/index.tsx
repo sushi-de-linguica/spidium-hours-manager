@@ -17,6 +17,7 @@ import { ConfirmDialog } from "../../components/confirm-dialog";
 import { IExportedJsonFile } from "@/domain";
 
 import { toast } from "react-toastify";
+import { downloadFile } from "@/services/download-file";
 
 enum ERemoveType {
   EVENT = "EVENT",
@@ -128,13 +129,7 @@ const DataExportImportTab = () => {
     };
 
     const jsonData = getExportDataStringify();
-    const blob = new Blob([jsonData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.download = `SHM-${formattedDate}.json`;
-    link.href = url;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadFile(`SHM-${formattedDate}.json`, jsonData, "application/json");
   };
 
   const handleReset = () => {
