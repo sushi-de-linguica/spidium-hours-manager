@@ -42,6 +42,17 @@ const MembersTab = () => {
     setIsOpenEditDialog(false);
   };
 
+  const RenderTwitchLink = ({ twitchUser }: any) => {
+    if (!twitchUser) {
+      return "";
+    }
+    return (
+      <a href={`https://twitch.tv/${twitchUser}`} target="_blank">
+        {twitchUser}
+      </a>
+    );
+  };
+
   const columns: GridColDef[] = [
     {
       field: "actions",
@@ -71,13 +82,26 @@ const MembersTab = () => {
     },
     { field: "name", headerName: "Nickname/Nome", minWidth: 100, flex: 1 },
     { field: "gender", headerName: "Pronome", width: 100 },
-    { field: "primaryTwitch", headerName: "Twitch primária", minWidth: 200 },
     {
+      field: "primaryTwitch",
+      renderCell: (options: any) => {
+        return <RenderTwitchLink twitchUser={options.row.primaryTwitch} />;
+      },
+      headerName: "Twitch primária",
+      minWidth: 200,
+    },
+    {
+      renderCell: (options: any) => {
+        return <RenderTwitchLink twitchUser={options.row.secondaryTwitch} />;
+      },
       field: "secondaryTwitch",
       headerName: "Twitch alternativa",
       minWidth: 200,
     },
     {
+      renderCell: (options: any) => {
+        return <RenderTwitchLink twitchUser={options.row.streamAt} />;
+      },
       field: "streamAt",
       headerName: "Vai transmitir em",
       minWidth: 200,

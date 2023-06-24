@@ -215,7 +215,20 @@ const RunsTab = () => {
     { field: "category", headerName: "Categoria", flex: 1 },
     { field: "platform", headerName: "Plataforma", width: 100 },
     { field: "estimate", headerName: "Estimativa", width: 130 },
-    { field: "all_runners", headerName: "Runner(s)", width: 200 },
+    {
+      field: "all_runners",
+      renderCell: (options) => {
+        return (
+          <div
+            dangerouslySetInnerHTML={{
+              __html: options.row.all_runners_nodes,
+            }}
+          />
+        );
+      },
+      headerName: "Runner(s)",
+      flex: 1,
+    },
     { field: "all_hosts", headerName: "Host(s)", minWidth: 200 },
     { field: "all_comments", headerName: "Comentarista(s)", minWidth: 200 },
   ];
