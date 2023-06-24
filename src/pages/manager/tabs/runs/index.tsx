@@ -10,6 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
+import * as os from "os";
 import {
   Alert,
   Box,
@@ -30,13 +31,15 @@ import { useMemo, useState } from "react";
 import { useConfigurationStore, useEventStore, useFileStore } from "@/stores";
 import { ConfirmDialog } from "../../components/confirm-dialog";
 import { EExportType, IMember, IRun } from "@/domain";
-import { FileExporter } from "@/services/file-exporter-service";
+import { FileExporter, TextGenerator } from "@/services/file-exporter-service";
 import { NightbotApiService } from "@/services/nightbot-service";
 import { toast } from "react-toastify";
 import { ipcRenderer } from "electron";
 import { EIpcEvents, EWsEvents } from "@/domain/enums";
 import { CommandSuggestionDialog } from "../../components/command-suggestion";
 import { RunsOrderDialog } from "../../components/runs-order";
+import { CommandSuggestionService } from "@/services/command-suggestion";
+import { downloadFile } from "@/services/download-file";
 
 const RunsTab = () => {
   const {
@@ -451,6 +454,24 @@ const RunsTab = () => {
     setIsOpenSetupAlert(false);
   };
 
+  const { seo_title_template } = useConfigurationStore((store) => store.state);
+
+  const handleExportRunsTitleAndGame = () => {
+    const datagridData = getDatagridDataByEventId(current_event_id);
+    const data = datagridData.map((row) => {
+      const title = CommandSuggestionService.getTitleByRun(
+        seo_title_template,
+        row
+      );
+      const game = CommandSuggestionService.getGameByRun(row);
+
+      return `!title ${title};!game ${game}`;
+    });
+
+    const dataWithLineBreaks = data.join(os.EOL);
+    downloadFile("title-e-game.txt", dataWithLineBreaks);
+  };
+
   return (
     <Box>
       {events.length === 0 && (
@@ -511,6 +532,14 @@ const RunsTab = () => {
               showEditMode={isOpenEditDialog}
               onClose={handleCancelEditDialog}
             />
+
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleExportRunsTitleAndGame}
+            >
+              Exportar comandos de title e game
+            </Button>
 
             <RunsOrderDialog eventId={current_event_id} />
           </div>

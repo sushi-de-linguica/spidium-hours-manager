@@ -1,4 +1,4 @@
-import { IMember, IRun } from "@/domain";
+import { IRun } from "@/domain";
 import {
   Box,
   Button,
@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { ClipboardCopy } from "../clipboard-copy";
-import { useMemo, useState } from "react";
-import { TextGenerator } from "@/services/file-exporter-service";
+import { useMemo } from "react";
 import { useConfigurationStore } from "@/stores";
+import { CommandSuggestionService } from "@/services/command-suggestion";
 
 interface ICommandsSuggestDialogProps {
   run: IRun | null;
@@ -28,28 +28,19 @@ const CommandSuggestionDialog = ({
 
   const { seo_title_template } = useConfigurationStore((store) => store.state);
 
-  const makeTitle = () => {
-    const hasCustomTemplate = run?.seoTitle && run?.seoTitle?.length > 0;
-
-    return TextGenerator.generate(
-      hasCustomTemplate ? run.seoTitle! : seo_title_template,
+  const titleMemo = useMemo(() => {
+    const title = CommandSuggestionService.getTitleByRun(
+      seo_title_template,
       run
     );
-  };
 
-  const getGame = () => {
-    const hasCustomGame = run.seoGame && run?.seoGame?.length > 0;
-
-    return hasCustomGame ? run.seoGame! : run.game;
-  };
-
-  const titleMemo = useMemo(() => {
-    return `!title ${makeTitle()}`;
-  }, [run]);
+    return `!title ${title}`;
+  }, [run, seo_title_template]);
 
   const gameMemo = useMemo(() => {
-    return `!game ${getGame()}`;
-  }, [run]);
+    const game = CommandSuggestionService.getGameByRun(run);
+    return `!game ${game}`;
+  }, [run, seo_title_template]);
 
   return (
     <>
