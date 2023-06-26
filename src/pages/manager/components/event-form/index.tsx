@@ -147,7 +147,10 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
       if (mappedRunners.length > 0) {
         const foundRunners: IMember[] = [];
-        const runnersToCreate: Pick<IMember, "name" | "primaryTwitch">[] = [];
+        const runnersToCreate: Pick<
+          IMember,
+          "name" | "primaryTwitch" | "streamAt"
+        >[] = [];
 
         mappedRunners.map((mappedRunner) => {
           const isMemberWithTwitch = mappedRunner.value !== null;
@@ -168,6 +171,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
             isAllowedPopulateMembers &&
               runnersToCreate.push({
                 primaryTwitch: isMemberWithTwitch ? findPrimaryTwitch : "",
+                streamAt: isMemberWithTwitch ? findPrimaryTwitch : "",
                 name: mappedRunner.text,
               });
             return;
