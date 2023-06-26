@@ -12,7 +12,6 @@ import {
   Autocomplete,
   Box,
   Button,
-  Checkbox,
   FormControl,
   FormControlLabel,
   FormLabel,

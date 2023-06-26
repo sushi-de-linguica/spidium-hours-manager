@@ -9,8 +9,10 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   Grid,
-  Paper,
+  Switch,
   TextField,
 } from "@mui/material";
 import { IEvent, IMember } from "@/domain";
@@ -22,6 +24,7 @@ import { toast } from "react-toastify";
 import { convertTime } from "@/helpers/convert-time";
 import { getMDString } from "@/helpers/get-md-string";
 import { sanitizeString } from "@/helpers/sanitize-string";
+import { defaultMemberData } from "../member-form";
 
 const defaultData: IEvent = {
   id: "",
@@ -40,9 +43,12 @@ interface IRunFormProps {
 }
 
 const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
+  const [isAllowedPopulateMembers, setIsAllowedPopulateMembers] =
+    useState(true);
   const [open, setOpen] = useState(false);
   const { addEvent, updateEvent } = useEventStore();
   const { members } = useMemberStore((store) => store.state);
+  const { addMember } = useMemberStore();
 
   const [currentData, setCurrentData] = useState<IEvent>(
     showEditMode && event ? { ...event } : { ...defaultData }
@@ -76,6 +82,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
     }
     setOpen(false);
     setCurrentData(defaultData);
+    setIsAllowedPopulateMembers(true);
   };
 
   const handleSubmit = async () => {
@@ -95,8 +102,8 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
   };
 
   const handleImportRunsFromHoraro = async () => {
-    console.log(currentData.scheduleLink);
     const horaroService = new HoraroImportService(currentData.scheduleLink!);
+
     const schedule: any = await horaroService
       .getSchedule()
       .catch(() =>
@@ -131,28 +138,49 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
     }
 
     const getRunnersFromMDMapped = (mappedRunners: any[]) => {
+      let createdRunners: IMember[] = [];
+
       if (mappedRunners.length > 0) {
         const foundRunners: IMember[] = [];
+        const runnersToCreate: Pick<IMember, "name" | "primaryTwitch">[] = [];
 
         mappedRunners.map((mappedRunner) => {
-          const twitchUserSplit = mappedRunner.value.split("twitch.tv/");
-          if (!twitchUserSplit) {
-            return;
-          }
+          const isMemberWithTwitch = mappedRunner.value !== null;
 
-          const runner = members.find(
-            (member) =>
-              sanitizeString(twitchUserSplit[1]) === member.primaryTwitch
-          );
+          const findPrimaryTwitch = isMemberWithTwitch
+            ? mappedRunner.value.split("twitch.tv/")[1]
+            : mappedRunner.text;
+
+          const runner = members
+            .filter((member) => member.primaryTwitch)
+            .find(
+              (member) =>
+                sanitizeString(findPrimaryTwitch).toLowerCase() ===
+                member.primaryTwitch?.toLowerCase()
+            );
 
           if (!runner) {
+            isAllowedPopulateMembers &&
+              runnersToCreate.push({
+                primaryTwitch: isMemberWithTwitch ? findPrimaryTwitch : "",
+                name: mappedRunner.text,
+              });
             return;
           }
 
           foundRunners.push(runner);
         });
 
-        return foundRunners;
+        if (isAllowedPopulateMembers && runnersToCreate.length > 0) {
+          createdRunners = runnersToCreate.map((runnerStartData) => {
+            const newMember = addMember({
+              ...defaultMemberData,
+              ...runnerStartData,
+            });
+            return newMember;
+          });
+        }
+        return [...foundRunners, ...createdRunners];
       }
 
       return [];
@@ -222,12 +250,24 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
                 <Grid
                   marginTop={"16px"}
                   gap="8px"
-                  display="grid"
+                  display="flex"
+                  flexDirection={"column"}
                   justifyContent={"center"}
                   alignContent={"center"}
                   alignItems={"center"}
                   gridTemplateColumns={"1fr 1fr"}
                 >
+                  <FormGroup>
+                    <FormControlLabel
+                      onChange={(_, checked) => {
+                        setIsAllowedPopulateMembers(checked);
+                      }}
+                      value={isAllowedPopulateMembers}
+                      control={<Switch defaultChecked />}
+                      label="Criar membros não existentes na base de dados"
+                    />
+                  </FormGroup>
+
                   <Button
                     onClick={handleImportRunsFromHoraro}
                     color="primary"
@@ -238,7 +278,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
                     Importar do horaro
                   </Button>
 
-                  {currentData.runs?.length > 0 && (
+                  {true && (
                     <Chip
                       color="success"
                       variant="outlined"

@@ -14,7 +14,7 @@ export interface IMemberStore {
   state: {
     members: IMember[];
   };
-  addMember: (run: IMember) => void;
+  addMember: (run: IMember) => IMember;
   updateMember: (run: IMember) => void;
   removeMember: (run: IMember) => void;
   setState: (files: IMember[]) => void;
@@ -31,12 +31,12 @@ const useMemberStore = create<IMemberStore, any>(
       state: {
         ...DEFAULT_STATE,
       },
-      addMember: (member: IMember) => {
-        set((state) => {
-          if (!member.id) {
-            member.id = randomUUID();
-          }
+      addMember: (member: IMember): IMember => {
+        if (!member.id) {
+          member.id = randomUUID();
+        }
 
+        set((state) => {
           return {
             ...state,
             state: {
@@ -45,6 +45,8 @@ const useMemberStore = create<IMemberStore, any>(
             },
           };
         });
+
+        return member;
       },
       updateMember: (member: IMember) => {
         set((state) => {
