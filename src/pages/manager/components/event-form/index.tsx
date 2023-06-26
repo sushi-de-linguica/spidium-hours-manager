@@ -95,6 +95,11 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
     if (showEditMode) {
       updateEvent(dataToSave);
     } else {
+      if (dataToSave.runs.length > 0) {
+        dataToSave.runs.forEach((run) => {
+          run.runners.forEach(addMember);
+        });
+      }
       addEvent(dataToSave);
     }
 
@@ -173,10 +178,10 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
         if (isAllowedPopulateMembers && runnersToCreate.length > 0) {
           createdRunners = runnersToCreate.map((runnerStartData) => {
-            const newMember = addMember({
+            const newMember = {
               ...defaultMemberData,
               ...runnerStartData,
-            });
+            };
             return newMember;
           });
         }

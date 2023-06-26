@@ -37,6 +37,14 @@ const useMemberStore = create<IMemberStore, any>(
         }
 
         set((state) => {
+          const alreadyExist = state.state.members.find(
+            (currentMember) => currentMember.id === member.id
+          );
+
+          if (alreadyExist) {
+            return state;
+          }
+
           return {
             ...state,
             state: {
