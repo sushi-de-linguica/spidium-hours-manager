@@ -5,7 +5,6 @@ import {
 } from "@/domain";
 import { useNightbot } from "@/stores";
 import axios, {
-  Axios,
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,

@@ -92,14 +92,6 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
     setCurrentRun((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleChangeCheckbox = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    value: boolean
-  ) => {
-    const { name } = event.target;
-    setCurrentRun((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleUploadFile = (uuid: string): Promise<string | null> => {
     return ipcRenderer.invoke(EIpcEvents.FILE_SAVE, {
       file,

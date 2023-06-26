@@ -22,7 +22,7 @@ import { useMemberStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
 import { memberFormTestId } from "./options";
 
-const defaultData: IMember = {
+export const defaultMemberData: IMember = {
   gender: "",
   name: "",
   primaryTwitch: "",
@@ -44,7 +44,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
   const { addMember, updateMember } = useMemberStore((store) => store);
 
   const [currentMember, setCurrentMember] = useState<IMember>(
-    showEditMode && member ? { ...member } : { ...defaultData }
+    showEditMode && member ? { ...member } : { ...defaultMemberData }
   );
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
       onClose();
     }
     setOpen(false);
-    setCurrentMember({ ...defaultData });
+    setCurrentMember({ ...defaultMemberData });
     setStreamAtOptions([]);
   };
 
@@ -105,7 +105,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
       addMember(newCurrentMember);
     }
 
-    setCurrentMember(defaultData);
+    setCurrentMember(defaultMemberData);
     handleClose();
   };
 
