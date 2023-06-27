@@ -28,7 +28,12 @@ import { ptBR } from "@mui/x-data-grid";
 import { exportRunsToDatagridRows } from "@/helpers/runs-to-datagrid-rows";
 import RunForm from "../../components/run-form";
 import { useMemo, useState } from "react";
-import { useConfigurationStore, useEventStore, useFileStore } from "@/stores";
+import {
+  useConfigurationStore,
+  useEventStore,
+  useFileStore,
+  useTwitch,
+} from "@/stores";
 import { ConfirmDialog } from "../../components/confirm-dialog";
 import { EExportType, IMember, IRun } from "@/domain";
 import { FileExporter, TextGenerator } from "@/services/file-exporter-service";
@@ -40,11 +45,13 @@ import { CommandSuggestionDialog } from "../../components/command-suggestion";
 import { RunsOrderDialog } from "../../components/runs-order";
 import { CommandSuggestionService } from "@/services/command-suggestion";
 import { downloadFile } from "@/services/download-file";
+import { TwitchApiService } from "@/services/twitch-service";
 
 const RunsTab = () => {
   const {
     last_selected_run_id,
     last_selected_setup_id,
+    last_selected_title_id,
     path_run,
     path_setup,
     path_assets,
@@ -72,9 +79,11 @@ const RunsTab = () => {
     return true;
   }, [obs_browser_cam_input_name, obs_browser_game_input_name]);
 
-  const { updateLastRunId, updateLastSetupId } = useConfigurationStore();
+  const { updateLastRunId, updateLastSetupId, updateLastTitleId } =
+    useConfigurationStore();
   const { current_event_id, events } = useEventStore((store) => store.state);
   const { setCurrentEvent, removeRun } = useEventStore();
+  const twitchStore = useTwitch();
 
   const getDatagridDataByEventId = (eventId: string | null) => {
     if (!eventId) {
@@ -180,7 +189,7 @@ const RunsTab = () => {
     {
       field: "",
       headerName: "Status",
-      width: 150,
+      width: 210,
       renderCell: (params) => {
         return (
           <Box display="flex" gap={1}>
@@ -208,6 +217,19 @@ const RunsTab = () => {
                 setRunToExport(params.row);
                 setIsOpenRunAlert(false);
                 setIsOpenSetupAlert(true);
+              }}
+            />
+            <Chip
+              variant={
+                params.row.id === last_selected_title_id ? "filled" : "outlined"
+              }
+              size="small"
+              color="warning"
+              label="TITLE"
+              onClick={() => {
+                handleUpdateTitle(params.row);
+                handleUpdateGame(params.row);
+                updateLastTitleId(params.row.id);
               }}
             />
           </Box>
@@ -258,6 +280,80 @@ const RunsTab = () => {
 
   const handleCloseCommandSuggestion = () => {
     setCommandSuggestionDialogOpen(false);
+  };
+
+  const getTitle = (run: IRun) => {
+    const hasCustomTemplate = run?.seoTitle && run?.seoTitle?.length > 0;
+
+    return TextGenerator.generate(
+      hasCustomTemplate ? run.seoTitle! : seo_title_template,
+      run
+    );
+  };
+
+  const getGame = (run: IRun) => {
+    const hasCustomGame = run.seoGame && run?.seoGame?.length > 0;
+
+    return hasCustomGame ? run.seoGame! : run.game;
+  };
+
+  const handleUpdateTwitchChannelGame = async (gameName: string) => {
+    const twitchService = new TwitchApiService(
+      twitchStore.state.broadcaster_id
+    );
+
+    const response = await twitchService.getGameByName(gameName);
+
+    const game = response.data?.data[0];
+    if (game) {
+      twitchService
+        .updateChannel({
+          game_id: game.id,
+        })
+        .then(() => {
+          toast.success("Jogo da live atualizado");
+        })
+        .catch(() => {
+          toast.error("Erro ao atualizar jogo da live");
+        });
+    }
+  };
+
+  const handleUpdateTwitchChannelTitle = async (title: string) => {
+    const twitchService = new TwitchApiService(
+      twitchStore.state.broadcaster_id
+    );
+
+    twitchService
+      .updateChannel({
+        title,
+      })
+      .then(() => {
+        toast.success("Titulo da live atualizado");
+      })
+      .catch(() => {
+        toast.error("Erro ao atualizar o titulo da live");
+      });
+  };
+
+  const handleUpdateGame = (run: IRun) => {
+    try {
+      const newLiveGame = getGame(run);
+
+      handleUpdateTwitchChannelGame(newLiveGame);
+    } catch (error) {
+      console.error("[erro] ao atualizar o titulo na twitch", error);
+    }
+  };
+
+  const handleUpdateTitle = (run: IRun) => {
+    try {
+      const newLiveTitle = getTitle(run);
+
+      handleUpdateTwitchChannelTitle(newLiveTitle);
+    } catch (error) {
+      console.error("[erro] ao atualizar o titulo na twitch", error);
+    }
   };
 
   const handleConfirmExport = async (data: IRun) => {

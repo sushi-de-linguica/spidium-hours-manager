@@ -3,6 +3,7 @@ import {
   CONFIGURATION_DEFAULT_STATE,
   useConfigurationStore,
   useNightbot,
+  useTwitch,
 } from "@/stores";
 import {
   Accordion,
@@ -31,10 +32,15 @@ import { INightbotCommandModel } from "@/domain";
 
 import { toast } from "react-toastify";
 import { useObsStore } from "@/stores/slices/obs";
+import {
+  TwitchApiService,
+  getUrlToGetTokenFromTwitch,
+} from "@/services/twitch-service";
 
 const OptionsForm = () => {
   const currentConfiguration = useConfigurationStore((store) => store.state);
   const { updateConfiguration } = useConfigurationStore();
+  const twitchStore = useTwitch();
   const [commands, setCommands] = useState<INightbotCommandModel[]>([]);
   const [isShowInfos, setIsShowInfos] = useState(false);
   const [isShowWsInfos, setIsShowWsInfos] = useState(false);
@@ -89,6 +95,9 @@ const OptionsForm = () => {
       "nightbot_client_id",
       "nightbot_client_secret",
       "nightbot_redirect_uri",
+      "twitch_client_id",
+      "twitch_redirect_uri",
+      "twitch_token",
     ]);
 
     setConfiguration({
@@ -109,11 +118,34 @@ const OptionsForm = () => {
       });
     }
 
+    if (configuration.twitch_token !== twitchStore.state.access_token) {
+      twitchStore.setState({
+        ...twitchStore.state,
+        access_token: configuration.twitch_token,
+        client_id: configuration.twitch_client_id,
+      });
+      setTimeout(handleTwitchTest, 2000);
+    }
+
     toast.success("Configurações atualizadas com sucesso");
   };
 
   const handleChangeRadio = (event: React.ChangeEvent<HTMLInputElement>) => {
     setObsVersion(parseInt(event.target.value));
+  };
+
+  const handleTwitchTest = () => {
+    const twitchApiService = new TwitchApiService();
+
+    twitchApiService
+      .updateBroadcastId()
+      .then((data) => {
+        console.log("twitch data", data);
+        toast.success("Conexão com Twitch estabelecida com sucesso!");
+      })
+      .catch(() => {
+        toast.error("Erro ao estabelecer conexão com Twitch");
+      });
   };
 
   const handleUpdateCommandSettings = () => {
@@ -202,8 +234,103 @@ const OptionsForm = () => {
     toast.success("Configurações do Templates atualizadas com sucesso");
   };
 
+  const handleOpenTwitchAccessTokenLink = () => {
+    const URL = getUrlToGetTokenFromTwitch({
+      client_id: configuration.twitch_client_id,
+      redirect_uri: configuration.twitch_redirect_uri,
+    });
+
+    window.open(URL, "_blank");
+  };
+
+  const isDisabledTwitchLoginButton = useMemo(
+    () =>
+      !currentConfiguration.twitch_client_id ||
+      !currentConfiguration.twitch_redirect_uri,
+    [configuration, currentConfiguration, updateConfiguration]
+  );
+
   return (
     <FormControl>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Twitch</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box display="flex" flexDirection="column" gap="8px">
+            <TextField
+              autoFocus
+              margin="dense"
+              name="twitch_client_id"
+              label="CLIENT_ID"
+              type={isShowInfos ? "text" : "password"}
+              value={configuration.twitch_client_id}
+              onChange={handleChange}
+              fullWidth
+            />
+
+            <TextField
+              autoFocus
+              margin="dense"
+              name="twitch_redirect_uri"
+              label="REDIRECT_URI"
+              value={configuration.twitch_redirect_uri}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Box>
+
+          <Box
+            marginTop="24px"
+            marginBottom="12px"
+            display="flex"
+            flexDirection="row"
+            gap="12px"
+          >
+            <Button
+              color="primary"
+              variant="contained"
+              disabled={isDisabledTwitchLoginButton}
+              onClick={handleOpenTwitchAccessTokenLink}
+            >
+              Obter token da Twitch
+            </Button>
+          </Box>
+
+          <Box>
+            <TextField
+              autoFocus
+              margin="dense"
+              name="twitch_token"
+              label="Token"
+              type={isShowInfos ? "text" : "password"}
+              value={configuration.twitch_token}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Box>
+
+          <Box marginTop="24px" display="flex" flexDirection="row" gap="12px">
+            <Button
+              color="success"
+              variant="contained"
+              onClick={handleUpdateConfiguration}
+            >
+              Salvar
+            </Button>
+
+            <Button
+              color="warning"
+              variant="contained"
+              onClick={() => setIsShowInfos(!isShowInfos)}
+            >
+              {!isShowInfos
+                ? "Mostrar informações sensiveis"
+                : "Esconder informações sensiveis"}
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Nightbot</Typography>

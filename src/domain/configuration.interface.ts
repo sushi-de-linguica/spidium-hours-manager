@@ -6,6 +6,7 @@ export interface IConfiguration {
   path_assets: string;
   last_selected_run_id: string;
   last_selected_setup_id: string;
+  last_selected_title_id: string;
   nightbot_client_id: string;
   nightbot_client_secret: string;
   nightbot_redirect_uri: string;
@@ -24,4 +25,7 @@ export interface IConfiguration {
   obs_browser_cam_input_name: string;
   obs_browser_game_input_name: string;
   seo_title_template: string;
+  twitch_client_id: string;
+  twitch_redirect_uri: string;
+  twitch_token: string;
 }
