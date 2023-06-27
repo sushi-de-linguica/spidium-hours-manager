@@ -19,6 +19,8 @@ import { IExportedJsonFile } from "@/domain";
 import { toast } from "react-toastify";
 import { downloadFile } from "@/services/download-file";
 
+import Updater from "../../../../components/update/index";
+
 enum ERemoveType {
   EVENT = "EVENT",
   MEMBER = "MEMBER",
@@ -231,6 +233,8 @@ const DataExportImportTab = () => {
           <Button onClick={() => setExportCredentials(!exportCredentials)}>
             Exportar credenciais\secrets: {exportCredentials ? "SIM" : "NÃO"}
           </Button>
+
+          <Updater />
 
           <Box
             display="grid"
