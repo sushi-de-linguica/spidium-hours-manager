@@ -134,6 +134,29 @@ const OptionsForm = () => {
     setObsVersion(parseInt(event.target.value));
   };
 
+  const handleObsTest = () => {
+    if (window.obsService) {
+      window.obsService
+        .connect()
+        .then((result) => {
+          console.log("chegou ", result);
+          if (result === true) {
+            toast.success("Conexão com OBS estabelecida com sucesso!");
+            return;
+          }
+
+          let errorMessage = "Erro ao estabelecer conexão com OBS. ";
+          if (result && result.error) {
+            errorMessage += result.error;
+          }
+          toast.error(errorMessage);
+        })
+        .catch(() => {
+          toast.error("Erro ao estabelecer conexão com OBS");
+        });
+    }
+  };
+
   const handleTwitchTest = () => {
     const twitchApiService = new TwitchApiService();
 
@@ -719,22 +742,7 @@ const OptionsForm = () => {
           Testar conexão com nightbot
         </Button>
 
-        <Button
-          color="info"
-          variant="outlined"
-          onClick={() => {
-            if (window.obsService) {
-              window.obsService
-                .connect()
-                .then(() => {
-                  toast.success("Conexão com OBS estabelecida com sucesso!");
-                })
-                .catch(() => {
-                  toast.error("Erro ao estabelecer conexão com OBS");
-                });
-            }
-          }}
-        >
+        <Button color="info" variant="outlined" onClick={handleObsTest}>
           Testar conexão com OBS
         </Button>
 
