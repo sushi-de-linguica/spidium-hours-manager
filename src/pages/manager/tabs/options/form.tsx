@@ -737,6 +737,10 @@ const OptionsForm = () => {
         >
           Testar conexão com OBS
         </Button>
+
+        <Button color="info" variant="outlined" onClick={handleTwitchTest}>
+          Testar conexão com a Twitch
+        </Button>
       </Box>
     </FormControl>
   );
