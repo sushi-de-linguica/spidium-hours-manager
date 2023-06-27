@@ -1,6 +1,7 @@
 import { ipcRenderer } from "electron";
 import { useConfigurationStore } from "../stores";
 import { EWsEvents } from "@/domain/enums";
+import { toast } from "react-toastify";
 
 export class ObsWebsocketService {
   constructor(version: number) {
@@ -24,19 +25,23 @@ export class ObsWebsocketService {
           "[ObsWebsocketService] Dont has input name for game or cam..."
         );
 
-        return Promise.resolve();
+        toast.warning(
+          "não existe o nome de um ELEMENTO de Browser nas configurações do OBS"
+        );
+
+        return Promise.reject();
       }
 
-      console.log("CONNECT", obs_ws_address, obs_ws_password);
+      console.log("CONNECT START", obs_ws_address, obs_ws_password);
 
-      return ipcRenderer.invoke(EWsEvents.CONNECT_OBS, {
+      return await ipcRenderer.invoke(EWsEvents.CONNECT_OBS, {
         address: obs_ws_address,
         password: obs_ws_password,
         secure: false,
       });
     } catch (error) {
       console.error("[OBS] error: ", error);
-      throw error;
+      return Promise.reject(error);
     }
   }
 
