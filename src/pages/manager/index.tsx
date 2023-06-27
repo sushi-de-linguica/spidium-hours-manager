@@ -13,7 +13,12 @@ import { FilesTab } from "./tabs/files";
 import { MembersTab } from "./tabs/member";
 import { DataExportImportTab } from "./tabs/data-export-import";
 import { OptionsTab } from "./tabs/options";
-import { INightbotStore, useConfigurationStore, useNightbot } from "@/stores";
+import {
+  INightbotStore,
+  useConfigurationStore,
+  useNightbot,
+  useTwitch,
+} from "@/stores";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -48,6 +53,7 @@ function TabPanel({ children, value, index, ...other }: TabPanelProps) {
 const RunManagerPage = () => {
   const [value, setValue] = useState(0);
   const { access_token } = useNightbot((store: INightbotStore) => store.state);
+  const twitchState = useTwitch((store) => store.state);
   const [obsIsReady, setObsIsReady] = useState(false);
   const [listenersAttached, setListenersAttached] = useState(false);
   const { version } = useObsStore((store) => store.state);
@@ -167,6 +173,7 @@ const RunManagerPage = () => {
       <Status
         obs={obsIsReady ? "success" : "error"}
         nightbot={access_token !== "" ? "success" : "error"}
+        twitch={twitchState.access_token !== "" ? "success" : "error"}
       />
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         {access_token === "" && (
