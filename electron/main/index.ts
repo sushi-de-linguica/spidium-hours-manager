@@ -204,8 +204,8 @@ ipcMain.handle(EWsEvents.CONNECT_OBS, async (event, args) => {
     await websocket?.connect(args);
     return true;
   } catch (error) {
-    console.log("error", error);
-    return false;
+    console.log("[obs] Connection error", error);
+    return error;
   }
 });
 
