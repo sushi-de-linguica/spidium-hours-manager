@@ -20,6 +20,8 @@ import { toast } from "react-toastify";
 import { downloadFile } from "@/services/download-file";
 
 import Updater from "../../../../components/update/index";
+import axios from "axios";
+import { environment } from "@/application";
 
 enum ERemoveType {
   EVENT = "EVENT",
@@ -162,6 +164,32 @@ const DataExportImportTab = () => {
     setIsOpen(false);
   };
 
+  const isDisabledToInitialImport = useMemo(
+    () => memberStore.state.members.length > 0,
+    [memberStore.state.members]
+  );
+
+  const handleImportInitialDatabase = async () => {
+    const response = await axios.get(environment.SHM_DATABASE_URL);
+
+    if (response.status === 200) {
+      try {
+        const { data } = response;
+
+        if (data.member && data.member.members.length > 0) {
+          memberStore.setState(data.member.members);
+        }
+        toast.success("Base inicial importada com sucesso!");
+      } catch (error) {
+        console.error("error", error);
+        toast.error("Erro durante importação da base inicial");
+      }
+      return;
+    }
+
+    toast.error("Erro ao importar a base inicial");
+  };
+
   return (
     <>
       <ConfirmDialog
@@ -235,6 +263,15 @@ const DataExportImportTab = () => {
           </Button>
 
           <Updater />
+
+          <Button
+            variant="contained"
+            color="warning"
+            disabled={isDisabledToInitialImport}
+            onClick={handleImportInitialDatabase}
+          >
+            Importar base de dados inicial
+          </Button>
 
           <Box
             display="grid"
