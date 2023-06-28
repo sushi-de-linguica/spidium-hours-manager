@@ -97,7 +97,6 @@ const OptionsForm = () => {
       "nightbot_redirect_uri",
       "twitch_client_id",
       "twitch_redirect_uri",
-      "twitch_token",
     ]);
 
     setConfiguration({
@@ -109,6 +108,7 @@ const OptionsForm = () => {
       ...currentConfiguration,
       ...resultToUpdate,
       nightbot_token: configuration.nightbot_token,
+      twitch_token: configuration.twitch_token,
     });
 
     if (configuration.nightbot_token !== nightbotStore.state.access_token) {
@@ -118,13 +118,18 @@ const OptionsForm = () => {
       });
     }
 
-    if (configuration.twitch_token !== twitchStore.state.access_token) {
-      twitchStore.setState({
-        ...twitchStore.state,
-        access_token: configuration.twitch_token,
-        client_id: configuration.twitch_client_id,
-      });
-      setTimeout(handleTwitchTest, 2000);
+    const changedTwitchFields =
+      twitchStore.state.access_token !== configuration.twitch_token ||
+      twitchStore.state.client_id !== configuration.twitch_client_id;
+
+    twitchStore.setState({
+      ...twitchStore.state,
+      access_token: configuration.twitch_token,
+      client_id: configuration.twitch_client_id,
+    });
+
+    if (changedTwitchFields) {
+      setTimeout(handleTwitchTest, 1000);
     }
 
     toast.success("Configurações atualizadas com sucesso");
