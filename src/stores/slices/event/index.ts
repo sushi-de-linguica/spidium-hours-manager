@@ -52,6 +52,19 @@ const useEventStore = create<IEventStore, any>(
             event.deleted_at = null;
           }
 
+          const runs = event.runs.map((run) => {
+            if (run.id) {
+              return run;
+            }
+
+            return {
+              id: randomUUID(),
+              ...run,
+            };
+          });
+
+          event.runs = runs;
+
           return {
             ...store,
             state: {

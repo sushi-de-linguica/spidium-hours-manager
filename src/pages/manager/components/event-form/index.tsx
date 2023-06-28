@@ -204,6 +204,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
       const runners = getRunnersFromMDMapped(mappedRunners);
 
       return {
+        id: randomUUID(),
         runners,
         hosts: [],
         comments: [],

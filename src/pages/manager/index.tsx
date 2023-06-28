@@ -31,6 +31,7 @@ import { NightbotApiService } from "@/services/nightbot-service";
 import { toast } from "react-toastify";
 import { EventsTab } from "./tabs/events";
 import { testId } from "./options";
+import { TwitchApiService } from "@/services/twitch-service";
 interface TabPanelProps {
   children?: ReactNode;
   index: number;
@@ -59,6 +60,7 @@ const RunManagerPage = () => {
   const { version } = useObsStore((store) => store.state);
 
   const nightbotStore = useNightbot();
+  const twitchStore = useTwitch();
   const { updateConfiguration, state } = useConfigurationStore();
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
@@ -97,7 +99,7 @@ const RunManagerPage = () => {
   const handleProtocolCallback = (callback: string, value: string) => {
     switch (callback) {
       case "nightbot_token":
-        console.log("updated nightbot token");
+        console.log("updating nightbot token from shm protocol callback");
 
         updateConfiguration({
           ...state,
@@ -115,6 +117,34 @@ const RunManagerPage = () => {
             console.log("commands list", data);
             toast.success("Conexão com nightbot validada com sucesso!");
           });
+        }, 500);
+
+        break;
+      case "twitch_token":
+        console.log("updating twitch token from shm protocol callback");
+
+        updateConfiguration({
+          ...state,
+          twitch_token: value,
+        });
+
+        twitchStore.setState({
+          ...twitchStore.state,
+          access_token: value,
+        });
+
+        setTimeout(() => {
+          const service = new TwitchApiService();
+
+          service
+            .updateBroadcastId()
+            .then((data) => {
+              console.log("twitch data", data);
+              toast.success("Conexão com Twitch estabelecida com sucesso!");
+            })
+            .catch(() => {
+              toast.error("Erro ao estabelecer conexão com Twitch");
+            });
         }, 500);
 
         break;
