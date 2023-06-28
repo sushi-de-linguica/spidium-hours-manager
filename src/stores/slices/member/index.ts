@@ -80,6 +80,7 @@ const useMemberStore = create<IMemberStore, any>(
         });
       },
       removeMember: (member: IMember) => {
+        handleRemoveMemberOnAllRuns(member);
         set((state) => ({
           ...state,
           state: {
@@ -149,6 +150,57 @@ const handleUpdateMembersOnAllRuns = (member: IMember) => {
   });
 
   if (updated > 0) {
+    updateFullEventState(newEventState);
+  }
+};
+
+const handleRemoveMemberOnAllRuns = (member: IMember) => {
+  let removed = 0;
+
+  const eventStore = useEventStore.getState();
+  const { updateFullEventState } = eventStore;
+  const { events } = eventStore.state;
+
+  const newEventState = [...JSON.parse(JSON.stringify(events))].map((event) => {
+    const newRuns = event.runs.map((run: IRun) => {
+      const memberIndexAtRunners = run.runners.findIndex(
+        ({ id }) => id === member.id
+      );
+      const memberIndexAtHosts = run.hosts.findIndex(
+        ({ id }) => id === member.id
+      );
+      const memberIndexAtComments = run.comments.findIndex(
+        ({ id }) => id === member.id
+      );
+
+      const filterExceptMemberId = (runMember: IMember) =>
+        runMember.id !== member.id;
+
+      if (memberIndexAtRunners !== null && memberIndexAtRunners !== null) {
+        removed++;
+        run.runners = run.runners.filter(filterExceptMemberId);
+      }
+
+      if (memberIndexAtHosts !== null && memberIndexAtHosts !== null) {
+        removed++;
+        run.hosts = run.hosts.filter(filterExceptMemberId);
+      }
+
+      if (memberIndexAtComments !== null && memberIndexAtComments !== null) {
+        removed++;
+        run.comments = run.comments.filter(filterExceptMemberId);
+      }
+
+      return { ...run };
+    });
+
+    return {
+      ...event,
+      runs: [...newRuns],
+    };
+  });
+
+  if (removed > 0) {
     updateFullEventState(newEventState);
   }
 };
