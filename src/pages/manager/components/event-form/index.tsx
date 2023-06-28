@@ -169,6 +169,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
           if (!runner) {
             isAllowedPopulateMembers &&
+              (isMemberWithTwitch || mappedRunner.text) &&
               runnersToCreate.push({
                 primaryTwitch: isMemberWithTwitch ? findPrimaryTwitch : "",
                 streamAt: isMemberWithTwitch ? findPrimaryTwitch : "",
