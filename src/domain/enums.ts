@@ -16,6 +16,10 @@ export enum EIpcEvents {
   COPY_FILE = "IPC:COPY_FILE",
 }
 
+export enum ECustomEvents {
+  RELOAD_APPLICATION = "APP:RELOAD_APPLICATION",
+}
+
 export enum EProtocolEvents {
   SHM_PROTOCOL_DATA = "SHM-PROTOCOL-DATA",
 }

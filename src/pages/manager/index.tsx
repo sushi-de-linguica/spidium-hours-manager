@@ -26,7 +26,7 @@ import { ObsWebsocketService } from "@/services/obs-service";
 import { Status } from "./components/status";
 import { ipcRenderer } from "electron";
 import { useObsStore } from "@/stores/slices/obs";
-import { EProtocolEvents } from "@/domain";
+import { ECustomEvents, EProtocolEvents } from "@/domain";
 import { NightbotApiService } from "@/services/nightbot-service";
 import { toast } from "react-toastify";
 import { EventsTab } from "./tabs/events";
@@ -111,13 +111,15 @@ const RunManagerPage = () => {
           access_token: value,
         });
 
+        window.dispatchEvent(new CustomEvent(ECustomEvents.RELOAD_APPLICATION));
+
         setTimeout(() => {
           const service = new NightbotApiService();
           service.getCommands().then(({ data }) => {
             console.log("commands list", data);
             toast.success("Conexão com nightbot validada com sucesso!");
           });
-        }, 500);
+        }, 1500);
 
         break;
       case "twitch_token":
@@ -131,7 +133,10 @@ const RunManagerPage = () => {
         twitchStore.setState({
           ...twitchStore.state,
           access_token: value,
+          client_id: state.twitch_client_id,
         });
+
+        window.dispatchEvent(new CustomEvent(ECustomEvents.RELOAD_APPLICATION));
 
         setTimeout(() => {
           const service = new TwitchApiService();
@@ -145,7 +150,7 @@ const RunManagerPage = () => {
             .catch(() => {
               toast.error("Erro ao estabelecer conexão com Twitch");
             });
-        }, 500);
+        }, 1500);
 
         break;
     }
@@ -170,11 +175,17 @@ const RunManagerPage = () => {
     }
   };
 
+  const handleReloadPage = () => {
+    window.document.location.reload();
+  };
+
   useEffect(() => {
     console.log("started at OBS WEBSOCKET VERSION", version);
     handleAttachListeners();
 
     ipcRenderer.on(EProtocolEvents.SHM_PROTOCOL_DATA, handleShmProtocolData);
+
+    window.addEventListener(ECustomEvents.RELOAD_APPLICATION, handleReloadPage);
 
     if (!window.obsService) {
       window.obsService = new ObsWebsocketService(version);
@@ -182,6 +193,11 @@ const RunManagerPage = () => {
 
     return () => {
       handleRemoveAttachedListeners();
+
+      window.removeEventListener(
+        ECustomEvents.RELOAD_APPLICATION,
+        handleReloadPage
+      );
     };
   }, []);
 
