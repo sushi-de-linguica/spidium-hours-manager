@@ -49,6 +49,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
   const { addEvent, updateEvent } = useEventStore();
   const { members } = useMemberStore((store) => store.state);
   const { addMember } = useMemberStore();
+  const [loadingImport, setLoadingImport] = useState(false);
 
   const [currentData, setCurrentData] = useState<IEvent>(
     showEditMode && event ? { ...event } : { ...defaultData }
@@ -107,13 +108,18 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
   };
 
   const handleImportRunsFromHoraro = async () => {
+    setLoadingImport(true);
+
     const horaroService = new HoraroImportService(currentData.scheduleLink!);
 
     const schedule: any = await horaroService
       .getSchedule()
       .catch(() =>
         toast.error("não foi possível importar dados do horaro.org :(")
-      );
+      )
+      .finally(() => {
+        setLoadingImport(false);
+      });
 
     if (!schedule) {
       toast.error("não foi possível importar dados do horaro.org :(");
@@ -196,27 +202,31 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
       return [];
     };
 
-    const runs = schedule.items.map((run: any) => {
-      const estimate = convertTime(run.length);
-      const game = run.data[gameColumnIndex];
-      const category = run.data[categoryColumnIndex];
-      const runnersData = run.data[runnerColumnIndex];
-      const mappedRunners = getMDString(runnersData);
-      const runners = getRunnersFromMDMapped(mappedRunners);
+    const runs = schedule.items
+      .filter(
+        (run: any) => run.data[gameColumnIndex] && run.data[categoryColumnIndex]
+      )
+      .map((run: any) => {
+        const estimate = convertTime(run.length);
+        const game = run.data[gameColumnIndex];
+        const category = run.data[categoryColumnIndex];
+        const runnersData = run.data[runnerColumnIndex];
+        const mappedRunners = getMDString(runnersData);
+        const runners = getRunnersFromMDMapped(mappedRunners);
 
-      return {
-        id: randomUUID(),
-        runners,
-        hosts: [],
-        comments: [],
-        estimate: estimate,
-        game,
-        category,
-        platform: "",
-        seoGame: "",
-        seoTitle: "",
-      };
-    });
+        return {
+          id: randomUUID(),
+          runners,
+          hosts: [],
+          comments: [],
+          estimate: estimate,
+          game,
+          category,
+          platform: "",
+          seoGame: "",
+          seoTitle: "",
+        };
+      });
 
     setCurrentData({ ...currentData, runs });
   };
@@ -247,7 +257,6 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
               />
 
               <TextField
-                autoFocus
                 margin="dense"
                 name="scheduleLink"
                 label="URL do horaro (opcional)"
@@ -273,6 +282,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
                       onChange={(_, checked) => {
                         setIsAllowedPopulateMembers(checked);
                       }}
+                      disabled={isDisabledToImport || loadingImport}
                       value={isAllowedPopulateMembers}
                       control={<Switch defaultChecked />}
                       label="Criar membros não existentes na base de dados"
@@ -283,15 +293,18 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
                     onClick={handleImportRunsFromHoraro}
                     color="primary"
                     variant="contained"
-                    disabled={isDisabledToImport}
+                    disabled={isDisabledToImport || loadingImport}
                     data-testid={eventFormTestId.SAVE_AND_UPDATE_BUTTON}
                   >
-                    Importar do horaro
+                    {loadingImport ? "importando..." : "Importar do horaro"}
                   </Button>
 
                   {true && (
                     <Chip
-                      color="success"
+                      color={
+                        currentData.runs.length > 0 ? "success" : "primary"
+                      }
+                      disabled={isDisabledToImport || loadingImport}
                       variant="outlined"
                       label={`${currentData.runs.length} run(s) localizadas`}
                     />
@@ -302,12 +315,16 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
             <DialogActions>
               <Button
                 onClick={handleClose}
+                disabled={loadingImport}
                 data-testid={eventFormTestId.CANCEL_BUTTON}
               >
                 Cancelar
               </Button>
               <Button
                 onClick={handleSubmit}
+                disabled={loadingImport}
+                color="success"
+                variant="contained"
                 data-testid={eventFormTestId.SAVE_AND_UPDATE_BUTTON}
               >
                 {showEditMode ? "Atualizar" : "Salvar"}
