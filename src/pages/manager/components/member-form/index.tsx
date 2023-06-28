@@ -245,6 +245,8 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
               </Button>
               <Button
                 onClick={handleSubmit}
+                color="success"
+                variant="contained"
                 data-testid={memberFormTestId.SAVE_AND_UPDATE_BUTTON}
               >
                 {showEditMode ? "Atualizar" : "Salvar"}

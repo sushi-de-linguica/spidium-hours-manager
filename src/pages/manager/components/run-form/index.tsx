@@ -393,7 +393,11 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>Cancelar</Button>
-              <Button onClick={handleSubmit}>
+              <Button
+                onClick={handleSubmit}
+                color="success"
+                variant="contained"
+              >
                 {showEditMode ? "Atualizar" : "Salvar"}
               </Button>
             </DialogActions>
