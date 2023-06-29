@@ -111,14 +111,13 @@ const RunManagerPage = () => {
           access_token: value,
         });
 
-        window.dispatchEvent(new CustomEvent(ECustomEvents.RELOAD_APPLICATION));
-
-        setTimeout(() => {
+        setTimeout(async () => {
           const service = new NightbotApiService();
-          service.getCommands().then(({ data }) => {
-            console.log("commands list", data);
-            toast.success("Conexão com nightbot validada com sucesso!");
-          });
+          await service.getCommands();
+
+          window.dispatchEvent(
+            new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+          );
         }, 1500);
 
         break;
@@ -133,23 +132,16 @@ const RunManagerPage = () => {
         twitchStore.setState({
           ...twitchStore.state,
           access_token: value,
-          client_id: state.twitch_client_id,
         });
 
-        window.dispatchEvent(new CustomEvent(ECustomEvents.RELOAD_APPLICATION));
-
-        setTimeout(() => {
+        setTimeout(async () => {
           const service = new TwitchApiService();
 
-          service
-            .updateBroadcastId()
-            .then((data) => {
-              console.log("twitch data", data);
-              toast.success("Conexão com Twitch estabelecida com sucesso!");
-            })
-            .catch(() => {
-              toast.error("Erro ao estabelecer conexão com Twitch");
-            });
+          await service.updateBroadcastId();
+
+          window.dispatchEvent(
+            new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+          );
         }, 1500);
 
         break;
