@@ -46,17 +46,9 @@ import { RunsOrderDialog } from "../../components/runs-order";
 import { CommandSuggestionService } from "@/services/command-suggestion";
 import { downloadFile } from "@/services/download-file";
 import { TwitchApiService } from "@/services/twitch-service";
+import { ConfigureForm } from "../../components/configure";
 
 const RunsTab = () => {
-  const {
-    last_selected_run_id,
-    last_selected_setup_id,
-    last_selected_title_id,
-    path_run,
-    path_setup,
-    path_assets,
-  } = useConfigurationStore((store) => store.state);
-
   const { files } = useFileStore((state) => state.state);
   const {
     nightbot_runner_command_id,
@@ -70,7 +62,19 @@ const RunsTab = () => {
     nightbot_commentator_text_plural,
     obs_browser_cam_input_name,
     obs_browser_game_input_name,
+    last_selected_run_id,
+    last_selected_setup_id,
+    last_selected_title_id,
+    path_run,
+    path_setup,
+    path_assets,
   } = useConfigurationStore((store) => store.state);
+
+  const configurationState = useConfigurationStore((store) => store.state);
+
+  const showPathConfigureWarning = useMemo(() => {
+    return path_run === "" || path_setup === "" || path_assets === "";
+  }, [configurationState, path_run, path_setup, path_assets]);
 
   const hasBrowserInputsForObs = useMemo(() => {
     if (!obs_browser_cam_input_name && !obs_browser_game_input_name) {
@@ -200,6 +204,7 @@ const RunsTab = () => {
               size="small"
               color="success"
               label="LIVE"
+              disabled={showPathConfigureWarning}
               onClick={() => {
                 setRunToExport(params.row);
                 setIsOpenSetupAlert(false);
@@ -213,6 +218,7 @@ const RunsTab = () => {
               size="small"
               color="info"
               label="SETUP"
+              disabled={showPathConfigureWarning}
               onClick={() => {
                 setRunToExport(params.row);
                 setIsOpenRunAlert(false);
@@ -554,6 +560,11 @@ const RunsTab = () => {
 
   const handleExportRunsTitleAndGame = () => {
     const datagridData = getDatagridDataByEventId(current_event_id);
+    if (datagridData.length === 0) {
+      toast.warning("Não existem runs para exportar os titulos de live");
+      return;
+    }
+
     const data = datagridData.map((row) => {
       const title = CommandSuggestionService.getTitleByRun(
         seo_title_template,
@@ -569,7 +580,7 @@ const RunsTab = () => {
   };
 
   return (
-    <Box>
+    <Box gap={"8px"} display={"flex"} flexDirection={"column"}>
       {events.length === 0 && (
         <>
           <Alert
@@ -580,6 +591,20 @@ const RunsTab = () => {
           >
             Não existem eventos cadastrados. Vá para a aba "Eventos" e cadastre
             seu primeiro evento!
+          </Alert>
+        </>
+      )}
+      {showPathConfigureWarning && (
+        <>
+          <Alert
+            severity="warning"
+            style={{
+              alignItems: "center",
+            }}
+          >
+            Para poder exportar suas runs, é necessário configurar destino de
+            exportação de arquivos. <br />
+            <ConfigureForm />
           </Alert>
         </>
       )}
