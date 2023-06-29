@@ -11,6 +11,7 @@ export interface ITwitch {
 
 export interface ITwitchStore {
   state: ITwitch;
+  appendState: (newState: Partial<ITwitch>) => void;
   setState: (newState: ITwitch) => void;
   setBroadcasterId: (value: string) => void;
   reset: () => void;
@@ -39,6 +40,15 @@ const useTwitch = create<ITwitchStore, any>(
       setState: (newState: ITwitch) => {
         set(() => ({
           state: {
+            ...newState,
+          },
+        }));
+      },
+      appendState: (newState: Partial<ITwitch>) => {
+        set((store) => ({
+          ...store,
+          state: {
+            ...store.state,
             ...newState,
           },
         }));

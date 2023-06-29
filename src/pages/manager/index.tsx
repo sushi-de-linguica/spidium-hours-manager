@@ -61,7 +61,7 @@ const RunManagerPage = () => {
 
   const nightbotStore = useNightbot();
   const twitchStore = useTwitch();
-  const { updateConfiguration, state } = useConfigurationStore();
+  const { appendConfiguration } = useConfigurationStore();
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -101,47 +101,44 @@ const RunManagerPage = () => {
       case "nightbot_token":
         console.log("updating nightbot token from shm protocol callback");
 
-        updateConfiguration({
-          ...state,
+        appendConfiguration({
           nightbot_token: value,
         });
 
-        nightbotStore.setState({
-          ...nightbotStore.state,
+        nightbotStore.appendState({
           access_token: value,
         });
 
         setTimeout(async () => {
           const service = new NightbotApiService();
-          await service.getCommands();
 
-          window.dispatchEvent(
-            new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
-          );
+          await service.getCommands().finally(() => {
+            window.dispatchEvent(
+              new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+            );
+          });
         }, 1500);
 
         break;
       case "twitch_token":
         console.log("updating twitch token from shm protocol callback");
 
-        updateConfiguration({
-          ...state,
+        appendConfiguration({
           twitch_token: value,
         });
 
-        twitchStore.setState({
-          ...twitchStore.state,
+        twitchStore.appendState({
           access_token: value,
         });
 
         setTimeout(async () => {
           const service = new TwitchApiService();
 
-          await service.updateBroadcastId();
-
-          window.dispatchEvent(
-            new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
-          );
+          service.updateBroadcastId().finally(() => {
+            window.dispatchEvent(
+              new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+            );
+          });
         }, 1500);
 
         break;

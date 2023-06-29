@@ -12,6 +12,7 @@ export interface INightbot {
 export interface INightbotStore {
   isValidToken: boolean;
   state: INightbot;
+  appendState: (newState: Partial<INightbot>) => void;
   setState: (newState: INightbot) => void;
   reset: () => void;
 }
@@ -30,6 +31,15 @@ const useNightbot = create<INightbotStore, any>(
       isValidToken: false,
       state: {
         ...DEFAULT_STATE,
+      },
+      appendState: (newState: Partial<INightbot>) => {
+        set((state) => ({
+          ...state,
+          state: {
+            ...state.state,
+            ...newState,
+          },
+        }));
       },
       setState: (newState: INightbot) => {
         set((state) => ({

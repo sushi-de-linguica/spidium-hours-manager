@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 
 export interface IConfigurationStore {
   state: IConfiguration;
+  appendConfiguration: (configuration: Partial<IConfiguration>) => void;
   updateConfiguration: (configuration: IConfiguration) => void;
   updateConfigurationField: (field: keyof IConfiguration, value: any) => void;
   updateLastRunId: (runId: string) => void;
@@ -51,6 +52,15 @@ const useConfigurationStore = create<IConfigurationStore, any>(
       state: {
         ...DEFAULT_STATE,
       },
+      appendConfiguration: (configuration: Partial<IConfiguration>) =>
+        set((state) => {
+          state.state = {
+            ...state.state,
+            ...configuration,
+          };
+
+          return state;
+        }),
       updateConfiguration: (configuration: IConfiguration) =>
         set((state) => {
           state.state = {
