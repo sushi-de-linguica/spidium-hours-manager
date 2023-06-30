@@ -1,21 +1,27 @@
-import { IExportFileRun } from "@/domain";
+import { IExportFileRun, IFileTag } from "@/domain";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { randomUUID } from "crypto";
 
+interface IFileStoreState {
+  files: IExportFileRun[];
+  tags: IFileTag[];
+}
+
 export interface IFileStore {
-  state: {
-    files: IExportFileRun[];
-  };
+  state: IFileStoreState;
+  addTag: (tag: IFileTag) => void;
+  removeTag: (tag: IFileTag) => void;
   addFile: (file: IExportFileRun) => void;
   updateFile: (file: IExportFileRun) => void;
   removeFile: (file: IExportFileRun) => void;
-  setState: (files: IExportFileRun[]) => void;
+  setState: (newState: Partial<IFileStoreState>) => void;
   reset: () => void;
 }
 
 const DEFAULT_STATE = {
   files: [],
+  tags: [],
 };
 
 const useFileStore = create<IFileStore, any>(
@@ -23,6 +29,34 @@ const useFileStore = create<IFileStore, any>(
     (set) => ({
       state: {
         ...DEFAULT_STATE,
+      },
+      addTag: (tag: IFileTag) => {
+        if (!tag.id) {
+          tag.id = randomUUID();
+        }
+
+        set((store) => {
+          return {
+            ...store,
+            state: {
+              ...store.state,
+              tags: [...store.state.tags, tag],
+            },
+          };
+        });
+      },
+      removeTag: (tag: IFileTag) => {
+        set((state) => {
+          const newState = { ...state };
+
+          newState.state.tags = [
+            ...state.state.tags.filter(
+              (currentTag) => currentTag.id !== tag.id
+            ),
+          ];
+
+          return newState;
+        });
       },
       addFile: (file: IExportFileRun) => {
         set((state) => {
@@ -68,10 +102,12 @@ const useFileStore = create<IFileStore, any>(
           return newState;
         });
       },
-      setState: (files: IExportFileRun[]) =>
-        set(() => ({
+      setState: (newState: Partial<IFileStoreState>) =>
+        set((store) => ({
+          ...store,
           state: {
-            files,
+            ...store.state,
+            ...newState,
           },
         })),
       reset: () =>

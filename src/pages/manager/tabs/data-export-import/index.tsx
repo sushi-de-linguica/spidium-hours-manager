@@ -85,8 +85,23 @@ const DataExportImportTab = () => {
         });
       }
 
-      if (json.file && json.file?.files?.length > 0) {
-        fileStore.setState(json.file.files);
+      if (
+        json.file &&
+        (json.file?.files?.length > 0 || json.file?.tags?.length > 0)
+      ) {
+        const hasFiles = json.file?.files?.length > 0;
+        const newFileState: any = {};
+
+        if (hasFiles) {
+          newFileState.files = json.file.files;
+        }
+
+        const hasTags = json.file?.tags?.length > 0;
+        if (hasTags) {
+          newFileState.tags = json.file.tags;
+        }
+
+        fileStore.setState({ ...newFileState });
       }
 
       if (json.member && json.member.members.length > 0) {
