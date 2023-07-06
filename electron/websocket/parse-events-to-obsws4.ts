@@ -1,5 +1,8 @@
 import { IObsWsEventSetInputSettings } from "./interfaces";
 
+// https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md
+// SetCurrentProgramScene -> { "requestData" : { "sceneName": "nome_da_cena" } }
+
 const handleParseEventsToOBSWS4 = (
   requests: IObsWsEventSetInputSettings[]
 ): IObsWsEventSetInputSettings[] => {

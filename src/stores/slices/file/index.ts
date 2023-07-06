@@ -11,6 +11,7 @@ interface IFileStoreState {
 export interface IFileStore {
   state: IFileStoreState;
   addTag: (tag: IFileTag) => void;
+  updateTag: (tag: IFileTag) => void;
   removeTag: (tag: IFileTag) => void;
   addFile: (file: IExportFileRun) => void;
   updateFile: (file: IExportFileRun) => void;
@@ -56,6 +57,26 @@ const useFileStore = create<IFileStore, any>(
           ];
 
           return newState;
+        });
+      },
+      updateTag: (tag: IFileTag) => {
+        set((store) => {
+          const newState = { ...store };
+
+          const tagIndex = store.state.tags.findIndex(
+            ({ id }) => id === tag.id
+          );
+
+          if (tagIndex === null || tagIndex === undefined) {
+            return store;
+          }
+
+          store.state.tags = store.state.tags.filter(({ id }) => id !== tag.id);
+          store.state.tags.push(tag);
+
+          newState.state = { ...store.state };
+
+          return { ...newState };
         });
       },
       addFile: (file: IExportFileRun) => {

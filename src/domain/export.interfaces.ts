@@ -1,5 +1,11 @@
 import { IConfiguration } from "./configuration.interface";
-import { EExportType } from "./enums";
+import {
+  EExportType,
+  EFileTagAction,
+  EFileTagActionComponentsNightbot,
+  EFileTagActionComponentsObs,
+  EFileTagActionComponentsTwitch,
+} from "./enums";
 import { IEvent } from "./event.interface";
 import { IMember } from "./member.interface";
 
@@ -12,18 +18,28 @@ export interface IExportFileRun {
   tags?: string[];
 }
 
-export interface IFileTagActionOptions<T = any> {
+export interface IFileTagActionModule {
   isEnabled: boolean;
-  options?: T;
+  module: EFileTagNightbotModule | EFileTagTwitchModule | EFileTagObsModule;
 }
 
-export interface IFileTagActions {
-  nightbotSetRunnerCommand: IFileTagActionOptions;
-  nightbotSetHostCommand: IFileTagActionOptions;
-  nightbotSetCommentCommand: IFileTagActionOptions;
-  obsSetBrowserSource: IFileTagActionOptions<string>;
-  twitchSetTitle: IFileTagActionOptions<string>;
-  twitchSetGame: IFileTagActionOptions;
+export interface EFileTagNightbotModule {
+  action: EFileTagAction.NIGHTBOT;
+  component: EFileTagActionComponentsNightbot;
+  configurationCommandField: string;
+  template: string;
+}
+
+export interface EFileTagTwitchModule {
+  action: EFileTagAction.TWITCH;
+  component: EFileTagActionComponentsTwitch;
+  value: string;
+}
+
+export interface EFileTagObsModule {
+  action: EFileTagAction.OBS;
+  component: EFileTagActionComponentsObs;
+  data: any;
 }
 
 export interface IFileTag {
@@ -31,7 +47,7 @@ export interface IFileTag {
   label: string;
   description?: string;
   path?: string;
-  actions: IFileTagActions[];
+  actions: IFileTagActionModule[];
 }
 
 export interface IExportedJsonFile {

@@ -33,6 +33,7 @@
     "immer": "^10.0.1",
     "obs-websocket-js": "4.0.3",
     "obs-websocket-js5": "npm:obs-websocket-js@5.0.2",
+    "react-hook-form": "^7.45.1",
     "react-toastify": "^9.1.2",
     "zustand": "^4.3.7"
   },
