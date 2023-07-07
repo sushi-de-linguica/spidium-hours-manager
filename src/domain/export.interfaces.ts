@@ -18,9 +18,11 @@ export interface IExportFileRun {
   tags?: string[];
 }
 
-export interface IFileTagActionModule {
+export interface IFileTagActionModule<
+  T = EFileTagNightbotModule | EFileTagTwitchModule | EFileTagObsModule
+> {
   isEnabled: boolean;
-  module: EFileTagNightbotModule | EFileTagTwitchModule | EFileTagObsModule;
+  module: T;
 }
 
 export interface EFileTagNightbotModule {

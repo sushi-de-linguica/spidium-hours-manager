@@ -15,12 +15,16 @@ import {
   Switch,
   TextField,
 } from "@mui/material";
-import { IFileTag } from "@/domain";
+import {
+  EFileTagAction,
+  EFileTagActionComponentsNightbot,
+  IFileTag,
+} from "@/domain";
 import { useFileStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
 import { toast } from "react-toastify";
 import { ActionNightbot } from "./components/action-nightbot";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 
 const defaultData: IFileTag = {
   id: "",
@@ -44,6 +48,11 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
     defaultValues: defaultData,
   });
 
+  const fieldArray = useFieldArray({
+    name: "actions",
+    control: formContext.control,
+  });
+
   useEffect(() => {
     if (!!action) {
       formContext.reset(action);
@@ -61,7 +70,6 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
   };
 
   const onSubmit = (data: IFileTag) => {
-    console.log("dispatch submit", data);
     if (!data.id) {
       data.id = randomUUID();
     }
@@ -74,6 +82,22 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
 
     addTag(data);
     handleClose();
+  };
+
+  const handleAddNightbotAction = (action: EFileTagAction) => {
+    switch (true) {
+      case action === EFileTagAction.NIGHTBOT:
+        fieldArray.append({
+          isEnabled: false,
+          module: {
+            action: EFileTagAction.NIGHTBOT,
+            component: EFileTagActionComponentsNightbot.UPDATE_COMMAND,
+            configurationCommandField: "",
+            template: "",
+          },
+        });
+        break;
+    }
   };
 
   return (
@@ -107,7 +131,25 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                   fullWidth
                 />
 
-                <ActionNightbot action={{} as any} />
+                <Button
+                  onClick={() =>
+                    handleAddNightbotAction(EFileTagAction.NIGHTBOT)
+                  }
+                >
+                  +1 Ação Nightbot
+                </Button>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    {fieldArray.fields.map((field, index) => (
+                      <ActionNightbot
+                        action={field as any}
+                        index={index}
+                        fieldArray={fieldArray}
+                        key={randomUUID()}
+                      />
+                    ))}
+                  </Grid>
+                </Grid>
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClose}>Cancelar</Button>
