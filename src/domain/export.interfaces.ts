@@ -50,6 +50,8 @@ export interface IFileTag {
   description?: string;
   path?: string;
   actions: IFileTagActionModule[];
+  variant: string;
+  color: string;
 }
 
 export interface IExportedJsonFile {
