@@ -6,6 +6,7 @@ import {
 
 import {
   Button,
+  Chip,
   Divider,
   FormControl,
   FormControlLabel,
@@ -20,13 +21,17 @@ import { useState } from "react";
 import { UseFieldArrayReturn } from "react-hook-form";
 
 import DeleteIcon from "@mui/icons-material/Delete";
-interface IActionNightbot {
+interface IActionNightbotProps {
   action: IFileTagActionModule<EFileTagNightbotModule>;
   index: number;
   fieldArray: UseFieldArrayReturn<IFileTag, "actions">;
 }
 
-const ActionNightbot = ({ action, index, fieldArray }: IActionNightbot) => {
+const ActionNightbot = ({
+  action,
+  index,
+  fieldArray,
+}: IActionNightbotProps) => {
   const [template, setTemplate] = useState(action.module.template ?? "");
 
   const handleChangeSwitch = (_: React.ChangeEvent, value: boolean) => {
@@ -55,16 +60,12 @@ const ActionNightbot = ({ action, index, fieldArray }: IActionNightbot) => {
   return (
     <FormGroup>
       <Divider textAlign="right">
-        Comando
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleRemove}
-          size="small"
-          style={{ marginLeft: "12px" }}
-        >
-          <DeleteIcon />
-        </Button>
+        <Chip
+          variant="outlined"
+          color="secondary"
+          label="Nightbot"
+          onDelete={handleRemove}
+        />
       </Divider>
       <Grid container spacing={2}>
         <Grid

@@ -41,7 +41,7 @@ export interface EFileTagTwitchModule {
 export interface EFileTagObsModule {
   action: EFileTagAction.OBS;
   component: EFileTagActionComponentsObs;
-  data: any;
+  value: string;
 }
 
 export interface IFileTag {

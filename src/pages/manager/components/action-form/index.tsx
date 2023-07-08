@@ -12,12 +12,14 @@ import {
   FormControlLabel,
   FormGroup,
   Grid,
+  Paper,
   Switch,
   TextField,
 } from "@mui/material";
 import {
   EFileTagAction,
   EFileTagActionComponentsNightbot,
+  EFileTagActionComponentsObs,
   IFileTag,
 } from "@/domain";
 import { useFileStore } from "@/stores";
@@ -25,6 +27,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { toast } from "react-toastify";
 import { ActionNightbot } from "./components/action-nightbot";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { ActionObs } from "./components/action-obs";
+import { ActionTwitch } from "./components/action-twitch";
 
 const defaultData: IFileTag = {
   id: "",
@@ -84,7 +88,7 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
     handleClose();
   };
 
-  const handleAddNightbotAction = (action: EFileTagAction) => {
+  const handleAddAction = (action: EFileTagAction) => {
     switch (true) {
       case action === EFileTagAction.NIGHTBOT:
         fieldArray.append({
@@ -97,6 +101,15 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
           },
         });
         break;
+      case action === EFileTagAction.OBS:
+        fieldArray.append({
+          isEnabled: false,
+          module: {
+            action: EFileTagAction.OBS,
+            component: EFileTagActionComponentsObs.SET_BROWSER_SOURCE,
+            value: "",
+          },
+        });
     }
   };
 
@@ -132,21 +145,53 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                 />
 
                 <Button
-                  onClick={() =>
-                    handleAddNightbotAction(EFileTagAction.NIGHTBOT)
-                  }
+                  variant="outlined"
+                  onClick={() => handleAddAction(EFileTagAction.NIGHTBOT)}
                 >
-                  +1 Ação Nightbot
+                  +1 Ação do Nightbot
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  onClick={() => handleAddAction(EFileTagAction.OBS)}
+                >
+                  +1 Ação do OBS
                 </Button>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     {fieldArray.fields.map((field, index) => (
-                      <ActionNightbot
-                        action={field as any}
-                        index={index}
-                        fieldArray={fieldArray}
-                        key={randomUUID()}
-                      />
+                      <Paper
+                        elevation={2}
+                        style={{
+                          padding: "16px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        {field.module.action === EFileTagAction.NIGHTBOT && (
+                          <ActionNightbot
+                            action={field as any}
+                            index={index}
+                            fieldArray={fieldArray}
+                            key={randomUUID()}
+                          />
+                        )}
+                        {field.module.action === EFileTagAction.OBS && (
+                          <ActionObs
+                            action={field as any}
+                            index={index}
+                            fieldArray={fieldArray}
+                            key={randomUUID()}
+                          />
+                        )}
+                        {field.module.action === EFileTagAction.TWITCH && (
+                          <ActionTwitch
+                            action={field as any}
+                            index={index}
+                            fieldArray={fieldArray}
+                            key={randomUUID()}
+                          />
+                        )}
+                      </Paper>
                     ))}
                   </Grid>
                 </Grid>
