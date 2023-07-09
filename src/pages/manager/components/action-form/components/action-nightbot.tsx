@@ -95,16 +95,19 @@ const ActionNightbot = ({
               <FormControlLabel
                 value="nightbot_runner_command_id"
                 control={<Radio />}
+                disabled={!action.isEnabled}
                 label="Runner"
               />
               <FormControlLabel
                 value="nightbot_host_command"
                 control={<Radio />}
+                disabled={!action.isEnabled}
                 label="Host"
               />
               <FormControlLabel
                 value="nightbot_commentator_command"
                 control={<Radio />}
+                disabled={!action.isEnabled}
                 label="Comentários"
               />
             </RadioGroup>
@@ -112,6 +115,7 @@ const ActionNightbot = ({
         </Grid>
         <Grid xs={12} item>
           <TextField
+            disabled={!action.isEnabled}
             margin="dense"
             label="Template"
             value={template}

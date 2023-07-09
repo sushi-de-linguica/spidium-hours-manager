@@ -93,11 +93,13 @@ const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
               <FormControlLabel
                 value={EFileTagActionComponentsObs.SET_BROWSER_SOURCE}
                 control={<Radio />}
+                disabled={!action.isEnabled}
                 label="Atualizar navegador"
               />
               <FormControlLabel
                 value={EFileTagActionComponentsObs.CHANGE_SCENE}
                 control={<Radio />}
+                disabled={!action.isEnabled}
                 label="Trocar cena"
               />
             </RadioGroup>
@@ -106,6 +108,7 @@ const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
         <Grid xs={12} item>
           <TextField
             margin="dense"
+            disabled={!action.isEnabled}
             label={
               action.module.component ===
               EFileTagActionComponentsObs.SET_BROWSER_SOURCE

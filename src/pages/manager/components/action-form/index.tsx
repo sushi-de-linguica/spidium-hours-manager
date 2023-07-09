@@ -190,6 +190,7 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                             padding: "16px",
                             marginBottom: "12px",
                           }}
+                          key={field.id}
                         >
                           {field.module.action === EFileTagAction.NIGHTBOT && (
                             <ActionNightbot
