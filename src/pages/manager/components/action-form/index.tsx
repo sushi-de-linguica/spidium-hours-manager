@@ -23,6 +23,7 @@ import {
   EFileTagAction,
   EFileTagActionComponentsNightbot,
   EFileTagActionComponentsObs,
+  EFileTagActionComponentsTwitch,
   IFileTag,
 } from "@/domain";
 import { useFileStore } from "@/stores";
@@ -126,8 +127,20 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
             action: EFileTagAction.OBS,
             component: EFileTagActionComponentsObs.SET_BROWSER_SOURCE,
             value: "",
+            resourceName: "",
           },
         });
+        break;
+      case action === EFileTagAction.TWITCH:
+        fieldArray.append({
+          isEnabled: false,
+          module: {
+            action: EFileTagAction.TWITCH,
+            component: EFileTagActionComponentsTwitch.UPDATE_TITLE,
+            value: "",
+          },
+        });
+        break;
     }
   };
 
@@ -180,6 +193,13 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                     onClick={() => handleAddAction(EFileTagAction.OBS)}
                   >
                     +1 Ação do OBS
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleAddAction(EFileTagAction.TWITCH)}
+                  >
+                    +1 Ação da Twitch
                   </Button>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>

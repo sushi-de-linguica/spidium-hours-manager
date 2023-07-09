@@ -7,7 +7,6 @@ import {
 import {
   FormGroup,
   Divider,
-  Button,
   Grid,
   Switch,
   FormControl,
@@ -18,7 +17,6 @@ import {
   Chip,
 } from "@mui/material";
 import { UseFieldArrayReturn } from "react-hook-form";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 
 interface IActionObsProps {
@@ -29,6 +27,10 @@ interface IActionObsProps {
 
 const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
   const [value, setValue] = useState(action.module.value ?? "");
+  const [resourceName, setResourceName] = useState(
+    action.module.resourceName ?? ""
+  );
+
   const handleChangeSwitch = (_: React.ChangeEvent, value: boolean) => {
     action.isEnabled = value;
     fieldArray.update(index, action);
@@ -49,6 +51,17 @@ const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
 
   const handleChangeValue = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
+  };
+
+  const handleBlurResourceName = () => {
+    action.module.resourceName = resourceName;
+    fieldArray.update(index, action);
+  };
+
+  const handleChangeResourceName = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setResourceName(event.target.value);
   };
 
   const handleRemove = () => {
@@ -127,6 +140,22 @@ const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
             fullWidth
           />
         </Grid>
+
+        {action.module.component ===
+          EFileTagActionComponentsObs.SET_BROWSER_SOURCE && (
+          <Grid xs={12} item>
+            <TextField
+              margin="dense"
+              disabled={!action.isEnabled}
+              label={"Nome do elemento do browser"}
+              value={resourceName}
+              placeholder={"Nome do elemento do browser"}
+              onChange={handleChangeResourceName}
+              onBlur={handleBlurResourceName}
+              fullWidth
+            />
+          </Grid>
+        )}
       </Grid>
     </FormGroup>
   );

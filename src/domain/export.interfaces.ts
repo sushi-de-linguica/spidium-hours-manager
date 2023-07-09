@@ -42,6 +42,7 @@ export interface EFileTagObsModule {
   action: EFileTagAction.OBS;
   component: EFileTagActionComponentsObs;
   value: string;
+  resourceName: string;
 }
 
 export interface IFileTag {

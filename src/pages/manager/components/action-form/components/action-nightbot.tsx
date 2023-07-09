@@ -20,7 +20,6 @@ import {
 import { useState } from "react";
 import { UseFieldArrayReturn } from "react-hook-form";
 
-import DeleteIcon from "@mui/icons-material/Delete";
 interface IActionNightbotProps {
   action: IFileTagActionModule<EFileTagNightbotModule>;
   index: number;
