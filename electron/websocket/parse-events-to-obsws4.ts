@@ -17,6 +17,14 @@ const handleParseEventsToOBSWS4 = (
               sourceSettings: requestData.inputSettings,
             },
           };
+
+        case "SetCurrentProgramScene":
+          return {
+            requestType: "SetCurrentScene",
+            requestData: {
+              "scene-name": requestData.sceneName,
+            },
+          };
         default:
           return null;
       }

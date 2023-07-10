@@ -47,6 +47,7 @@ import { CommandSuggestionService } from "@/services/command-suggestion";
 import { downloadFile } from "@/services/download-file";
 import { TwitchApiService } from "@/services/twitch-service";
 import { ConfigureForm } from "../../components/configure";
+import { ActionButtons } from "../../components/action-buttons";
 
 const RunsTab = () => {
   const { files } = useFileStore((state) => state.state);
@@ -194,52 +195,8 @@ const RunsTab = () => {
       field: "",
       headerName: "Status",
       width: 210,
-      renderCell: (params) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Chip
-              variant={
-                params.row.id === last_selected_run_id ? "filled" : "outlined"
-              }
-              size="small"
-              color="success"
-              label="LIVE"
-              disabled={showPathConfigureWarning}
-              onClick={() => {
-                setRunToExport(params.row);
-                setIsOpenSetupAlert(false);
-                setIsOpenRunAlert(true);
-              }}
-            />
-            <Chip
-              variant={
-                params.row.id === last_selected_setup_id ? "filled" : "outlined"
-              }
-              size="small"
-              color="info"
-              label="SETUP"
-              disabled={showPathConfigureWarning}
-              onClick={() => {
-                setRunToExport(params.row);
-                setIsOpenRunAlert(false);
-                setIsOpenSetupAlert(true);
-              }}
-            />
-            <Chip
-              variant={
-                params.row.id === last_selected_title_id ? "filled" : "outlined"
-              }
-              size="small"
-              color="warning"
-              label="TITLE"
-              onClick={() => {
-                handleUpdateTitle(params.row);
-                handleUpdateGame(params.row);
-                updateLastTitleId(params.row.id);
-              }}
-            />
-          </Box>
-        );
+      renderCell: ({ row }) => {
+        return <ActionButtons row={row} />;
       },
     },
     { field: "game", headerName: "Jogo", flex: 2 },
@@ -669,6 +626,7 @@ const RunsTab = () => {
             <DataGrid
               rowSelection={false}
               rows={getDatagridDataByEventId(current_event_id)}
+              rowHeight={80}
               columns={columns}
               autoHeight
               localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}

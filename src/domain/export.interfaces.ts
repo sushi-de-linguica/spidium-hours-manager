@@ -19,26 +19,26 @@ export interface IExportFileRun {
 }
 
 export interface IFileTagActionModule<
-  T = EFileTagNightbotModule | EFileTagTwitchModule | EFileTagObsModule
+  T = IFileTagNightbotModule | IFileTagTwitchModule | IFileTagObsModule
 > {
   isEnabled: boolean;
   module: T;
 }
 
-export interface EFileTagNightbotModule {
+export interface IFileTagNightbotModule {
   action: EFileTagAction.NIGHTBOT;
   component: EFileTagActionComponentsNightbot;
   configurationCommandField: string;
   template: string;
 }
 
-export interface EFileTagTwitchModule {
+export interface IFileTagTwitchModule {
   action: EFileTagAction.TWITCH;
   component: EFileTagActionComponentsTwitch;
   value: string;
 }
 
-export interface EFileTagObsModule {
+export interface IFileTagObsModule {
   action: EFileTagAction.OBS;
   component: EFileTagActionComponentsObs;
   value: string;
@@ -53,6 +53,8 @@ export interface IFileTag {
   actions: IFileTagActionModule[];
   variant: string;
   color: string;
+  minimumRunnersToShow: number;
+  isShow: boolean;
 }
 
 export interface IExportedJsonFile {

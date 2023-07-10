@@ -1,5 +1,5 @@
 import {
-  EFileTagNightbotModule,
+  IFileTagNightbotModule,
   IFileTag,
   IFileTagActionModule,
 } from "@/domain";
@@ -21,7 +21,7 @@ import { useState } from "react";
 import { UseFieldArrayReturn } from "react-hook-form";
 
 interface IActionNightbotProps {
-  action: IFileTagActionModule<EFileTagNightbotModule>;
+  action: IFileTagActionModule<IFileTagNightbotModule>;
   index: number;
   fieldArray: UseFieldArrayReturn<IFileTag, "actions">;
 }

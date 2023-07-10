@@ -4,20 +4,24 @@ import { randomUUID } from "crypto";
 import {
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Switch,
   Tab,
   Tabs,
   TextField,
+  Typography,
 } from "@mui/material";
 import {
   EFileTagAction,
@@ -40,14 +44,18 @@ import { ActionObs } from "./components/action-obs";
 import { ActionTwitch } from "./components/action-twitch";
 import { TabPanel } from "../tab-panel";
 
+import Icon from "@mui/icons-material/CheckOutlined";
+
 const defaultData: IFileTag = {
   id: "",
   actions: [],
   label: "",
   description: "",
   path: "",
-  variant: "contained",
+  variant: "outlined",
   color: "primary",
+  minimumRunnersToShow: 0,
+  isShow: true,
 };
 
 interface IRunFormProps {
@@ -160,8 +168,9 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
               </DialogTitle>
               <DialogContent>
                 <Tabs value={selectedTab} onChange={handleChangeSelectTab}>
-                  <Tab label="Dados de ação" />
+                  <Tab label="Dados" />
                   <Tab label="Estilo do botão" />
+                  <Tab label="Ações" />
                 </Tabs>
 
                 <TabPanel value={selectedTab} index={0}>
@@ -169,8 +178,8 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                     autoFocus
                     margin="dense"
                     label="Nome do botão"
-                    fullWidth
                     {...formContext.register("label")}
+                    fullWidth
                   />
 
                   <TextField
@@ -181,65 +190,34 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                     fullWidth
                   />
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.NIGHTBOT)}
-                  >
-                    +1 Ação do Nightbot
-                  </Button>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    type="number"
+                    helperText={
+                      "Exemplo: mostrar apenas para runs com mais de 4 runners"
+                    }
+                    label="Minimo de runners para mostrar o botão"
+                    {...formContext.register("minimumRunnersToShow")}
+                    fullWidth
+                  />
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.OBS)}
-                  >
-                    +1 Ação do OBS
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.TWITCH)}
-                  >
-                    +1 Ação da Twitch
-                  </Button>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      {fieldArray.fields.map((field, index) => (
-                        <Paper
-                          elevation={2}
-                          style={{
-                            padding: "16px",
-                            marginBottom: "12px",
-                          }}
-                          key={field.id}
-                        >
-                          {field.module.action === EFileTagAction.NIGHTBOT && (
-                            <ActionNightbot
-                              action={field as any}
-                              index={index}
-                              fieldArray={fieldArray}
-                              key={randomUUID()}
-                            />
-                          )}
-                          {field.module.action === EFileTagAction.OBS && (
-                            <ActionObs
-                              action={field as any}
-                              index={index}
-                              fieldArray={fieldArray}
-                              key={randomUUID()}
-                            />
-                          )}
-                          {field.module.action === EFileTagAction.TWITCH && (
-                            <ActionTwitch
-                              action={field as any}
-                              index={index}
-                              fieldArray={fieldArray}
-                              key={randomUUID()}
-                            />
-                          )}
-                        </Paper>
-                      ))}
-                    </Grid>
-                  </Grid>
+                  <Controller
+                    name="isShow"
+                    control={formContext.control}
+                    defaultValue={true}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        {...field}
+                        checked={field.value}
+                        control={<Switch />}
+                        onChange={(_, checked) => {
+                          formContext.setValue("isShow", checked);
+                        }}
+                        label="Mostrar botão"
+                      />
+                    )}
+                  />
                 </TabPanel>
 
                 <TabPanel value={selectedTab} index={1}>
@@ -250,7 +228,7 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                     marginTop={"8px"}
                     marginBottom={"12px"}
                   >
-                    <FormControl fullWidth>
+                    <FormControl style={{ display: "none" }} fullWidth>
                       <InputLabel id="label-id-variant">Variante</InputLabel>
                       <Controller
                         name="variant"
@@ -306,14 +284,92 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
 
                   <Divider />
 
-                  <Paper elevation={0} style={{ padding: "12px" }}>
-                    <Button
-                      variant={formContext.watch("variant") as any}
+                  <Paper elevation={0} style={{ padding: "12px 0" }}>
+                    <Typography>Inativo</Typography>
+                    <Chip
+                      // variant={formContext.watch("variant") as any}
+                      variant={"outlined"}
+                      size="small"
                       color={formContext.watch("color") as any}
-                    >
-                      {formContext.watch("label")}
-                    </Button>
+                      label={formContext.watch("label")}
+                      onClick={() => {}}
+                    />
                   </Paper>
+                  <Paper elevation={0}>
+                    <Typography>Ativo</Typography>
+                    <Chip
+                      // variant={formContext.watch("variant") as any}
+                      variant={"filled"}
+                      size="small"
+                      color={formContext.watch("color") as any}
+                      label={formContext.watch("label")}
+                      onClick={() => {}}
+                      icon={<Icon />}
+                    />
+                  </Paper>
+                </TabPanel>
+
+                <TabPanel value={selectedTab} index={2}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleAddAction(EFileTagAction.NIGHTBOT)}
+                  >
+                    +1 Ação do Nightbot
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleAddAction(EFileTagAction.OBS)}
+                  >
+                    +1 Ação do OBS
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleAddAction(EFileTagAction.TWITCH)}
+                  >
+                    +1 Ação da Twitch
+                  </Button>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      {fieldArray.fields.map((field, index) => (
+                        <Paper
+                          elevation={2}
+                          style={{
+                            padding: "16px",
+                            marginBottom: "12px",
+                          }}
+                          key={field.id}
+                        >
+                          {field.module.action === EFileTagAction.NIGHTBOT && (
+                            <ActionNightbot
+                              action={field as any}
+                              index={index}
+                              fieldArray={fieldArray}
+                              key={randomUUID()}
+                            />
+                          )}
+                          {field.module.action === EFileTagAction.OBS && (
+                            <ActionObs
+                              action={field as any}
+                              index={index}
+                              fieldArray={fieldArray}
+                              key={randomUUID()}
+                            />
+                          )}
+                          {field.module.action === EFileTagAction.TWITCH && (
+                            <ActionTwitch
+                              action={field as any}
+                              index={index}
+                              fieldArray={fieldArray}
+                              key={randomUUID()}
+                            />
+                          )}
+                        </Paper>
+                      ))}
+                    </Grid>
+                  </Grid>
                 </TabPanel>
               </DialogContent>
               <DialogActions>

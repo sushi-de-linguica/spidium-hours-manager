@@ -1,6 +1,6 @@
 import { DataGrid, GridColDef, ptBR } from "@mui/x-data-grid";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, Chip } from "@mui/material";
 import { IExportFileRun, IFile, IFileTag } from "@/domain";
 import { useFileStore } from "@/stores";
 import { useMemo, useState } from "react";
@@ -38,7 +38,21 @@ const FilesTabTags = () => {
         );
       },
     },
-    { field: "label", headerName: "Nome da tag", flex: 1 },
+    {
+      field: "label",
+      headerName: "Nome da tag",
+      renderCell: ({ row }) => {
+        return (
+          <Chip
+            label={row.label}
+            color={row.color as any}
+            variant="outlined"
+            size="small"
+          />
+        );
+      },
+      flex: 1,
+    },
     { field: "description", headerName: "Descrição", flex: 3 },
   ];
 

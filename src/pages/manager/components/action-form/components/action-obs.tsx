@@ -1,6 +1,6 @@
 import {
   EFileTagActionComponentsObs,
-  EFileTagObsModule,
+  IFileTagObsModule,
   IFileTag,
   IFileTagActionModule,
 } from "@/domain";
@@ -20,7 +20,7 @@ import { UseFieldArrayReturn } from "react-hook-form";
 import { useState } from "react";
 
 interface IActionObsProps {
-  action: IFileTagActionModule<EFileTagObsModule>;
+  action: IFileTagActionModule<IFileTagObsModule>;
   index: number;
   fieldArray: UseFieldArrayReturn<IFileTag, "actions">;
 }

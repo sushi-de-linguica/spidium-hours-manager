@@ -1,6 +1,6 @@
 import {
   EFileTagActionComponentsTwitch,
-  EFileTagTwitchModule,
+  IFileTagTwitchModule,
   IFileTag,
   IFileTagActionModule,
 } from "@/domain";
@@ -21,7 +21,7 @@ import { useState } from "react";
 import { UseFieldArrayReturn } from "react-hook-form";
 
 interface IActionTwitchProps {
-  action: IFileTagActionModule<EFileTagTwitchModule>;
+  action: IFileTagActionModule<IFileTagTwitchModule>;
   index: number;
   fieldArray: UseFieldArrayReturn<IFileTag, "actions">;
 }
