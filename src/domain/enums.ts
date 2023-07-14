@@ -23,3 +23,23 @@ export enum ECustomEvents {
 export enum EProtocolEvents {
   SHM_PROTOCOL_DATA = "SHM-PROTOCOL-DATA",
 }
+
+export enum EFileTagAction {
+  NIGHTBOT = "NIGHTBOT",
+  OBS = "OBS",
+  TWITCH = "TWITCH",
+}
+
+export enum EFileTagActionComponentsNightbot {
+  UPDATE_COMMAND = "UPDATE_COMMAND",
+}
+
+export enum EFileTagActionComponentsObs {
+  CHANGE_SCENE = "CHANGE_SCENE",
+  SET_BROWSER_SOURCE = "SET_BROWSER_SOURCE",
+}
+
+export enum EFileTagActionComponentsTwitch {
+  UPDATE_TITLE = "UPDATE_TITLE",
+  UPDATE_GAME = "UPDATE_GAME",
+}

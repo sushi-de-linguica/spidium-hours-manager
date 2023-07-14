@@ -4,3 +4,8 @@ export interface IFile {
   lastModified: number;
   removed?: boolean;
 }
+
+export interface ITagActive {
+  tagId: string;
+  runId: string;
+}
