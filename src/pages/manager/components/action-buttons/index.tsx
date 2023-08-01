@@ -1,8 +1,7 @@
-import { randomUUID } from "crypto";
 import { useFileStore } from "@/stores";
 import { Box, Chip } from "@mui/material";
 import Icon from "@mui/icons-material/CheckOutlined";
-import { IFileTag, IFileTagActionModule, IRun } from "@/domain";
+import { IFileTag, IRun } from "@/domain";
 import { useMemo } from "react";
 import { ActionRunnerService } from "@/services/action-runner";
 
@@ -12,13 +11,17 @@ interface IActionButtonsProps {
 
 const ActionButtons = ({ row }: IActionButtonsProps) => {
   const { tags, activated } = useFileStore((store) => store.state);
-  const { setActiveTag } = useFileStore();
+  const { setActiveTag, state } = useFileStore();
 
   const handleActions = (tag: IFileTag) => {
     try {
       const enabledActions = tag.actions.filter((action) => action.isEnabled);
 
-      const runnerService = new ActionRunnerService(enabledActions, row);
+      const runnerService = new ActionRunnerService(
+        enabledActions,
+        row,
+        state.files
+      );
       runnerService.execute();
 
       setActiveTag(tag.id as string, row.id as string);

@@ -7,9 +7,6 @@ export interface IConfigurationStore {
   appendConfiguration: (configuration: Partial<IConfiguration>) => void;
   updateConfiguration: (configuration: IConfiguration) => void;
   updateConfigurationField: (field: keyof IConfiguration, value: any) => void;
-  updateLastRunId: (runId: string) => void;
-  updateLastSetupId: (runId: string) => void;
-  updateLastTitleId: (runId: string) => void;
   reset: () => void;
 }
 
@@ -17,9 +14,6 @@ const DEFAULT_STATE: IConfiguration = {
   path_run: "",
   path_setup: "",
   path_assets: "",
-  last_selected_run_id: "",
-  last_selected_setup_id: "",
-  last_selected_title_id: "",
   nightbot_client_id: "",
   nightbot_client_secret: "",
   nightbot_redirect_uri: "https://usina.spidium.live",
@@ -42,6 +36,7 @@ const DEFAULT_STATE: IConfiguration = {
   twitch_client_id: "",
   twitch_redirect_uri: "https://usina.spidium.live",
   twitch_token: "",
+  runs_row_height: 100,
 };
 
 export { DEFAULT_STATE as CONFIGURATION_DEFAULT_STATE };
@@ -77,31 +72,6 @@ const useConfigurationStore = create<IConfigurationStore, any>(
 
           return state;
         }),
-      updateLastRunId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_run_id: id,
-          },
-        })),
-      updateLastSetupId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_setup_id: id,
-          },
-        })),
-      updateLastTitleId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_title_id: id,
-          },
-        })),
-
       reset: () =>
         set(() => ({
           state: {

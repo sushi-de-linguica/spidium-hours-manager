@@ -1,7 +1,7 @@
 import { IConfiguration } from "./configuration.interface";
 import {
-  EExportType,
   EFileTagAction,
+  EFileTagActionComponentsExportFiles,
   EFileTagActionComponentsNightbot,
   EFileTagActionComponentsObs,
   EFileTagActionComponentsTwitch,
@@ -11,7 +11,6 @@ import { IMember } from "./member.interface";
 
 export interface IExportFileRun {
   id?: string;
-  type: EExportType;
   name: string;
   template: string;
   maxCharsPerLine?: number;
@@ -19,7 +18,11 @@ export interface IExportFileRun {
 }
 
 export interface IFileTagActionModule<
-  T = IFileTagNightbotModule | IFileTagTwitchModule | IFileTagObsModule
+  T =
+    | IFileTagNightbotModule
+    | IFileTagTwitchModule
+    | IFileTagObsModule
+    | IFileTagExportFilesModule
 > {
   isEnabled: boolean;
   module: T;
@@ -43,6 +46,12 @@ export interface IFileTagObsModule {
   component: EFileTagActionComponentsObs;
   value: string;
   resourceName: string;
+}
+
+export interface IFileTagExportFilesModule {
+  action: EFileTagAction.EXPORT_FILES;
+  component: EFileTagActionComponentsExportFiles;
+  value: string;
 }
 
 export interface IFileTag {

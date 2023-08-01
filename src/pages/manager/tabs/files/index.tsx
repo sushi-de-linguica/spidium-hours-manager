@@ -14,7 +14,7 @@ const FilesTab = () => {
     <Box>
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          Arquivos exportados
+          1 - Arquivos para exportar
         </AccordionSummary>
         <AccordionDetails>
           <FilesTabFiles />
@@ -23,7 +23,7 @@ const FilesTab = () => {
 
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          Configurações de ações
+          2 - Botões de ação
         </AccordionSummary>
         <AccordionDetails>
           <FilesTabTags />

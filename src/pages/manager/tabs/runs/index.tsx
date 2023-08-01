@@ -4,8 +4,6 @@ import {
   GridColDef,
   GridRowParams,
 } from "@mui/x-data-grid";
-import VideoSettingsIcon from "@mui/icons-material/VideoSettings";
-import VideocamIcon from "@mui/icons-material/Videocam";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -15,61 +13,35 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   FormControl,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  TextField,
 } from "@mui/material";
 
 import { ptBR } from "@mui/x-data-grid";
 
 import { exportRunsToDatagridRows } from "@/helpers/runs-to-datagrid-rows";
 import RunForm from "../../components/run-form";
-import { useMemo, useState } from "react";
-import {
-  useConfigurationStore,
-  useEventStore,
-  useFileStore,
-  useTwitch,
-} from "@/stores";
+import { useEffect, useMemo, useState } from "react";
+import { useConfigurationStore, useEventStore } from "@/stores";
 import { ConfirmDialog } from "../../components/confirm-dialog";
-import { EExportType, IMember, IRun } from "@/domain";
-import { FileExporter, TextGenerator } from "@/services/file-exporter-service";
-import { NightbotApiService } from "@/services/nightbot-service";
+import { IRun } from "@/domain";
 import { toast } from "react-toastify";
-import { ipcRenderer } from "electron";
-import { EIpcEvents, EWsEvents } from "@/domain/enums";
 import { CommandSuggestionDialog } from "../../components/command-suggestion";
 import { RunsOrderDialog } from "../../components/runs-order";
 import { CommandSuggestionService } from "@/services/command-suggestion";
 import { downloadFile } from "@/services/download-file";
-import { TwitchApiService } from "@/services/twitch-service";
 import { ConfigureForm } from "../../components/configure";
 import { ActionButtons } from "../../components/action-buttons";
 
 const RunsTab = () => {
-  const { files } = useFileStore((state) => state.state);
-  const {
-    nightbot_runner_command_id,
-    nightbot_host_command,
-    nightbot_commentator_command,
-    nightbot_runner_text_singular,
-    nightbot_runner_text_plural,
-    nightbot_host_text_singular,
-    nightbot_host_text_plural,
-    nightbot_commentator_text_singular,
-    nightbot_commentator_text_plural,
-    obs_browser_cam_input_name,
-    obs_browser_game_input_name,
-    last_selected_run_id,
-    last_selected_setup_id,
-    last_selected_title_id,
-    path_run,
-    path_setup,
-    path_assets,
-  } = useConfigurationStore((store) => store.state);
+  const { path_run, path_setup, path_assets, runs_row_height } =
+    useConfigurationStore((store) => store.state);
+
+  const { updateConfigurationField } = useConfigurationStore();
 
   const configurationState = useConfigurationStore((store) => store.state);
 
@@ -77,18 +49,8 @@ const RunsTab = () => {
     return path_run === "" || path_setup === "" || path_assets === "";
   }, [configurationState, path_run, path_setup, path_assets]);
 
-  const hasBrowserInputsForObs = useMemo(() => {
-    if (!obs_browser_cam_input_name && !obs_browser_game_input_name) {
-      return false;
-    }
-    return true;
-  }, [obs_browser_cam_input_name, obs_browser_game_input_name]);
-
-  const { updateLastRunId, updateLastSetupId, updateLastTitleId } =
-    useConfigurationStore();
   const { current_event_id, events } = useEventStore((store) => store.state);
   const { setCurrentEvent, removeRun } = useEventStore();
-  const twitchStore = useTwitch();
 
   const getDatagridDataByEventId = (eventId: string | null) => {
     if (!eventId) {
@@ -113,11 +75,6 @@ const RunsTab = () => {
     useState(false);
   const [runToSuggestion, setRunToSuggestion] = useState<IRun | null>(null);
 
-  const [isOpenSetupAlert, setIsOpenSetupAlert] = useState(false);
-  const [isOpenRunAlert, setIsOpenRunAlert] = useState(false);
-
-  const [runToExport, setRunToExport] = useState<IRun | null>(null);
-
   const handleCancelDialog = () => {
     setRunToRemove(null);
     setIsOpenDialog(false);
@@ -128,12 +85,6 @@ const RunsTab = () => {
     setIsOpenEditDialog(false);
   };
 
-  const handleCancelAlert = () => {
-    setRunToExport(null);
-    setIsOpenRunAlert(false);
-    setIsOpenSetupAlert(false);
-  };
-
   const columns: GridColDef[] = [
     {
       field: "actions",
@@ -141,27 +92,6 @@ const RunsTab = () => {
       headerName: "Ações",
       align: "center",
       getActions: (params: GridRowParams) => [
-        <GridActionsCellItem
-          icon={<VideoSettingsIcon color="primary" />}
-          label="mandar para SETUP"
-          onClick={() => {
-            setRunToExport(params.row);
-            setIsOpenRunAlert(false);
-            setIsOpenSetupAlert(true);
-          }}
-          showInMenu
-        />,
-        <GridActionsCellItem
-          label="mandar para tela de RUN"
-          icon={<VideocamIcon color="error" />}
-          onClick={() => {
-            setRunToExport(params.row);
-            setIsOpenSetupAlert(false);
-            setIsOpenRunAlert(true);
-          }}
-          showInMenu
-          divider
-        />,
         <GridActionsCellItem
           label="sugestões de !title e !game"
           icon={<ContentCopyIcon />}
@@ -221,296 +151,8 @@ const RunsTab = () => {
     { field: "all_comments", headerName: "Comentarista(s)", minWidth: 200 },
   ];
 
-  const getLinkByMember = (runner: IMember) => {
-    if (!runner.link && !runner.primaryTwitch) {
-      return "ih rapaz, arruma ai mods...";
-    }
-
-    if (!!runner.link) {
-      return runner.link;
-    }
-
-    if (!!runner.primaryTwitch) {
-      return `https://www.twitch.tv/${runner.primaryTwitch}`;
-    }
-
-    return "";
-  };
-
-  const getBrowserLinkToObsByMember = (member: IMember) => {
-    return `https://player.twitch.tv/?channel=${member.streamAt}&muted=false&parent=multitwitch.tv&parent=www.multitwitch.tv`;
-  };
-
   const handleCloseCommandSuggestion = () => {
     setCommandSuggestionDialogOpen(false);
-  };
-
-  const getTitle = (run: IRun) => {
-    const hasCustomTemplate = run?.seoTitle && run?.seoTitle?.length > 0;
-
-    return TextGenerator.generate(
-      hasCustomTemplate ? run.seoTitle! : seo_title_template,
-      run
-    );
-  };
-
-  const getGame = (run: IRun) => {
-    const hasCustomGame = run.seoGame && run?.seoGame?.length > 0;
-
-    return hasCustomGame ? run.seoGame! : run.game;
-  };
-
-  const handleUpdateTwitchChannelGame = async (gameName: string) => {
-    const twitchService = new TwitchApiService(
-      twitchStore.state.broadcaster_id
-    );
-
-    const response = await twitchService.getGameByName(gameName);
-
-    const game = response.data?.data[0];
-    if (game) {
-      twitchService
-        .updateChannel({
-          game_id: game.id,
-        })
-        .then(() => {
-          toast.success("Jogo da live atualizado");
-        })
-        .catch(() => {
-          toast.error("Erro ao atualizar jogo da live");
-        });
-    }
-  };
-
-  const handleUpdateTwitchChannelTitle = async (title: string) => {
-    const twitchService = new TwitchApiService(
-      twitchStore.state.broadcaster_id
-    );
-
-    twitchService
-      .updateChannel({
-        title,
-      })
-      .then(() => {
-        toast.success("Titulo da live atualizado");
-      })
-      .catch(() => {
-        toast.error("Erro ao atualizar o titulo da live");
-      });
-  };
-
-  const handleUpdateGame = (run: IRun) => {
-    try {
-      const newLiveGame = getGame(run);
-
-      handleUpdateTwitchChannelGame(newLiveGame);
-    } catch (error) {
-      console.error("[erro] ao atualizar o titulo na twitch", error);
-    }
-  };
-
-  const handleUpdateTitle = (run: IRun) => {
-    try {
-      const newLiveTitle = getTitle(run);
-
-      handleUpdateTwitchChannelTitle(newLiveTitle);
-    } catch (error) {
-      console.error("[erro] ao atualizar o titulo na twitch", error);
-    }
-  };
-
-  const handleConfirmExport = async (data: IRun) => {
-    const handleCopyRunImage = () => {
-      if (!data.imageFile) {
-        return;
-      }
-
-      const path = isOpenSetupAlert ? path_setup : path_run;
-
-      try {
-        ipcRenderer.invoke(EIpcEvents.COPY_FILE, {
-          uuid: data.id,
-          fileName: "game",
-          path_assets,
-          path,
-        });
-      } catch (error) {
-        console.error("copy file error", error);
-      }
-    };
-
-    const handleUpdateNightbotRunner = () => {
-      const needUpdateNightbotRunnerCommand =
-        nightbot_runner_command_id && data?.runners?.length > 0;
-
-      if (needUpdateNightbotRunnerCommand) {
-        try {
-          const nightbotService = new NightbotApiService();
-          let message = "";
-          if (data.runners.length === 1) {
-            const [firstRunner] = data.runners;
-            message = `${nightbot_runner_text_singular ?? ""}`;
-            message += getLinkByMember(firstRunner);
-          } else {
-            const mappedLinks = data.runners.map((runner) =>
-              getLinkByMember(runner)
-            );
-            message = `${nightbot_runner_text_plural ?? ""}`;
-            message += mappedLinks.join(" | ");
-          }
-
-          nightbotService
-            .updateCustomCommandById(nightbot_runner_command_id._id, {
-              message,
-            })
-            .then(() => {
-              toast.success(
-                `O comando ${nightbot_runner_command_id.name} foi atualizado no nightbot`
-              );
-            });
-
-          console.log("atualizou comando com:", message);
-        } catch (error) {
-          console.error("error nightbot", error);
-        }
-      }
-    };
-
-    const handleUpdateNightbotHost = () => {
-      const needUpdateNightbotHost =
-        nightbot_host_command && data?.hosts?.length > 0;
-
-      if (needUpdateNightbotHost) {
-        try {
-          const nightbotService = new NightbotApiService();
-          let message = "";
-
-          if (data.hosts.length === 1) {
-            const [firstHost] = data.hosts;
-            message = `${nightbot_host_text_singular ?? ""}`;
-            message += getLinkByMember(firstHost);
-          } else {
-            const mappedLinks = data.hosts.map((host) => getLinkByMember(host));
-            message = `${nightbot_host_text_plural ?? ""}`;
-            message += mappedLinks.join(" | ");
-          }
-
-          nightbotService
-            .updateCustomCommandById(nightbot_host_command._id, {
-              message,
-            })
-            .then(() => {
-              toast.success(
-                `O comando ${nightbot_host_command.name} foi atualizado no nightbot`
-              );
-            });
-
-          console.log("atualizou comando com:", message);
-        } catch (error) {
-          console.error("error nightbot", error);
-        }
-      }
-    };
-
-    const handleUpdateNightbotCommentator = () => {
-      const needUpdateNightbotCommentator =
-        nightbot_commentator_command && data?.comments?.length > 0;
-
-      if (needUpdateNightbotCommentator) {
-        try {
-          const nightbotService = new NightbotApiService();
-          let message = "";
-
-          if (data.comments.length === 1) {
-            const [firstHost] = data.comments;
-            message = `${nightbot_commentator_text_singular ?? ""}`;
-            message += getLinkByMember(firstHost);
-          } else {
-            const mappedLinks = data.comments.map((host) =>
-              getLinkByMember(host)
-            );
-            message = `${nightbot_commentator_text_plural ?? ""}`;
-            message += mappedLinks.join(" | ");
-          }
-
-          nightbotService
-            .updateCustomCommandById(nightbot_commentator_command._id, {
-              message,
-            })
-            .then(() => {
-              toast.success(
-                `O comando ${nightbot_commentator_command.name} foi atualizado no nightbot`
-              );
-            });
-
-          console.log("atualizou comando com:", message);
-        } catch (error) {
-          console.error("error nightbot", error);
-        }
-      }
-    };
-
-    const handleUpdateBrowserSources = async () => {
-      const [runner] = data.runners;
-      console.log("runner", runner);
-      console.log("------");
-      if (
-        runner &&
-        runner.streamAt &&
-        hasBrowserInputsForObs &&
-        window.obsService
-      ) {
-        const batchCall: any[] = [
-          obs_browser_cam_input_name,
-          obs_browser_game_input_name,
-        ]
-          .filter((value) => !!value)
-          .map((field) => ({
-            requestType: "SetInputSettings",
-            requestData: {
-              inputName: field,
-              inputSettings: {
-                url: getBrowserLinkToObsByMember(runner),
-              },
-            },
-          }));
-        console.log(batchCall);
-        if (batchCall.length > 0) {
-          ipcRenderer.send(EWsEvents.SEND_BATCH_EVENT_OBS, batchCall);
-        }
-      }
-    };
-
-    const pathToExport = isOpenSetupAlert ? path_setup : path_run;
-    const exportType = isOpenSetupAlert
-      ? EExportType.SETUP_SCREEN
-      : EExportType.RUN_SCREEN;
-
-    const filesToExport = files.filter((file) => file.type === exportType);
-
-    if (isOpenSetupAlert) {
-      updateLastSetupId(data.id!);
-      FileExporter.exportFilesToPath(filesToExport, pathToExport, data);
-      toast.success(
-        `A Run do game: ${data.game} foi enviada para tela de SETUP !`
-      );
-    } else {
-      updateLastRunId(data.id!);
-      FileExporter.exportFilesToPath(filesToExport, path_run, data);
-      toast.success(
-        `A Run do game: ${data.game} foi enviada para tela de RUN !`
-      );
-
-      handleUpdateBrowserSources();
-      handleUpdateNightbotRunner();
-      handleUpdateNightbotHost();
-      handleUpdateNightbotCommentator();
-    }
-
-    handleCopyRunImage();
-
-    setIsOpenRunAlert(false);
-    setIsOpenSetupAlert(false);
   };
 
   const { seo_title_template } = useConfigurationStore((store) => store.state);
@@ -535,6 +177,14 @@ const RunsTab = () => {
     const dataWithLineBreaks = data.join(os.EOL);
     downloadFile("title-e-game.txt", dataWithLineBreaks);
   };
+
+  const [rowHeightLocal, setRowHeightLocal] = useState<number>(
+    runs_row_height ?? 100
+  );
+
+  useEffect(() => {
+    updateConfigurationField("runs_row_height", rowHeightLocal);
+  }, [rowHeightLocal]);
 
   return (
     <Box gap={"8px"} display={"flex"} flexDirection={"column"}>
@@ -622,11 +272,21 @@ const RunsTab = () => {
             <RunsOrderDialog eventId={current_event_id} />
           </div>
 
+          <TextField
+            margin="dense"
+            label="Tamanho da linha"
+            value={rowHeightLocal}
+            onChange={(event) => {
+              setRowHeightLocal(parseInt(event.target.value));
+            }}
+            type="number"
+          />
+
           <Box marginTop={"24px"}>
             <DataGrid
               rowSelection={false}
               rows={getDatagridDataByEventId(current_event_id)}
-              rowHeight={80}
+              rowHeight={runs_row_height}
               columns={columns}
               autoHeight
               localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
@@ -666,23 +326,6 @@ const RunsTab = () => {
         Você está prestes a excluir a RUN, essa alteração não pode ser
         revertida, tem certeza?
       </ConfirmDialog>
-
-      {isOpenSetupAlert || isOpenRunAlert ? (
-        <ConfirmDialog
-          isOpen={isOpenSetupAlert || isOpenRunAlert}
-          data={runToExport}
-          handleConfirm={handleConfirmExport}
-          cancelText="não, cancelar"
-          confirmText={`sim, mandar pra ${isOpenSetupAlert ? "SETUP" : "RUN"}`}
-          confirmColor={isOpenSetupAlert ? "secondary" : "success"}
-          handleCancel={handleCancelAlert}
-        >
-          {isOpenSetupAlert &&
-            `Você está prestes a alterar todos os TEXTOS da tela de SETUP para os dados da run de: ${runToExport?.game} - ${runToExport?.category}`}
-          {isOpenRunAlert &&
-            `Você está prestes a alterar todos Textos da tela de RUN para os dados da run de: ${runToExport?.game} - ${runToExport?.category}`}
-        </ConfirmDialog>
-      ) : null}
     </Box>
   );
 };

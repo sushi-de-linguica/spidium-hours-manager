@@ -207,7 +207,7 @@ const useFileStore = create<IFileStore, any>(
         })),
     }),
     {
-      name: "SPIDIUM_FILE_STORE",
+      name: "SPIDIUM_FILE_STORE_V1",
     }
   )
 );

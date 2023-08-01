@@ -4,9 +4,6 @@ export interface IConfiguration {
   path_run: string;
   path_setup: string;
   path_assets: string;
-  last_selected_run_id: string;
-  last_selected_setup_id: string;
-  last_selected_title_id: string;
   nightbot_client_id: string;
   nightbot_client_secret: string;
   nightbot_redirect_uri: string;
@@ -28,4 +25,5 @@ export interface IConfiguration {
   twitch_client_id: string;
   twitch_redirect_uri: string;
   twitch_token: string;
+  runs_row_height: number;
 }

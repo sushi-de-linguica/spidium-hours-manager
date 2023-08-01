@@ -28,6 +28,7 @@ export enum EFileTagAction {
   NIGHTBOT = "NIGHTBOT",
   OBS = "OBS",
   TWITCH = "TWITCH",
+  EXPORT_FILES = "EXPORT_FILES",
 }
 
 export enum EFileTagActionComponentsNightbot {
@@ -42,4 +43,8 @@ export enum EFileTagActionComponentsObs {
 export enum EFileTagActionComponentsTwitch {
   UPDATE_TITLE = "UPDATE_TITLE",
   UPDATE_GAME = "UPDATE_GAME",
+}
+
+export enum EFileTagActionComponentsExportFiles {
+  EXPORT_ALL = "EXPORT_ALL",
 }

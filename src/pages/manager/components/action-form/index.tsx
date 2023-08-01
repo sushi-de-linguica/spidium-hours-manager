@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import {
   EFileTagAction,
+  EFileTagActionComponentsExportFiles,
   EFileTagActionComponentsNightbot,
   EFileTagActionComponentsObs,
   EFileTagActionComponentsTwitch,
@@ -45,6 +46,7 @@ import { ActionTwitch } from "./components/action-twitch";
 import { TabPanel } from "../tab-panel";
 
 import Icon from "@mui/icons-material/CheckOutlined";
+import { ActionExportFiles } from "./components/action-export-files";
 
 const defaultData: IFileTag = {
   id: "",
@@ -145,6 +147,16 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
           module: {
             action: EFileTagAction.TWITCH,
             component: EFileTagActionComponentsTwitch.UPDATE_TITLE,
+            value: "",
+          },
+        });
+        break;
+      case action === EFileTagAction.EXPORT_FILES:
+        fieldArray.append({
+          isEnabled: false,
+          module: {
+            action: EFileTagAction.EXPORT_FILES,
+            component: EFileTagActionComponentsExportFiles.EXPORT_ALL,
             value: "",
           },
         });
@@ -310,26 +322,47 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                 </TabPanel>
 
                 <TabPanel value={selectedTab} index={2}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.NIGHTBOT)}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      flexDirection: "row",
+                      marginTop: "12px",
+                    }}
                   >
-                    +1 Ação do Nightbot
-                  </Button>
+                    <Button
+                      variant="contained"
+                      color="info"
+                      onClick={() => handleAddAction(EFileTagAction.NIGHTBOT)}
+                    >
+                      + Nightbot
+                    </Button>
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.OBS)}
-                  >
-                    +1 Ação do OBS
-                  </Button>
+                    <Button
+                      variant="contained"
+                      color="info"
+                      onClick={() => handleAddAction(EFileTagAction.OBS)}
+                    >
+                      + OBS
+                    </Button>
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleAddAction(EFileTagAction.TWITCH)}
-                  >
-                    +1 Ação da Twitch
-                  </Button>
+                    <Button
+                      variant="contained"
+                      color="info"
+                      onClick={() => handleAddAction(EFileTagAction.TWITCH)}
+                    >
+                      + Twitch
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="info"
+                      onClick={() =>
+                        handleAddAction(EFileTagAction.EXPORT_FILES)
+                      }
+                    >
+                      + Exportar Arquivos
+                    </Button>
+                  </div>
 
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
@@ -360,6 +393,15 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                           )}
                           {field.module.action === EFileTagAction.TWITCH && (
                             <ActionTwitch
+                              action={field as any}
+                              index={index}
+                              fieldArray={fieldArray}
+                              key={randomUUID()}
+                            />
+                          )}
+                          {field.module.action ===
+                            EFileTagAction.EXPORT_FILES && (
+                            <ActionExportFiles
                               action={field as any}
                               index={index}
                               fieldArray={fieldArray}

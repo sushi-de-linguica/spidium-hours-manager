@@ -1,10 +1,13 @@
 import {
   EFileTagAction,
+  EFileTagActionComponentsExportFiles,
   EFileTagActionComponentsNightbot,
   EFileTagActionComponentsObs,
   EFileTagActionComponentsTwitch,
   EWsEvents,
+  IExportFileRun,
   IFileTagActionModule,
+  IFileTagExportFilesModule,
   IFileTagNightbotModule,
   IFileTagObsModule,
   IFileTagTwitchModule,
@@ -13,7 +16,7 @@ import {
 } from "@/domain";
 import { getBrowserLinkFromByMember } from "@/helpers/get-browser-link-from-member";
 import { useConfigurationStore, useTwitch } from "@/stores";
-import { TextGenerator } from "./file-exporter-service";
+import { FileExporter, TextGenerator } from "./file-exporter-service";
 import { ipcRenderer } from "electron";
 import { getTwitchLinkByMember } from "@/helpers/get-twitch-link-by-member";
 import { NightbotApiService } from "./nightbot-service";
@@ -30,6 +33,7 @@ interface INightbotText {
 class ActionRunnerService {
   private actions: IFileTagActionModule[];
   private run: IRun;
+  private files: IExportFileRun[];
 
   private runner: INightbotText;
   private host: INightbotText;
@@ -37,10 +41,15 @@ class ActionRunnerService {
 
   private title_template: string;
 
-  constructor(actions: IFileTagActionModule[], run: IRun) {
+  constructor(
+    actions: IFileTagActionModule[],
+    run: IRun,
+    files: IExportFileRun[]
+  ) {
     const enabledActions = actions.filter((action) => action.isEnabled);
     this.actions = enabledActions;
     this.run = run;
+    this.files = files;
 
     const configurationState = useConfigurationStore.getState().state;
 
@@ -78,14 +87,21 @@ class ActionRunnerService {
     const obsModules = this.getModulesByAction(EFileTagAction.OBS);
     const twitchModules = this.getModulesByAction(EFileTagAction.TWITCH);
     const nightbotModules = this.getModulesByAction(EFileTagAction.NIGHTBOT);
+    const exportFilesModules = this.getModulesByAction(
+      EFileTagAction.EXPORT_FILES
+    );
 
     console.info(`obs actions -> ${obsModules.length}`);
     console.info(`twitch actions -> ${twitchModules.length}`);
     console.info(`nightbot actions -> ${nightbotModules.length}`);
+    console.info(`export files actions -> ${exportFilesModules.length}`);
 
     this.handleRunObsActions(obsModules as IFileTagObsModule[]);
     this.handleRunNightbotActions(nightbotModules as IFileTagNightbotModule[]);
     this.handleRunTwitchActions(twitchModules as IFileTagTwitchModule[]);
+    this.handleRunExportFilesActions(
+      exportFilesModules as IFileTagExportFilesModule[]
+    );
   }
 
   private getModulesByAction(actionToGet: EFileTagAction) {
@@ -283,6 +299,32 @@ class ActionRunnerService {
 
         case action.component === EFileTagActionComponentsTwitch.UPDATE_GAME:
           await handleUpdateGame(action);
+          break;
+      }
+    }
+  }
+
+  private async handleRunExportFilesActions(
+    actions: IFileTagExportFilesModule[]
+  ) {
+    console.log("handleRunExportFilesActions", actions);
+
+    const handleExportAll = async (module: IFileTagExportFilesModule) => {
+      try {
+        if (module.value && this.files.length > 0) {
+          FileExporter.exportFilesToPath(this.files, module.value, this.run);
+          toast.success("Arquivos exportados!");
+        }
+      } catch (error) {
+        console.error("[erro] ao exportar arquivos", error);
+      }
+    };
+
+    for (const action of actions) {
+      switch (true) {
+        case action.component ===
+          EFileTagActionComponentsExportFiles.EXPORT_ALL:
+          await handleExportAll(action);
           break;
       }
     }

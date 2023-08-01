@@ -10,7 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { Box, Chip } from "@mui/material";
-import { EExportType, IExportFileRun } from "@/domain";
+import { IExportFileRun } from "@/domain";
 import ExportFileForm from "../../../components/export-file-form";
 import { filesToDataGridRows } from "@/helpers/files-to-datagrid-rows";
 import { ConfigureForm } from "../../../components/configure";
@@ -68,23 +68,6 @@ const FilesTabFiles = () => {
           label="remover"
         />,
       ],
-    },
-    {
-      field: "type",
-      headerName: "Tela",
-      width: 100,
-      renderCell: (props) => {
-        return (
-          <Chip
-            label={
-              props.row.type === EExportType.SETUP_SCREEN ? "SETUP" : "RUN"
-            }
-            color={
-              props.row.type === EExportType.SETUP_SCREEN ? "info" : "success"
-            }
-          />
-        );
-      },
     },
     { field: "name", headerName: "Nome do arquivo", flex: 1 },
     { field: "template", headerName: "template", flex: 2 },
