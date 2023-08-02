@@ -73,6 +73,12 @@ const ActionExportFiles = ({
             disabled={!action.isEnabled}
             label={"Endereço da pasta destino"}
             value={value}
+            error={value === ""}
+            helperText={
+              value === ""
+                ? "Você precisa fornecer um caminho (exemplo: D:\\SPIDIUM) para que os arquivos sejam exportados"
+                : ""
+            }
             placeholder={"Endereço da pasta destino"}
             onChange={handleChangeValue}
             onBlur={handleBlurValue}

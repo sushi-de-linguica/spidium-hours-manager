@@ -125,7 +125,7 @@ const ActionObs = ({ action, index, fieldArray }: IActionObsProps) => {
             label={
               action.module.component ===
               EFileTagActionComponentsObs.SET_BROWSER_SOURCE
-                ? "Template da URL do Browser"
+                ? "Template da URL do Browser (opcional)"
                 : "Nome da cena"
             }
             value={value}

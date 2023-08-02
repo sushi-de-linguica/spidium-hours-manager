@@ -111,15 +111,15 @@ const ActionTwitch = ({ action, index, fieldArray }: IActionTwitchProps) => {
             label={
               action.module.component ===
               EFileTagActionComponentsTwitch.UPDATE_TITLE
-                ? "Template para alteração do titulo"
-                : "Template para alteração do jogo"
+                ? "Template para alteração do titulo (opcional)"
+                : "Template para alteração do jogo (opcional)"
             }
             value={value}
             placeholder={
               action.module.component ===
               EFileTagActionComponentsTwitch.UPDATE_TITLE
-                ? "Template para alteração do titulo"
-                : "Template para alteração do jogo"
+                ? "Template para alteração do titulo (opcional)"
+                : "Template para alteração do jogo (opcional)"
             }
             onChange={handleChangeValue}
             onBlur={handleBlurValue}

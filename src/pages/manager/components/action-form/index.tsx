@@ -57,6 +57,7 @@ const defaultData: IFileTag = {
   variant: "outlined",
   color: "primary",
   minimumRunnersToShow: 0,
+  isRequiredConfirmation: false,
   isShow: true,
 };
 
@@ -212,6 +213,26 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                     label="Minimo de runners para mostrar o botão"
                     {...formContext.register("minimumRunnersToShow")}
                     fullWidth
+                  />
+
+                  <Controller
+                    name="isRequiredConfirmation"
+                    control={formContext.control}
+                    defaultValue={false}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        {...field}
+                        checked={field.value}
+                        control={<Switch />}
+                        onChange={(_, checked) => {
+                          formContext.setValue(
+                            "isRequiredConfirmation",
+                            checked
+                          );
+                        }}
+                        label="Exibir alerta de confirmação de ação"
+                      />
+                    )}
                   />
 
                   <Controller

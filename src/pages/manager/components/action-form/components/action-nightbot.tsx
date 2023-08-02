@@ -5,6 +5,7 @@ import {
 } from "@/domain";
 
 import {
+  Alert,
   Button,
   Chip,
   Divider,
@@ -116,13 +117,22 @@ const ActionNightbot = ({
           <TextField
             disabled={!action.isEnabled}
             margin="dense"
-            label="Template"
+            label="Template (opcional)"
             value={template}
             onChange={handleChangeTemplate}
             onBlur={handleBlurTemplate}
             fullWidth
           />
         </Grid>
+
+        {template === "" && (
+          <Grid xs={12} item>
+            <Alert color="warning">
+              Ao deixar em branco, será utilizado o template padrão existente em
+              "Extensões / Configurações dos comandos"
+            </Alert>
+          </Grid>
+        )}
       </Grid>
     </FormGroup>
   );

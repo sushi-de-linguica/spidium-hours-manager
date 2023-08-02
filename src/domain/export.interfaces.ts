@@ -60,6 +60,7 @@ export interface IFileTag {
   description?: string;
   path?: string;
   actions: IFileTagActionModule[];
+  isRequiredConfirmation: boolean;
   variant: string;
   color: string;
   minimumRunnersToShow: number;
