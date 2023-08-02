@@ -4,6 +4,7 @@ import {
   EFileTagActionComponentsNightbot,
   EFileTagActionComponentsObs,
   EFileTagActionComponentsTwitch,
+  EIpcEvents,
   EWsEvents,
   IExportFileRun,
   IFileTagActionModule,
@@ -40,6 +41,7 @@ class ActionRunnerService {
   private commentator: INightbotText;
 
   private title_template: string;
+  private path_assets: string;
 
   constructor(
     actions: IFileTagActionModule[],
@@ -73,6 +75,8 @@ class ActionRunnerService {
       plural: configurationState.nightbot_commentator_text_plural,
       members: run.comments,
     };
+
+    this.path_assets = configurationState.path_assets;
 
     this.title_template = configurationState.seo_title_template;
   }
@@ -309,10 +313,52 @@ class ActionRunnerService {
   ) {
     console.log("handleRunExportFilesActions", actions);
 
+    const handleCopyImage = (
+      uuid: string,
+      path: string,
+      path_assets: string,
+      fileName: string
+    ) => {
+      try {
+        ipcRenderer.invoke(EIpcEvents.COPY_FILE, {
+          uuid,
+          fileName,
+          path_assets,
+          path,
+        });
+      } catch (error) {
+        console.error("copy file error", error);
+      }
+    };
+
     const handleExportAll = async (module: IFileTagExportFilesModule) => {
       try {
         if (module.value && this.files.length > 0) {
           FileExporter.exportFilesToPath(this.files, module.value, this.run);
+
+          if (this.run.imageFile) {
+            handleCopyImage(
+              this.run.id as string,
+              module.value,
+              this.path_assets,
+              "game"
+            );
+            return;
+          }
+
+          const runnerWithImage = this.run.runners.filter(
+            (runner) => runner.imageFile
+          );
+
+          runnerWithImage.forEach((member, index) => {
+            handleCopyImage(
+              member.id as string,
+              module.value,
+              this.path_assets,
+              `runner-${index + 1}`
+            );
+          });
+
           toast.success("Arquivos exportados!");
         }
       } catch (error) {
