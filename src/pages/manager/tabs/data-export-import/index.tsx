@@ -219,6 +219,7 @@ const DataExportImportTab = () => {
           const newDataFiles = handleMapWithId(data.file.files, "id");
           fileStore.setState({
             files: newDataFiles,
+            tags: data.file.tags ? data.file.tags : [],
           });
           toast.success("Arquivos importados com sucesso!");
         }
