@@ -79,15 +79,6 @@ const ActionExportFiles = ({
             fullWidth
           />
         </Grid>
-
-        {value === "" && (
-          <Grid xs={12} item>
-            <Alert color="warning">
-              Ao deixar em branco, será utilizado o template padrão existente em
-              "Extensões / Templates padrões"
-            </Alert>
-          </Grid>
-        )}
       </Grid>
     </FormGroup>
   );

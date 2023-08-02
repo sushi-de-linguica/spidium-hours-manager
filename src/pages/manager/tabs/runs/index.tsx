@@ -38,16 +38,17 @@ import { ConfigureForm } from "../../components/configure";
 import { ActionButtons } from "../../components/action-buttons";
 
 const RunsTab = () => {
-  const { path_run, path_setup, path_assets, runs_row_height } =
-    useConfigurationStore((store) => store.state);
+  const { path_assets, runs_row_height } = useConfigurationStore(
+    (store) => store.state
+  );
 
   const { updateConfigurationField } = useConfigurationStore();
 
   const configurationState = useConfigurationStore((store) => store.state);
 
   const showPathConfigureWarning = useMemo(() => {
-    return path_run === "" || path_setup === "" || path_assets === "";
-  }, [configurationState, path_run, path_setup, path_assets]);
+    return path_assets === "";
+  }, [configurationState, path_assets]);
 
   const { current_event_id, events } = useEventStore((store) => store.state);
   const { setCurrentEvent, removeRun } = useEventStore();

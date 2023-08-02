@@ -11,8 +11,6 @@ export interface IConfigurationStore {
 }
 
 const DEFAULT_STATE: IConfiguration = {
-  path_run: "",
-  path_setup: "",
   path_assets: "",
   nightbot_client_id: "",
   nightbot_client_secret: "",

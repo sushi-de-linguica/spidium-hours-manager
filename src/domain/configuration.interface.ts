@@ -1,8 +1,6 @@
 import { INightbotCommandModel } from "./extensions";
 
 export interface IConfiguration {
-  path_run: string;
-  path_setup: string;
   path_assets: string;
   nightbot_client_id: string;
   nightbot_client_secret: string;
