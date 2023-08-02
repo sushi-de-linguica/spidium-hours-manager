@@ -65,7 +65,7 @@ const useConfigurationStore = create<IConfigurationStore, any>(
           };
         }),
       updateConfigurationField: (field: keyof IConfiguration, value: any) =>
-        set((state) => {
+        set((state: any) => {
           state.state[field] = value;
 
           return state;
