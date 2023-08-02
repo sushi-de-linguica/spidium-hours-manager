@@ -190,7 +190,9 @@ const DataExportImportTab = () => {
   );
 
   const handleImportInitialDatabase = async () => {
-    const response = await axios.get(environment.SHM_DATABASE_URL);
+    const response = await axios.get(
+      `${environment.SHM_DATABASE_URL}?timestamp=${Date.now()}`
+    );
 
     const handleMapWithId = (array: any[], field: string) => {
       return array.map((data: any) => {
