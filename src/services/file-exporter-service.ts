@@ -3,7 +3,8 @@ import * as fs from "fs";
 import * as os from "os";
 
 const REGEX = {
-  LOOP_REGEX: /<loop property='(.*?)' separator='(.*?)'>(.*?)<\/loop>/,
+  LOOP_REGEX:
+    /<loop property='(.*?)' separator='(.*?)' prefix='(.+)?'>(.*?)<\/loop>/,
   ITEM_REGEX: /<item property='(.*?)' index='(.*?)'>(.*?)<\/item>/,
 };
 
@@ -41,21 +42,58 @@ class TextGenerator {
     return output;
   }
 
+  private static getFirstFieldFromItem(
+    item: any,
+    property: any,
+    prefix: string[]
+  ) {
+    const fields = property.indexOf(",") >= 0 ? property.split(",") : [];
+
+    if (fields.length === 0 && property) {
+      fields.push(property);
+    }
+
+    if (!property || !item) {
+      return "";
+    }
+
+    let value = "";
+
+    const hasPrefixes = prefix && prefix.length > 0;
+
+    fields.forEach((field: any, index: number) => {
+      const currentValue = item[field];
+
+      if (!currentValue || value) {
+        return;
+      }
+
+      let prefixValue = hasPrefixes && prefix[index] ? prefix[index] : "";
+
+      value = `${prefixValue}${currentValue}`;
+    });
+
+    return value ? value : "";
+  }
+
   private static handleLoopMatch(
     loopMatch: RegExpMatchArray,
     output: string,
     data: IRun
   ): string {
-    const [, property, separator, content] = loopMatch;
+    const [, property, separator, prefix, content] = loopMatch;
     const loopItems = data[property];
 
     const loopOutput = loopItems
       ?.map((item: any) => {
-        return content.replace(/\{(.*?)\[(.*?)\]\}/g, (_, p1, p2) => {
-          return item[p2] ?? "";
+        const prefixList = prefix && prefix.length > 0 ? prefix.split(",") : [];
+        return content.replace(/{(.*?)\[(.*?)\]\}/g, (_, p1, p2) => {
+          return TextGenerator.getFirstFieldFromItem(item, p2, prefixList);
         });
       })
       .join(separator);
+
+    console.log("loopOutput", loopOutput);
 
     return output.replace(loopMatch[0], loopOutput ?? "");
   }
@@ -69,7 +107,8 @@ class TextGenerator {
     const item = data[property][parseInt(index)] as any;
 
     const itemOutput = content.replace(/\{(.*?)\[(.*?)\]\}/g, (_, p1, p2) => {
-      return item && p2 ? item[p2] : "";
+      const value = TextGenerator.getFirstFieldFromItem(item, p2, []);
+      return value;
     });
 
     return output.replace(itemMatch[0], itemOutput ?? "");

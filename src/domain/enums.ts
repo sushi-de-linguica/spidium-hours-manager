@@ -14,6 +14,7 @@ export enum EIpcEvents {
   FILE_SAVE = "IPC:FILE_SAVE",
   FILE_REMOVE = "IPC:FILE_REMOVE",
   COPY_FILE = "IPC:COPY_FILE",
+  RESET_IMAGES = "IPC:RESET_IMAGES",
 }
 
 export enum ECustomEvents {
@@ -22,4 +23,29 @@ export enum ECustomEvents {
 
 export enum EProtocolEvents {
   SHM_PROTOCOL_DATA = "SHM-PROTOCOL-DATA",
+}
+
+export enum EFileTagAction {
+  NIGHTBOT = "NIGHTBOT",
+  OBS = "OBS",
+  TWITCH = "TWITCH",
+  EXPORT_FILES = "EXPORT_FILES",
+}
+
+export enum EFileTagActionComponentsNightbot {
+  UPDATE_COMMAND = "UPDATE_COMMAND",
+}
+
+export enum EFileTagActionComponentsObs {
+  CHANGE_SCENE = "CHANGE_SCENE",
+  SET_BROWSER_SOURCE = "SET_BROWSER_SOURCE",
+}
+
+export enum EFileTagActionComponentsTwitch {
+  UPDATE_TITLE = "UPDATE_TITLE",
+  UPDATE_GAME = "UPDATE_GAME",
+}
+
+export enum EFileTagActionComponentsExportFiles {
+  EXPORT_ALL = "EXPORT_ALL",
 }

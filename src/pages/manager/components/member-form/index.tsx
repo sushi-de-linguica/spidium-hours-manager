@@ -1,5 +1,7 @@
 // src/components/ExportFileForm.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { randomUUID } from "crypto";
+
 import {
   Alert,
   Autocomplete,
@@ -17,10 +19,14 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
-import { IMember } from "@/domain";
-import { useMemberStore } from "@/stores";
+import { EIpcEvents, IFile, IMember } from "@/domain";
+import { useConfigurationStore, useMemberStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
+import { readFileSync, existsSync } from "node:fs";
+
 import { memberFormTestId } from "./options";
+import { ipcRenderer } from "electron";
+import { toast } from "react-toastify";
 
 export const defaultMemberData: IMember = {
   gender: "",
@@ -39,13 +45,40 @@ interface IMemberFormProps {
 
 const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
   const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<IFile | null>(null);
+  const [unavailableFile, setUnavailableFile] = useState(false);
   const [streamAtOption, setStreamAtOptions] = useState<string[]>([]);
 
   const { addMember, updateMember } = useMemberStore((store) => store);
+  const { path_assets } = useConfigurationStore((store) => store.state);
 
   const [currentMember, setCurrentMember] = useState<IMember>(
     showEditMode && member ? { ...member } : { ...defaultMemberData }
   );
+
+  const imageBase64: null | string = useMemo(() => {
+    if (!file || file?.removed) {
+      return null;
+    }
+
+    const existFile = existsSync(file.path);
+
+    if (!existFile) {
+      setUnavailableFile(true);
+      return null;
+    }
+
+    const base64String = readFileSync(file.path, "base64");
+    return `data:${file.type};base64,${base64String}`;
+  }, [file]);
+
+  const handleUploadFile = (uuid: string): Promise<string | null> => {
+    return ipcRenderer.invoke(EIpcEvents.FILE_SAVE, {
+      file,
+      uuid,
+      path: path_assets,
+    });
+  };
 
   useEffect(() => {
     handleMapTwitchOptions();
@@ -54,6 +87,9 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
   useEffect(() => {
     if (!!member) {
       setCurrentMember(member);
+      if (!!member.imageFile) {
+        setFile(member.imageFile);
+      }
     }
   }, [member]);
 
@@ -81,6 +117,7 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
       onClose();
     }
     setOpen(false);
+    setFile(null);
     setCurrentMember({ ...defaultMemberData });
     setStreamAtOptions([]);
   };
@@ -89,14 +126,40 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
     setCurrentMember((prev) => ({ ...prev, gender: value ? value : "" }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newCurrentMember = { ...currentMember };
     const dontHasStreamAt = newCurrentMember.streamAt === "";
     const hasButNeedRenew =
       !dontHasStreamAt && !streamAtOption.includes(newCurrentMember.streamAt!);
 
+    newCurrentMember.id = newCurrentMember.id ?? randomUUID();
+    const uuid = newCurrentMember.id;
+
     if (dontHasStreamAt || hasButNeedRenew) {
       newCurrentMember.streamAt = newCurrentMember.primaryTwitch;
+    }
+
+    if (file && !file.removed) {
+      const hasFileToAttach = file !== null && !newCurrentMember.imageFile;
+      const needRenewFileData =
+        file !== null &&
+        newCurrentMember.imageFile &&
+        file.lastModified !== newCurrentMember.imageFile.lastModified;
+
+      if (hasFileToAttach || needRenewFileData) {
+        const filePath = await handleUploadFile(uuid);
+
+        if (filePath) {
+          newCurrentMember.imageFile = {
+            path: filePath,
+            type: file.type,
+            lastModified: file.lastModified,
+          };
+        }
+      }
+    } else if (file && file.removed) {
+      newCurrentMember.imageFile = null;
+      await ipcRenderer.invoke(EIpcEvents.FILE_REMOVE, { uuid, path_assets });
     }
 
     if (showEditMode) {
@@ -107,6 +170,23 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
 
     setCurrentMember(defaultMemberData);
     handleClose();
+  };
+
+  const handleFileInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const [file] = event.target.files as FileList;
+    if (!file) {
+      toast.info("nenhum arquivo foi selecionado");
+      return;
+    }
+    const { path, type, lastModified } = file;
+
+    setFile({
+      path,
+      type,
+      lastModified,
+    });
   };
 
   return (
@@ -166,7 +246,6 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                   data-testid={memberFormTestId.NICKNAME_FIELD}
                 />
               </Grid>
-
               <Grid gap="8px" display={"grid"} gridTemplateColumns={"2fr 2fr"}>
                 <TextField
                   margin="dense"
@@ -202,7 +281,6 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                   data-testid={memberFormTestId.SECONDARY_TWITCH}
                 />
               </Grid>
-
               <FormControl fullWidth>
                 <InputLabel id="twitch-stream-at">Vai transmitir em</InputLabel>
                 <Select
@@ -230,11 +308,59 @@ const MemberForm = ({ showEditMode, member, onClose }: IMemberFormProps) => {
                 fullWidth
                 data-testid={memberFormTestId.SOCIALS_FIELD}
               />
+
               <Alert severity="info">
                 Caso o link do "Redes sociais" seja o mesmo da{" "}
                 <span>Twitch Primária</span> NÃO é necessário preencher esse
                 campo
               </Alert>
+
+              <input
+                type="file"
+                onChange={handleFileInputChange}
+                multiple={false}
+                style={{
+                  marginBottom: "12px",
+                }}
+                accept="image/jpeg,image/jpg,image/gif,image/png"
+              />
+
+              {!imageBase64 && file && file.removed && (
+                <Alert severity="info">
+                  Você precisa salvar\atualizar para que seja removida a imagem!
+                </Alert>
+              )}
+              <br />
+              {imageBase64 && (
+                <>
+                  <img src={imageBase64} width={300} height={"auto"} />
+                  <br />
+
+                  <Button
+                    onClick={() => {
+                      if (!!file) {
+                        setFile({ ...file, removed: true });
+                      }
+                    }}
+                  >
+                    Remover arquivo
+                  </Button>
+                </>
+              )}
+              <br />
+              {!imageBase64 && unavailableFile && file && !file.removed && (
+                <>
+                  <Button
+                    onClick={() => {
+                      if (!!file) {
+                        setFile({ ...file, removed: true });
+                      }
+                    }}
+                  >
+                    Remover arquivo
+                  </Button>
+                </>
+              )}
             </DialogContent>
             <DialogActions>
               <Button

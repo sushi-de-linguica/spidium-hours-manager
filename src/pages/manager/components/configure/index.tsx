@@ -52,24 +52,6 @@ const ConfigureForm = ({}) => {
           <TextField
             autoFocus
             margin="dense"
-            name="path_run"
-            label="Destino de arquivos - Tela de RUN"
-            value={currentConfiguration.path_run}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            name="path_setup"
-            label="Destino de arquivos - Tela de SETUP"
-            value={currentConfiguration.path_setup}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            autoFocus
-            margin="dense"
             name="path_assets"
             label="Destino de arquivos - Imagens dos jogos (assets)"
             value={currentConfiguration.path_assets}

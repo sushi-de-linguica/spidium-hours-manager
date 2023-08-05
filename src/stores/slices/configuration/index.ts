@@ -7,19 +7,11 @@ export interface IConfigurationStore {
   appendConfiguration: (configuration: Partial<IConfiguration>) => void;
   updateConfiguration: (configuration: IConfiguration) => void;
   updateConfigurationField: (field: keyof IConfiguration, value: any) => void;
-  updateLastRunId: (runId: string) => void;
-  updateLastSetupId: (runId: string) => void;
-  updateLastTitleId: (runId: string) => void;
   reset: () => void;
 }
 
 const DEFAULT_STATE: IConfiguration = {
-  path_run: "",
-  path_setup: "",
   path_assets: "",
-  last_selected_run_id: "",
-  last_selected_setup_id: "",
-  last_selected_title_id: "",
   nightbot_client_id: "",
   nightbot_client_secret: "",
   nightbot_redirect_uri: "https://usina.spidium.live",
@@ -38,10 +30,11 @@ const DEFAULT_STATE: IConfiguration = {
   obs_browser_cam_input_name: "",
   obs_browser_game_input_name: "",
   seo_title_template:
-    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', '>@{runners[primaryTwitch]}</loop>",
+    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', ' prefix='@,'>@{runners[primaryTwitch,name]}</loop>",
   twitch_client_id: "",
   twitch_redirect_uri: "https://usina.spidium.live",
   twitch_token: "",
+  runs_row_height: 100,
 };
 
 export { DEFAULT_STATE as CONFIGURATION_DEFAULT_STATE };
@@ -67,39 +60,16 @@ const useConfigurationStore = create<IConfigurationStore, any>(
             ...configuration,
           };
 
-          return state;
+          return {
+            ...state,
+          };
         }),
       updateConfigurationField: (field: keyof IConfiguration, value: any) =>
-        set((state) => {
+        set((state: any) => {
           state.state[field] = value;
 
           return state;
         }),
-      updateLastRunId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_run_id: id,
-          },
-        })),
-      updateLastSetupId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_setup_id: id,
-          },
-        })),
-      updateLastTitleId: (id: string) =>
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            last_selected_title_id: id,
-          },
-        })),
-
       reset: () =>
         set(() => ({
           state: {

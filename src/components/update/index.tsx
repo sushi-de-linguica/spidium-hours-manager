@@ -46,8 +46,8 @@ const Update = () => {
       if (arg1.update) {
         setModalBtn((state) => ({
           ...state,
-          cancelText: "Cancel",
-          okText: "Update",
+          cancelText: "Cancelar",
+          okText: "Atualizar",
           onOk: () => ipcRenderer.invoke("start-download"),
         }));
         setUpdateAvailable(true);
@@ -78,8 +78,8 @@ const Update = () => {
       setProgressInfo({ percent: 100 });
       setModalBtn((state) => ({
         ...state,
-        cancelText: "Later",
-        okText: "Install now",
+        cancelText: "Mais tarde",
+        okText: "Instalar agora",
         onOk: () => ipcRenderer.invoke("quit-and-install"),
       }));
     },
