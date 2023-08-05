@@ -30,7 +30,7 @@ const DEFAULT_STATE: IConfiguration = {
   obs_browser_cam_input_name: "",
   obs_browser_game_input_name: "",
   seo_title_template:
-    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', '>@{runners[primaryTwitch]}</loop>",
+    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', ' prefix='@,'>@{runners[primaryTwitch,name]}</loop>",
   twitch_client_id: "",
   twitch_redirect_uri: "https://usina.spidium.live",
   twitch_token: "",
