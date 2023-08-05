@@ -13,7 +13,7 @@ interface IObsWsRequestDataV5 {
   inputSettings: any;
 }
 
-export interface IObsWsEventSetInputSettings<T = IObsWsRequestDataV5> {
+export interface IObsWsEventSetInputSettings<T = IObsWsRequestDataV5 | any> {
   requestType: string;
   requestData: T;
 }

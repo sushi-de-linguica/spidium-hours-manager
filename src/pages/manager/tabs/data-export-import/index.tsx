@@ -85,8 +85,23 @@ const DataExportImportTab = () => {
         });
       }
 
-      if (json.file && json.file?.files?.length > 0) {
-        fileStore.setState(json.file.files);
+      if (
+        json.file &&
+        (json.file?.files?.length > 0 || json.file?.tags?.length > 0)
+      ) {
+        const hasFiles = json.file?.files?.length > 0;
+        const newFileState: any = {};
+
+        if (hasFiles) {
+          newFileState.files = json.file.files;
+        }
+
+        const hasTags = json.file?.tags?.length > 0;
+        if (hasTags) {
+          newFileState.tags = json.file.tags;
+        }
+
+        fileStore.setState({ ...newFileState });
       }
 
       if (json.member && json.member.members.length > 0) {
@@ -164,22 +179,52 @@ const DataExportImportTab = () => {
     setIsOpen(false);
   };
 
-  const isDisabledToInitialImport = useMemo(
-    () => memberStore.state.members.length > 0,
+  const isAllowToImportMembers = useMemo(
+    () => memberStore.state.members.length === 0,
     [memberStore.state.members]
   );
 
+  const isAllowToImportFiles = useMemo(
+    () => fileStore.state.files.length === 0,
+    [fileStore.state.files]
+  );
+
   const handleImportInitialDatabase = async () => {
-    const response = await axios.get(environment.SHM_DATABASE_URL);
+    const response = await axios.get(
+      `${environment.SHM_DATABASE_URL}?timestamp=${Date.now()}`
+    );
+
+    const handleMapWithId = (array: any[], field: string) => {
+      return array.map((data: any) => {
+        if (!data[field]) {
+          data[field] = randomUUID();
+        }
+
+        return data;
+      });
+    };
 
     if (response.status === 200) {
       try {
         const { data } = response;
 
-        if (data.member && data.member.members.length > 0) {
+        if (
+          isAllowToImportMembers &&
+          data.member &&
+          data.member.members?.length > 0
+        ) {
           memberStore.setState(data.member.members);
+          toast.success("Membros importados com sucesso!");
         }
-        toast.success("Base inicial importada com sucesso!");
+
+        if (isAllowToImportFiles) {
+          const newDataFiles = handleMapWithId(data.file.files, "id");
+          fileStore.setState({
+            files: newDataFiles,
+            tags: data.file.tags ? data.file.tags : [],
+          });
+          toast.success("Arquivos importados com sucesso!");
+        }
       } catch (error) {
         console.error("error", error);
         toast.error("Erro durante importação da base inicial");
@@ -267,7 +312,6 @@ const DataExportImportTab = () => {
           <Button
             variant="contained"
             color="warning"
-            disabled={isDisabledToInitialImport}
             onClick={handleImportInitialDatabase}
           >
             Importar base de dados inicial

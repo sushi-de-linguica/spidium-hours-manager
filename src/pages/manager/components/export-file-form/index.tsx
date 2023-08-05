@@ -1,26 +1,21 @@
 // src/components/ExportFileForm.tsx
 import React, { useEffect, useState } from "react";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
   TextField,
 } from "@mui/material";
-import { EExportType, IExportFileRun } from "@/domain";
+import { IExportFileRun } from "@/domain";
 import { useFileStore } from "@/stores";
 import AddIcon from "@mui/icons-material/Add";
 
 const defaultData: IExportFileRun = {
   name: "",
   template: "",
-  type: EExportType.SETUP_SCREEN,
 };
 
 interface IExportFileFormProps {
@@ -62,11 +57,6 @@ const ExportFileForm = ({
     } catch (error) {
       console.log("houve um erro ao tentar converter o numero");
     }
-  };
-
-  const handleChangeType = (event: SelectChangeEvent) => {
-    const { value, name } = event.target;
-    setCurrentFile((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleClose = () => {
@@ -126,17 +116,6 @@ const ExportFileForm = ({
             onChange={handleChangeNumber}
             fullWidth
           />
-          <Select
-            id="select-type"
-            value={currentFile.type}
-            label="Tela"
-            placeholder="tela"
-            name="type"
-            onChange={handleChangeType}
-          >
-            <MenuItem value={EExportType.RUN_SCREEN}>Tela de RUN</MenuItem>
-            <MenuItem value={EExportType.SETUP_SCREEN}>Tela de SETUP</MenuItem>
-          </Select>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>
