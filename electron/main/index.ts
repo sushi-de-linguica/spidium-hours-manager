@@ -1,6 +1,8 @@
-import { app, BrowserWindow, shell, ipcMain, protocol } from "electron";
+import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
+import { createWriteStream, readdirSync } from "node:fs";
+import { PNG } from "pngjs";
 import {
   writeFileSync,
   existsSync,
@@ -266,12 +268,45 @@ ipcMain.handle(
   (event, { uuid, path, path_assets, fileName }) => {
     const fileNameWithExtension = getGameImagemByUUID(uuid);
     const filePathToSave = `${path_assets}\\${fileNameWithExtension}`;
-    console.log("fileNameWithExtension", fileNameWithExtension);
-    console.log("filePathToSave", filePathToSave);
+
     if (existsSync(filePathToSave)) {
       const newFilePath = `${path}\\${fileName}.${DEFAULT_EXTENSION}`;
-      console.log("newFilePath", newFilePath);
       copyFileSync(filePathToSave, newFilePath);
     }
   }
 );
+
+function findFilesWithPattern(folderPath: string, filePattern: string) {
+  const files = readdirSync(folderPath);
+
+  const matchingFiles = files.filter((file) => {
+    return (
+      file.endsWith(`.${DEFAULT_EXTENSION}`) && file.startsWith(filePattern)
+    );
+  });
+
+  return matchingFiles;
+}
+
+const filePatterns = ["runner-", "host-", "commentator-", "game"];
+
+ipcMain.handle(EIpcEvents.RESET_IMAGES, (event, { path }) => {
+  filePatterns.forEach((pattern) => {
+    const matchingFiles = findFilesWithPattern(path, pattern);
+
+    console.log(`Arquivos correspondentes a "${pattern}":`);
+    matchingFiles.forEach((file: any) => {
+      const newFilePath = `${path}\\${file}`;
+      const png = new PNG({ width: 1, height: 1 });
+
+      png.data[0] = 0;
+      png.data[1] = 0;
+      png.data[2] = 0;
+      png.data[3] = 0;
+
+      png.pack().pipe(createWriteStream(newFilePath));
+    });
+
+    console.log("\n");
+  });
+});

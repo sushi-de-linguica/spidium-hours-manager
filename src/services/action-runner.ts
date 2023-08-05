@@ -334,32 +334,39 @@ class ActionRunnerService {
     const handleExportAll = async (module: IFileTagExportFilesModule) => {
       try {
         if (module.value && this.files.length > 0) {
-          FileExporter.exportFilesToPath(this.files, module.value, this.run);
-
-          if (this.run.imageFile) {
-            handleCopyImage(
-              this.run.id as string,
-              module.value,
-              this.path_assets,
-              "game"
-            );
-            return;
-          }
-
-          const runnerWithImage = this.run.runners.filter(
-            (runner) => runner.imageFile
-          );
-
-          runnerWithImage.forEach((member, index) => {
-            handleCopyImage(
-              member.id as string,
-              module.value,
-              this.path_assets,
-              `runner-${index + 1}`
-            );
+          ipcRenderer.invoke(EIpcEvents.RESET_IMAGES, {
+            path: module.value,
           });
 
-          toast.success("Arquivos exportados!");
+          FileExporter.exportFilesToPath(this.files, module.value, this.run);
+
+          const handleFinishExport = () => {
+            if (this.run.imageFile) {
+              handleCopyImage(
+                this.run.id as string,
+                module.value,
+                this.path_assets,
+                "game"
+              );
+            }
+
+            const runnerWithImage = this.run.runners.filter(
+              (runner) => runner.imageFile
+            );
+
+            runnerWithImage.forEach((member, index) => {
+              handleCopyImage(
+                member.id as string,
+                module.value,
+                this.path_assets,
+                `runner-${index + 1}`
+              );
+            });
+
+            toast.success("Arquivos exportados!");
+          };
+
+          setTimeout(handleFinishExport, 1000);
         }
       } catch (error) {
         console.error("[erro] ao exportar arquivos", error);

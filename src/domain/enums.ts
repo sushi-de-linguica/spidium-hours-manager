@@ -14,6 +14,7 @@ export enum EIpcEvents {
   FILE_SAVE = "IPC:FILE_SAVE",
   FILE_REMOVE = "IPC:FILE_REMOVE",
   COPY_FILE = "IPC:COPY_FILE",
+  RESET_IMAGES = "IPC:RESET_IMAGES",
 }
 
 export enum ECustomEvents {
