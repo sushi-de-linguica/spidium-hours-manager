@@ -139,6 +139,12 @@ const RunsTab = () => {
       renderCell: (options) => {
         return (
           <div
+            style={{
+              display: "flex",
+              whiteSpace: "break-spaces",
+              flexDirection: "column",
+              flexWrap: "wrap",
+            }}
             dangerouslySetInnerHTML={{
               __html: options.row.all_runners_nodes,
             }}
