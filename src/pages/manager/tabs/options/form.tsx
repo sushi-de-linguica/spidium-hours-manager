@@ -201,8 +201,6 @@ const OptionsForm = () => {
     const result = makeResultObjectFromFields([
       "obs_ws_address",
       "obs_ws_password",
-      "obs_browser_game_input_name",
-      "obs_browser_cam_input_name",
     ]);
 
     const isNeedReconnect =
@@ -657,26 +655,6 @@ const OptionsForm = () => {
             label="Websocket Senha"
             type={isShowWsInfos ? "text" : "password"}
             value={configuration.obs_ws_password}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <TextField
-            autoFocus
-            margin="dense"
-            name="obs_browser_cam_input_name"
-            label="Nome do elemento - CAMERA (BROWSER)"
-            value={configuration.obs_browser_cam_input_name}
-            onChange={handleChange}
-            fullWidth
-          />
-
-          <TextField
-            autoFocus
-            margin="dense"
-            name="obs_browser_game_input_name"
-            label="Nome do elemento - GAME (BROWSER)"
-            value={configuration.obs_browser_game_input_name}
             onChange={handleChange}
             fullWidth
           />

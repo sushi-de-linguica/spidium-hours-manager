@@ -126,14 +126,28 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
       return;
     }
 
-    const runnerColumnIndex = schedule.columns.findIndex(
-      (column: string) => column.toLowerCase() === "runner"
+    const runnerColumnIndex = schedule.columns.findIndex((column: string) =>
+      ["runners", "runner", "corredor", "corredores"].includes(
+        column.toLowerCase()
+      )
     );
     const gameColumnIndex = schedule.columns.findIndex((column: string) =>
-      ["jogo", "game"].includes(column.toLowerCase())
+      ["jogo", "jogos", "game", "games"].includes(column.toLowerCase())
     );
     const categoryColumnIndex = schedule.columns.findIndex((column: string) =>
-      ["categoria", "category"].includes(column.toLowerCase())
+      ["categoria", "categorias", "category", "categories"].includes(
+        column.toLowerCase()
+      )
+    );
+    const platformColumnIndex = schedule.columns.findIndex((column: string) =>
+      [
+        "plataforma",
+        "plataformas",
+        "platform",
+        "platforms",
+        "console",
+        "consoles",
+      ].includes(column.toLowerCase())
     );
 
     const isValidColumns =
@@ -211,6 +225,8 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
         const game = run.data[gameColumnIndex];
         const category = run.data[categoryColumnIndex];
         const runnersData = run.data[runnerColumnIndex];
+        const platform =
+          platformColumnIndex >= 0 ? run.data[platformColumnIndex] : "";
         const mappedRunners = getMDString(runnersData);
         const runners = getRunnersFromMDMapped(mappedRunners);
 
@@ -219,10 +235,10 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
           runners,
           hosts: [],
           comments: [],
-          estimate: estimate,
+          estimate,
           game,
           category,
-          platform: "",
+          platform,
           seoGame: "",
           seoTitle: "",
         };

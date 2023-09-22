@@ -14,7 +14,7 @@ const exportRunsToDatagridRows = (runs: IRun[]) => {
           }
           return `<a href="https://twitch.tv/${runner.streamAt}" target="_blank">${runner.name} (${runner.streamAt})</a>`;
         })
-        .join(", "),
+        .join(""),
       all_hosts: run.hosts.map((hosts) => hosts.name).join(", "),
       all_comments: run.comments
         .map((commentator) => commentator.name)

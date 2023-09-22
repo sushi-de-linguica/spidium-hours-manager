@@ -1,3 +1,4 @@
+import { environment } from "@/application";
 import axios, { AxiosInstance } from "axios";
 
 const REGEX = {
@@ -68,6 +69,10 @@ class HoraroImportService {
   }
 
   async getSchedule(): Promise<IHoraroEventDataResponse | null> {
+    // if (environment.isDevelop) {
+    //   return Promise.resolve(testMockData);
+    // }
+
     const event = await this.getEvent();
     if (!event) {
       return null;

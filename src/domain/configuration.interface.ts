@@ -17,8 +17,6 @@ export interface IConfiguration {
   nightbot_commentator_text_plural: string;
   obs_ws_address: string;
   obs_ws_password: string;
-  obs_browser_cam_input_name: string;
-  obs_browser_game_input_name: string;
   seo_title_template: string;
   twitch_client_id: string;
   twitch_redirect_uri: string;
