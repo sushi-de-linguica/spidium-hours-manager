@@ -13,24 +13,8 @@ export class ObsWebsocketService {
 
   async connect() {
     try {
-      const {
-        obs_ws_address,
-        obs_ws_password,
-        obs_browser_cam_input_name,
-        obs_browser_game_input_name,
-      } = useConfigurationStore.getState().state;
-
-      if (!obs_browser_cam_input_name && !obs_browser_game_input_name) {
-        console.log(
-          "[ObsWebsocketService] Dont has input name for game or cam..."
-        );
-
-        toast.warning(
-          "não existe o nome de um ELEMENTO de Browser nas configurações do OBS"
-        );
-
-        return Promise.reject();
-      }
+      const { obs_ws_address, obs_ws_password } =
+        useConfigurationStore.getState().state;
 
       console.log("CONNECT START", obs_ws_address, obs_ws_password);
 

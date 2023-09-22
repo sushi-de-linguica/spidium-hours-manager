@@ -27,10 +27,8 @@ const DEFAULT_STATE: IConfiguration = {
   nightbot_commentator_text_plural: "",
   obs_ws_address: "127.0.0.1:4455",
   obs_ws_password: "",
-  obs_browser_cam_input_name: "",
-  obs_browser_game_input_name: "",
   seo_title_template:
-    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', ' prefix='@,'>@{runners[primaryTwitch,name]}</loop>",
+    "NOME DO EVENTO - {game} [{category}] por <loop property='runners' separator=', ' prefix='@,'>{runners[primaryTwitch,name]}</loop>",
   twitch_client_id: "",
   twitch_redirect_uri: "https://usina.spidium.live",
   twitch_token: "",
