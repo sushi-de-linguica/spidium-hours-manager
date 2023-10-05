@@ -69,7 +69,7 @@ interface IRunFormProps {
 
 const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
   const [open, setOpen] = useState(false);
-  const { addTag, updateTag } = useFileStore();
+  const { addTag, updateTag, removeTag } = useFileStore();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -162,6 +162,32 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
           },
         });
         break;
+    }
+  };
+
+  const handleRemove = () => {
+    const values = formContext.getValues();
+    if (
+      confirm(
+        `Essa ação não pode ser revertida, tem certeza que deseja apagar o botão "${values?.label}" ?`
+      )
+    ) {
+      handleClose();
+      removeTag(values);
+    }
+  };
+
+  const handleDuplicate = () => {
+    const values = formContext.getValues();
+    if (confirm(`Deseja criar uma cópia do botão: ${values?.label} ?`)) {
+      const newButton = {
+        ...values,
+      };
+
+      newButton.id = randomUUID();
+      newButton.label = `${newButton?.label} [cópia]`;
+      addTag(newButton);
+      handleClose();
     }
   };
 
@@ -436,10 +462,36 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                 </TabPanel>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleClose}>Cancelar</Button>
-                <Button color="success" variant="contained" type="submit">
-                  {showEditMode ? "Atualizar" : "Salvar"}
-                </Button>
+                <Box
+                  display="flex"
+                  width={"100%"}
+                  flexDirection={"row"}
+                  justifyContent={"space-between"}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleRemove}
+                    >
+                      Remover
+                    </Button>
+                    <Button variant="outlined" onClick={handleDuplicate}>
+                      Duplicar
+                    </Button>
+                  </div>
+                  <div>
+                    <Button onClick={handleClose}>Cancelar</Button>
+                    <Button color="success" variant="contained" type="submit">
+                      {showEditMode ? "Atualizar" : "Salvar"}
+                    </Button>
+                  </div>
+                </Box>
               </DialogActions>
             </>
           )}
