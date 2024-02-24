@@ -30,6 +30,7 @@ const defaultData: IRun = {
   comments: [],
   estimate: "",
   game: "",
+  year: "",
   category: "",
   platform: "",
   seoGame: "",
@@ -238,14 +239,37 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                   onChange={handleChange}
                   fullWidth
                 />
-                <Grid container columnGap={1}>
+                <Grid
+                  container
+                  columnGap={1}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "nowrap",
+                  }}
+                >
                   <TextField
                     margin="dense"
                     name="platform"
                     label="Plataforma (PC,SNES,GBA, etc...)"
                     value={currentRun.platform}
+                    style={{
+                      flexBasis: "100%",
+                    }}
                     onChange={handleChange}
                   />
+                  <TextField
+                    margin="dense"
+                    name="year"
+                    label="Ano"
+                    style={{
+                      width: "150px",
+                    }}
+                    value={currentRun.year}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid container columnGap={1}>
                   <TextField
                     margin="dense"
                     name="estimate"

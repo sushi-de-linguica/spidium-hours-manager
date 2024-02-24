@@ -10,6 +10,7 @@ export interface IRun {
   game: string;
   category: string;
   platform: string;
+  year?: string;
   imageFile?: IFile | null;
 
   seoTitle?: string;

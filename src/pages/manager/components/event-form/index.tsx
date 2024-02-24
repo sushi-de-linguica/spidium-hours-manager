@@ -150,6 +150,10 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
       ].includes(column.toLowerCase())
     );
 
+    const yearColumnIndex = schedule.columns.findIndex((column: string) =>
+      ["ano", "year"].includes(column.toLowerCase())
+    );
+
     const isValidColumns =
       runnerColumnIndex >= 0 &&
       gameColumnIndex >= 0 &&
@@ -227,6 +231,11 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
         const runnersData = run.data[runnerColumnIndex];
         const platform =
           platformColumnIndex >= 0 ? run.data[platformColumnIndex] : "";
+        const year =
+          yearColumnIndex && yearColumnIndex >= 0
+            ? run.data[yearColumnIndex]
+            : "";
+
         const mappedRunners = getMDString(runnersData);
         const runners = getRunnersFromMDMapped(mappedRunners);
 
@@ -237,6 +246,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
           comments: [],
           estimate,
           game,
+          year,
           category,
           platform,
           seoGame: "",
