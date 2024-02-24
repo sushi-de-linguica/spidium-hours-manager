@@ -150,6 +150,20 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
       ].includes(column.toLowerCase())
     );
 
+    const yearColumnIndex = schedule.columns.findIndex((column: string) =>
+      ["ano", "year"].includes(column.toLowerCase())
+    );
+
+    const commentsColumnIndex = schedule.columns.findIndex((column: string) =>
+      [
+        "comentarista",
+        "comentarista(s)",
+        "comentaristas",
+        "comments",
+        "commentators",
+      ].includes(column.toLowerCase())
+    );
+
     const isValidColumns =
       runnerColumnIndex >= 0 &&
       gameColumnIndex >= 0 &&
@@ -225,18 +239,33 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
         const game = run.data[gameColumnIndex];
         const category = run.data[categoryColumnIndex];
         const runnersData = run.data[runnerColumnIndex];
+
         const platform =
           platformColumnIndex >= 0 ? run.data[platformColumnIndex] : "";
+        const year =
+          yearColumnIndex && yearColumnIndex >= 0
+            ? run.data[yearColumnIndex]
+            : "";
+
+        const commentsData =
+          commentsColumnIndex && commentsColumnIndex >= 0
+            ? run.data[commentsColumnIndex]
+            : "";
+
         const mappedRunners = getMDString(runnersData);
         const runners = getRunnersFromMDMapped(mappedRunners);
+
+        const mappedComments = getMDString(commentsData);
+        const comments: IMember[] = getRunnersFromMDMapped(mappedComments);
 
         return {
           id: randomUUID(),
           runners,
           hosts: [],
-          comments: [],
+          comments,
           estimate,
           game,
+          year,
           category,
           platform,
           seoGame: "",

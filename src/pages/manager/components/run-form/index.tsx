@@ -30,6 +30,7 @@ const defaultData: IRun = {
   comments: [],
   estimate: "",
   game: "",
+  year: "",
   category: "",
   platform: "",
   seoGame: "",
@@ -179,6 +180,22 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
     setCurrentRun((prev) => ({ ...prev, [field]: values }));
   };
 
+  const handleRenderOption = (props: any, option: IMember) => {
+    return (
+      <li {...props} key={option.id}>
+        {option.name}{" "}
+        <span
+          style={{
+            fontSize: "12px",
+            marginLeft: "4px",
+          }}
+        >
+          ({option?.streamAt || "-- não configurado --"})
+        </span>
+      </li>
+    );
+  };
+
   return (
     <FormControl>
       <Button
@@ -222,14 +239,37 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                   onChange={handleChange}
                   fullWidth
                 />
-                <Grid container columnGap={1}>
+                <Grid
+                  container
+                  columnGap={1}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexWrap: "nowrap",
+                  }}
+                >
                   <TextField
                     margin="dense"
                     name="platform"
                     label="Plataforma (PC,SNES,GBA, etc...)"
                     value={currentRun.platform}
+                    style={{
+                      flexBasis: "100%",
+                    }}
                     onChange={handleChange}
                   />
+                  <TextField
+                    margin="dense"
+                    name="year"
+                    label="Ano"
+                    style={{
+                      width: "150px",
+                    }}
+                    value={currentRun.year}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid container columnGap={1}>
                   <TextField
                     margin="dense"
                     name="estimate"
@@ -308,6 +348,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                       option.id === value.id
                     }
                     value={currentRun?.runners}
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
@@ -332,6 +373,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                     isOptionEqualToValue={(option, value) =>
                       option.id === value.id
                     }
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
@@ -354,6 +396,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                     isOptionEqualToValue={(option, value) =>
                       option.id === value.id
                     }
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
