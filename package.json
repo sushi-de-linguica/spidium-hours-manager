@@ -1,6 +1,6 @@
 {
   "name": "spidium-hours-manager",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "main": "dist-electron/main/index.js",
   "description": "spidium baby",
   "author": "matheus azambuja (sushi de linguiça) <matheushenrique.ads@gmail.com>",
