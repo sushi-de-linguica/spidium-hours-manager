@@ -179,6 +179,22 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
     setCurrentRun((prev) => ({ ...prev, [field]: values }));
   };
 
+  const handleRenderOption = (props: any, option: IMember) => {
+    return (
+      <li {...props} key={option.id}>
+        {option.name}{" "}
+        <span
+          style={{
+            fontSize: "12px",
+            marginLeft: "4px",
+          }}
+        >
+          ({option?.streamAt || "-- não configurado --"})
+        </span>
+      </li>
+    );
+  };
+
   return (
     <FormControl>
       <Button
@@ -308,6 +324,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                       option.id === value.id
                     }
                     value={currentRun?.runners}
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
@@ -332,6 +349,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                     isOptionEqualToValue={(option, value) =>
                       option.id === value.id
                     }
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
@@ -354,6 +372,7 @@ const RunForm = ({ showEditMode, run, eventId, onClose }: IRunFormProps) => {
                     isOptionEqualToValue={(option, value) =>
                       option.id === value.id
                     }
+                    renderOption={handleRenderOption}
                     getOptionLabel={(option) => option.name}
                     renderInput={(params) => (
                       <TextField
