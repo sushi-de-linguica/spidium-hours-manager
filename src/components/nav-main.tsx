@@ -77,7 +77,7 @@ export function NavMain({
                 <a
                   className="group-data-[collapsible=icon]:!flex"
                   href={item.url}
-                  aria-describedby="teste"
+                  title={item.title}
                 >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>

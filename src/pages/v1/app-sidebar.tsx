@@ -8,6 +8,7 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Lightbulb,
   Map,
   PieChart,
   Settings2,
@@ -90,6 +91,15 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const toggleTheme = () => {
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+      "theme",
+      document.body.classList.contains("dark") ? "dark" : ""
+    );
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -97,7 +107,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <img className="h-8 w-8" src={HeaderImage} />
           <div className="flex flex-col text-wrap group-data-[collapsible=icon]:hidden">
             <strong>Spidium Hours Manager</strong>
-            <small>v1.0.0</small>
+            <div className="flex flex-row gap-2 items-center justify-start">
+              <small>v1.0.0</small>
+              <Lightbulb
+                className="w-3 h-3 hover:cursor-pointer"
+                onClick={toggleTheme}
+              />
+            </div>
           </div>
         </div>
       </SidebarHeader>

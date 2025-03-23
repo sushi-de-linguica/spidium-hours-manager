@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import "./App.scss";
 import RunManagerPage from "./pages/manager";
 import Layout from "./pages/v1";
@@ -8,6 +9,15 @@ console.log(
 );
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (!theme) {
+      return;
+    }
+
+    document.body.classList.add(theme);
+  }, []);
+
   return (
     <div className="flex flex-col w-full min-h-screen">
       <Layout>
