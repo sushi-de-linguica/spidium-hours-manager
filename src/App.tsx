@@ -1,5 +1,6 @@
 import "./App.scss";
 import RunManagerPage from "./pages/manager";
+import Layout from "./pages/v1";
 
 console.log(
   "[App.tsx]",
@@ -9,7 +10,9 @@ console.log(
 function App() {
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <RunManagerPage />
+      <Layout>
+        <span>oie</span>
+      </Layout>
     </div>
   );
 }
