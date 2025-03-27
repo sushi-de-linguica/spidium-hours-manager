@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Lightbulb, LucideLayoutDashboard } from "lucide-react";
+import {
+  BookOpen,
+  Lightbulb,
+  LucideLayoutDashboard,
+  Network,
+} from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import {
@@ -26,7 +31,7 @@ const data = {
       title: "Eventos",
       url: "#",
       icon: BookOpen,
-      isActive: true,
+      isActive: false,
       items: [
         {
           title: "Gerenciar eventos",
@@ -39,10 +44,10 @@ const data = {
       ],
     },
     {
-      title: "Configurações",
+      title: "Integrações",
       url: "#",
-      icon: Settings,
-      isActive: true,
+      icon: Network,
+      isActive: false,
       items: [
         {
           title: "Nightbot",
@@ -56,6 +61,15 @@ const data = {
           title: "Twitch",
           url: "/settings/integration/twitch",
         },
+      ],
+    },
+
+    {
+      title: "Configurações",
+      url: "#",
+      icon: Settings,
+      isActive: false,
+      items: [
         {
           title: "Título da live",
           url: "/settings/title",
