@@ -1,66 +1,35 @@
-import * as React from "react"
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react"
+"use client";
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import * as React from "react";
+import { BookOpen, Lightbulb, LucideLayoutDashboard } from "lucide-react";
+
+import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-// This is sample data.
+import HeaderImage from "/icon-144x144.png?url";
+import { Settings } from "@mui/icons-material";
+
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
-      title: "Playground",
+      title: "Dashboard",
+      url: "/",
+      icon: LucideLayoutDashboard,
+      isActive: true,
+    },
+    {
+      title: "Eventos",
       url: "#",
-      icon: SquareTerminal,
+      icon: BookOpen,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
+          title: "Gerenciar eventos",
           url: "#",
         },
         {
@@ -70,104 +39,63 @@ const data = {
       ],
     },
     {
-      title: "Models",
+      title: "Configurações",
       url: "#",
-      icon: Bot,
+      icon: Settings,
+      isActive: true,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Twitch",
+          url: "/settings/integration/twitch",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Nightbot",
+          url: "/settings/integration/nightbot",
         },
         {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
+          title: "OBS",
+          url: "/settings/integration/obs",
         },
         {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Old Times",
+          url: "/old-times",
         },
       ],
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const toggleTheme = () => {
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+      "theme",
+      document.body.classList.contains("dark") ? "dark" : ""
+    );
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <div className="flex w-full items-center justify-start gap-2">
+          <img className="h-8 w-8" src={HeaderImage} />
+          <div className="flex flex-col text-wrap group-data-[collapsible=icon]:hidden">
+            <strong>Spidium Hours Manager</strong>
+            <div className="flex flex-row gap-2 items-center justify-start">
+              <small>v1.0.0</small>
+              <Lightbulb
+                className="w-3 h-3 hover:cursor-pointer"
+                onClick={toggleTheme}
+              />
+            </div>
+          </div>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

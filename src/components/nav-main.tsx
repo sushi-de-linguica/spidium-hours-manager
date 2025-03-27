@@ -16,7 +16,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { Link } from "react-router";
 
 export function NavMain({
   items,
@@ -32,9 +34,10 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { open } = useSidebar();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Spidium Baby!</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           if (item.items) {
@@ -58,9 +61,9 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <Link to={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
@@ -74,14 +77,14 @@ export function NavMain({
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuSubButton hidden={false} asChild>
-                <a
+                <Link
                   className="group-data-[collapsible=icon]:!flex"
-                  href={item.url}
-                  title={item.title}
+                  to={item.url}
+                  title={!open ? item.title : undefined}
                 >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuSubButton>
             </SidebarMenuItem>
           );

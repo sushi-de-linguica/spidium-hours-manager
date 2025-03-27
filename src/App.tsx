@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import "./App.scss";
-import RunManagerPage from "./pages/manager";
 import Layout from "./pages/v1";
+import { Outlet } from "react-router";
 
 console.log(
   "[App.tsx]",
@@ -21,7 +21,7 @@ function App() {
   return (
     <div className="flex flex-col w-full min-h-screen">
       <Layout>
-        <span>oie</span>
+        <Outlet />
       </Layout>
     </div>
   );
