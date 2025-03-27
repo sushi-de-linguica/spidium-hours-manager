@@ -45,16 +45,20 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Twitch",
-          url: "/settings/integration/twitch",
-        },
-        {
           title: "Nightbot",
           url: "/settings/integration/nightbot",
         },
         {
           title: "OBS",
           url: "/settings/integration/obs",
+        },
+        {
+          title: "Twitch",
+          url: "/settings/integration/twitch",
+        },
+        {
+          title: "Título da live",
+          url: "/settings/title",
         },
         {
           title: "Old Times",
