@@ -68,6 +68,7 @@ export class NightbotApiService {
     try {
       await this.getCommands();
       nightbotStore.setIsConnected(true);
+      return true;
     } catch (err) {
       console.error(err);
       nightbotStore.setIsConnected(false);

@@ -3,12 +3,7 @@ import { useNightbot as useNightbotStore } from "@/stores";
 import { useEffect } from "react";
 
 export const useNightbot = () => {
-  const {
-    state: nightbotState,
-    isConnected,
-    appendState,
-    setIsConnected,
-  } = useNightbotStore();
+  const { state: nightbotState, isConnected } = useNightbotStore();
 
   const testConnection = () => {
     const service = new NightbotApiService();
