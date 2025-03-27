@@ -6,17 +6,23 @@ import {
 } from "@/components/ui/popover";
 import { useNightbot } from "@/hooks/use-nightbot";
 import { useObs } from "@/hooks/use-obs";
+import { useTwitch } from "@/hooks/use-twitch";
 import { AlertCircle, Check, CircleAlert } from "lucide-react";
 import { useMemo } from "react";
 
 export const Status = () => {
   const { obsIsReady, version } = useObs();
   const { isConnected: nightbotIsReady } = useNightbot();
+  const { isConnected: twitchIsReady } = useTwitch();
 
-  const hasError = useMemo(() => !obsIsReady || !nightbotIsReady, [obsIsReady]);
+  const hasError = useMemo(
+    () => !obsIsReady || !nightbotIsReady || !twitchIsReady,
+    [obsIsReady, nightbotIsReady, twitchIsReady]
+  );
+
   const allError = useMemo(
-    () => !obsIsReady && !nightbotIsReady,
-    [obsIsReady, nightbotIsReady]
+    () => !obsIsReady && !nightbotIsReady && !twitchIsReady,
+    [obsIsReady, nightbotIsReady, twitchIsReady]
   );
 
   return (
@@ -46,7 +52,7 @@ export const Status = () => {
           </div>
           <div className="flex flex-row items-center gap-2">
             <CircleAlert
-              className={obsIsReady ? "text-green-600" : "text-red-400"}
+              className={twitchIsReady ? "text-green-600" : "text-red-400"}
             />
             <span className="ml-2">Twitch</span>
           </div>

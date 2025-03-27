@@ -11,9 +11,11 @@ export interface ITwitch {
 
 export interface ITwitchStore {
   state: ITwitch;
+  isConnected: boolean;
   appendState: (newState: Partial<ITwitch>) => void;
   setState: (newState: ITwitch) => void;
   setBroadcasterId: (value: string) => void;
+  setIsConnected: (connected: boolean) => void;
   reset: () => void;
 }
 
@@ -26,6 +28,7 @@ const DEFAULT_STATE: ITwitch = {
 const useTwitch = create<ITwitchStore, any>(
   persist(
     (set) => ({
+      isConnected: false,
       state: {
         ...DEFAULT_STATE,
       },
@@ -59,6 +62,12 @@ const useTwitch = create<ITwitchStore, any>(
             ...DEFAULT_STATE,
           },
         })),
+      setIsConnected: (connected: boolean) => {
+        set((state) => ({
+          ...state,
+          isConnected: connected,
+        }));
+      },
     }),
     {
       name: "SPIDIUM_TWITCH_STORE",

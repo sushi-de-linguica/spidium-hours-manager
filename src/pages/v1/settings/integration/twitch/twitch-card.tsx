@@ -1,37 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import IntegrationCard from "@/components/integrations-card";
-import { ArrowRight, Save, Twitch } from "lucide-react";
+import { ArrowRight, RefreshCcw, Save, Twitch } from "lucide-react";
+import { useTwitch } from "@/hooks/use-twitch";
+import { useConfiguration } from "@/hooks/use-configuration";
+import { getUrlToGetTokenFromTwitch } from "@/services/twitch-service";
 
 const TwitchIntegration = () => {
   const [clientId, setClientId] = useState("");
   const [redirectUri, setRedirectUri] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [isGettingToken, setIsGettingToken] = useState(false);
+  const { isConnected, testConnection, appendState } = useTwitch();
+  const { configuration, appendConfiguration } = useConfiguration();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setClientId(configuration.twitch_client_id ?? "");
+    setRedirectUri(configuration.twitch_redirect_uri ?? "");
+  }, [configuration]);
+
+  const isDisabledTwitchLoginButton = useMemo(
+    () => !configuration.twitch_client_id || !configuration.twitch_redirect_uri,
+    [configuration]
+  );
+
+  const handleTestConnection = async () => {
+    const success = await testConnection();
+
+    if (!success) {
+      toast({
+        title: "Erro ao conectar com a twitch",
+        description: "Verifique se o client id e secret estão corretos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Conexão com twitch estabelecida com sucesso!",
+      description: "Você pode agora atualizar os dados da twitch.",
+      variant: "default",
+    });
+  };
 
   const handleGetToken = () => {
     if (!clientId || !redirectUri) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Erro de validação",
+        description: "Todos os campos são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
     setIsGettingToken(true);
+    const URL = getUrlToGetTokenFromTwitch({
+      client_id: configuration.twitch_client_id,
+      redirect_uri: configuration.twitch_redirect_uri,
+    });
 
-    // In a real app, this would redirect to Twitch OAuth endpoint
-    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&response_type=code&scope=channel:read:subscriptions`;
-
+    window.open(URL, "_blank");
     setTimeout(() => {
-      window.open(twitchAuthUrl, "_blank");
       setIsGettingToken(false);
     }, 800);
   };
@@ -39,36 +71,49 @@ const TwitchIntegration = () => {
   const handleSave = () => {
     if (!clientId || !redirectUri) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Erro de validação",
+        description: "Todos os campos são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsSaving(true);
+    appendState({
+      client_id: clientId,
+    });
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
-      toast({
-        title: "Settings Saved",
-        description: "Your Twitch integration settings have been saved.",
-      });
-    }, 1000);
+    appendConfiguration({
+      twitch_client_id: clientId,
+      twitch_redirect_uri: redirectUri,
+    });
+
+    toast({
+      title: "Configurações salvas",
+      description: "Sua twitch foi configurada.",
+    });
   };
 
   return (
     <IntegrationCard
-      title="Twitch Integration"
-      description="Connect your Twitch account for streaming features"
+      title="Twitch"
+      description="Conecte-se a sua conta da Twitch para gerenciar titulos da live."
       icon={Twitch}
       iconColor="twitch"
       footer={
-        <Button variant="default" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Settings"}
-          <Save className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={isConnected ? "success" : "outline"}
+            onClick={handleTestConnection}
+          >
+            Testar conexão
+            <RefreshCcw className="ml-2 h-4 w-4" />
+          </Button>
+
+          <Button variant="default" onClick={handleSave}>
+            Salvar configurações
+            <Save className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       }
     >
       <div className="space-y-4">
@@ -80,7 +125,7 @@ const TwitchIntegration = () => {
             id="twitch-client-id"
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
-            placeholder="Enter your Twitch Client ID"
+            placeholder="Digite seu Twitch Client ID"
             className="mt-1.5"
           />
         </div>
@@ -103,9 +148,9 @@ const TwitchIntegration = () => {
             variant="outline"
             className="text-twitch border-twitch/20 hover:bg-twitch/10 hover:text-twitch"
             onClick={handleGetToken}
-            disabled={isGettingToken}
+            disabled={isGettingToken || isDisabledTwitchLoginButton}
           >
-            {isGettingToken ? "Redirecting..." : "Get Twitch Token"}
+            {isGettingToken ? "Redirecionando..." : "Obter token da twitch"}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>

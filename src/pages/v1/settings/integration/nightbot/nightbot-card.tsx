@@ -30,13 +30,8 @@ const NightbotIntegration = () => {
     }
   }, [configuration]);
 
-  const handleUpdateCommandsList = async () => {
-    const service = new NightbotApiService();
-    return service.getCommands();
-  };
-
-  const handleTestConnection = () => {
-    const success = testConnection();
+  const handleTestConnection = async () => {
+    const success = await testConnection();
 
     if (!success) {
       toast({
