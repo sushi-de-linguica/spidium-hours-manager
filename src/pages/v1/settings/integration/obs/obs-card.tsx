@@ -1,70 +1,143 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import IntegrationCard from "@/components/integrations-card";
-import { Monitor, Save } from "lucide-react";
+import { Monitor, Save, RefreshCcw } from "lucide-react";
+import { useObs } from "@/hooks/use-obs";
+import { useConfiguration } from "@/hooks/use-configuration";
 
 const OBSIntegration = () => {
   const [websocketAddress, setWebsocketAddress] = useState("");
   const [websocketPassword, setWebsocketPassword] = useState("");
-  const [version, setVersion] = useState("27");
-  const [isSaving, setIsSaving] = useState(false);
+  const [version, setVersion] = useState("4");
+
   const { toast } = useToast();
+  const { appendConfiguration, configuration } = useConfiguration();
+  const { obsIsReady, setObsStoreState, obsStoreState } = useObs();
+
+  useEffect(() => {
+    if (obsStoreState.version) {
+      setVersion(obsStoreState.version.toString());
+    }
+  }, []);
+
+  const handleTestConnection = () => {
+    if (window.obsService) {
+      window.obsService
+        .connect()
+        .then((result) => {
+          console.log("chegou ", result);
+          if (result === true) {
+            toast({
+              title: "OBS",
+              description: "Conexão com OBS estabelecida com sucesso!",
+              variant: "default",
+            });
+            return;
+          }
+
+          let errorMessage = "Erro ao estabelecer conexão com OBS. ";
+          if (result && result.error) {
+            errorMessage += result.error;
+          }
+
+          toast({
+            title: "Erro ao conectar",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Erro ao conectar",
+            description: "Erro ao estabelecer conexão com OBS",
+            variant: "destructive",
+          });
+        });
+    }
+  };
+
+  useEffect(() => {
+    if (configuration?.obs_ws_address) {
+      setWebsocketAddress(configuration.obs_ws_address);
+    }
+    if (configuration?.obs_ws_password) {
+      setWebsocketPassword(configuration.obs_ws_password);
+    }
+  }, [
+    configuration,
+    configuration?.obs_ws_address,
+    configuration?.obs_ws_password,
+  ]);
 
   const handleSave = () => {
     if (!websocketAddress || !websocketPassword) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Erro de validação",
+        description: "Todos os campos são obrigatórios",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate websocket address format
     const addressRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$/;
     if (!addressRegex.test(websocketAddress)) {
       toast({
-        title: "Invalid Format",
-        description: "Websocket address must be in format 127.0.0.1:0000",
+        title: "Formato inválido",
+        description:
+          "endereço do Websocket deve seguir o formato 127.0.0.1:0000",
         variant: "destructive",
       });
       return;
     }
 
-    setIsSaving(true);
+    setObsStoreState({
+      ...obsStoreState,
+      version: parseInt(version) ?? 4,
+    });
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
-      toast({
-        title: "Settings Saved",
-        description: "Your OBS integration settings have been saved.",
-      });
-    }, 1000);
+    appendConfiguration({
+      obs_ws_address: websocketAddress,
+      obs_ws_password: websocketPassword,
+    });
+
+    toast({
+      title: "Configurações salvas",
+      description: "Suas configurações de integração foram atualizadas.",
+    });
   };
 
   return (
     <IntegrationCard
-      title="OBS Integration"
-      description="Connect to Open Broadcast Software for streaming control"
+      title="OBS - Open Broadcast Software"
+      description="Conecte-se com OBS para automações avançadas."
       icon={Monitor}
       iconColor="obs"
       footer={
-        <Button variant="default" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Settings"}
-          <Save className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={obsIsReady ? "success" : "outline"}
+            onClick={handleTestConnection}
+          >
+            Testar conexão
+            <RefreshCcw className="ml-2 h-4 w-4" />
+          </Button>
+
+          <Button variant="default" onClick={handleSave}>
+            Salvar configurações
+            <Save className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       }
     >
       <div className="space-y-4">
         <div className="form-element">
           <div className="mb-4">
             <Label className="text-sm font-medium mb-2 block">
-              OBS Version
+              Versão do OBS
             </Label>
             <RadioGroup
               value={version}
@@ -72,13 +145,13 @@ const OBSIntegration = () => {
               className="flex gap-6"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="27" id="obs-27" />
+                <RadioGroupItem value="4" id="obs-27" />
                 <Label htmlFor="obs-27" className="cursor-pointer">
                   27.x
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="28" id="obs-28" />
+                <RadioGroupItem value="5" id="obs-28" />
                 <Label htmlFor="obs-28" className="cursor-pointer">
                   28/29.x
                 </Label>
@@ -92,7 +165,7 @@ const OBSIntegration = () => {
             htmlFor="obs-websocket-address"
             className="text-sm font-medium"
           >
-            Websocket Address
+            Endereço do Websocket
           </Label>
           <Input
             id="obs-websocket-address"
@@ -102,7 +175,7 @@ const OBSIntegration = () => {
             className="mt-1.5"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Format: 127.0.0.1:4455 (IP:PORT)
+            Formato: 127.0.0.1:4455 (IP:PORTA)
           </p>
         </div>
 
@@ -111,14 +184,14 @@ const OBSIntegration = () => {
             htmlFor="obs-websocket-password"
             className="text-sm font-medium"
           >
-            Websocket Password
+            Senha do Websocket
           </Label>
           <Input
             id="obs-websocket-password"
             type="password"
             value={websocketPassword}
             onChange={(e) => setWebsocketPassword(e.target.value)}
-            placeholder="Enter your OBS Websocket Password"
+            placeholder="Digite sua senha do websocket"
             className="mt-1.5"
           />
         </div>

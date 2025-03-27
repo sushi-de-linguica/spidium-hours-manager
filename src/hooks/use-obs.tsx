@@ -1,13 +1,24 @@
 import { ECustomEvents } from "@/domain";
 import { ObsWebsocketService } from "@/services/obs-service";
-import { useObsStore } from "@/stores/slices/obs";
+import { IObs, useObsStore } from "@/stores/slices/obs";
 import { ipcRenderer } from "electron";
 import { useEffect, useState } from "react";
 
 export const useObs = () => {
-  const [obsIsReady, setObsIsReady] = useState(false);
   const [listenersAttached, setListenersAttached] = useState(false);
   const { version } = useObsStore((store) => store.state);
+
+  const { setState: setObsStoreState, state: obsStoreState } = useObsStore();
+  const [obsIsReady, setObsIsReady] = useState(
+    obsStoreState?.isConnected ?? false
+  );
+
+  useEffect(() => {
+    setObsStoreState({
+      ...obsStoreState,
+      isConnected: obsIsReady,
+    });
+  }, [obsIsReady]);
 
   const handleObsReady = () => setObsIsReady(true);
   const handleObsNotReady = () => setObsIsReady(false);
@@ -65,5 +76,7 @@ export const useObs = () => {
   return {
     obsIsReady,
     version,
+    setObsStoreState,
+    obsStoreState,
   };
 };
