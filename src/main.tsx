@@ -9,6 +9,7 @@ import RunManagerPage from "./pages/manager";
 import { IntegrationTwitchPage } from "./pages/v1/settings/integration/twitch/page";
 import { IntegrationNightbotPage } from "./pages/v1/settings/integration/nightbot/page";
 import { IntegrationObsPage } from "./pages/v1/settings/integration/obs/page";
+import { Toaster } from "./components/ui/toaster";
 
 const Router = () => {
   const [showOldPage, setShowOldPage] = React.useState(false);
@@ -21,30 +22,33 @@ const Router = () => {
   }, []);
 
   return (
-    <BrowserRouter>
-      {showOldPage ? (
-        <RunManagerPage />
-      ) : (
-        <Routes>
-          <Route element={<App />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route
-              path="/settings/integration/twitch"
-              element={<IntegrationTwitchPage />}
-            />
-            <Route
-              path="/settings/integration/nightbot"
-              element={<IntegrationNightbotPage />}
-            />
-            <Route
-              path="/settings/integration/obs"
-              element={<IntegrationObsPage />}
-            />
-            <Route path="/old-times" element={<RunManagerPage />} />
-          </Route>
-        </Routes>
-      )}
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        {showOldPage ? (
+          <RunManagerPage />
+        ) : (
+          <Routes>
+            <Route element={<App />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route
+                path="/settings/integration/twitch"
+                element={<IntegrationTwitchPage />}
+              />
+              <Route
+                path="/settings/integration/nightbot"
+                element={<IntegrationNightbotPage />}
+              />
+              <Route
+                path="/settings/integration/obs"
+                element={<IntegrationObsPage />}
+              />
+              <Route path="/old-times" element={<RunManagerPage />} />
+            </Route>
+          </Routes>
+        )}
+      </BrowserRouter>
+      <Toaster />
+    </>
   );
 };
 
