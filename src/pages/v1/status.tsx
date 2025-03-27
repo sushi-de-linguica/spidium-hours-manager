@@ -4,19 +4,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useNightbot } from "@/hooks/use-nightbot";
 import { useObs } from "@/hooks/use-obs";
 import { AlertCircle, Check, CircleAlert } from "lucide-react";
 import { useMemo } from "react";
 
 export const Status = () => {
   const { obsIsReady, version } = useObs();
+  const { isConnected: nightbotIsReady } = useNightbot();
 
-  const hasError = useMemo(() => !obsIsReady, [obsIsReady]);
+  const hasError = useMemo(() => !obsIsReady || !nightbotIsReady, [obsIsReady]);
+  const allError = useMemo(
+    () => !obsIsReady && !nightbotIsReady,
+    [obsIsReady, nightbotIsReady]
+  );
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant={hasError ? "destructive" : "success"} size={"sm"}>
+        <Button
+          variant={allError ? "destructive" : hasError ? "warning" : "success"}
+          size={"sm"}
+        >
           {hasError && <AlertCircle />}
           {!hasError && <Check />}
         </Button>
@@ -31,7 +40,7 @@ export const Status = () => {
           </div>
           <div className="flex flex-row items-center gap-2">
             <CircleAlert
-              className={obsIsReady ? "text-green-600" : "text-red-400"}
+              className={nightbotIsReady ? "text-green-600" : "text-red-400"}
             />
             <span className="ml-2">Nightbot</span>
           </div>

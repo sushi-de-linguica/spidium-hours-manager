@@ -8,6 +8,7 @@ import IntegrationCard from "@/components/integrations-card";
 import { Monitor, Save, RefreshCcw } from "lucide-react";
 import { useObs } from "@/hooks/use-obs";
 import { useConfiguration } from "@/hooks/use-configuration";
+import { NightbotApiService } from "@/services/nightbot-service";
 
 const OBSIntegration = () => {
   const [websocketAddress, setWebsocketAddress] = useState("");

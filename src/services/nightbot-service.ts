@@ -63,6 +63,18 @@ export class NightbotApiService {
     });
   }
 
+  async testConnection() {
+    const nightbotStore = useNightbot.getState();
+    try {
+      await this.getCommands();
+      nightbotStore.setIsConnected(true);
+    } catch (err) {
+      console.error(err);
+      nightbotStore.setIsConnected(false);
+      return false;
+    }
+  }
+
   async updateCustomCommandById(
     commandId: string,
     data: Partial<INightbotCommand>

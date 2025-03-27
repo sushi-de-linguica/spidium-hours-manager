@@ -11,9 +11,11 @@ export interface INightbot {
 
 export interface INightbotStore {
   isValidToken: boolean;
+  isConnected: boolean;
   state: INightbot;
   appendState: (newState: Partial<INightbot>) => void;
   setState: (newState: INightbot) => void;
+  setIsConnected: (connected: boolean) => void;
   reset: () => void;
 }
 
@@ -29,6 +31,7 @@ const useNightbot = create<INightbotStore, any>(
   persist(
     (set) => ({
       isValidToken: false,
+      isConnected: false,
       state: {
         ...DEFAULT_STATE,
       },
@@ -58,6 +61,12 @@ const useNightbot = create<INightbotStore, any>(
             ...DEFAULT_STATE,
           },
         })),
+      setIsConnected: (value: boolean) => {
+        set((state) => ({
+          ...state,
+          isConnected: value,
+        }));
+      },
     }),
     {
       name: "SPIDIUM_NIGHTBOT_STORE",
