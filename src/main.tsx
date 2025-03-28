@@ -11,6 +11,7 @@ import { IntegrationNightbotPage } from "./pages/v1/settings/integration/nightbo
 import { IntegrationObsPage } from "./pages/v1/settings/integration/obs/page";
 import { Toaster } from "./components/ui/toaster";
 import { TitlePage } from "./pages/v1/settings/integration/title/page";
+import { MembersPage } from "./pages/v1/events/members/page";
 
 const Router = () => {
   const [showOldPage, setShowOldPage] = React.useState(false);
@@ -44,6 +45,7 @@ const Router = () => {
                 element={<IntegrationObsPage />}
               />
               <Route path="/settings/title" element={<TitlePage />} />
+              <Route path="/events/members" element={<MembersPage />} />
               <Route path="/old-times" element={<RunManagerPage />} />
             </Route>
           </Routes>

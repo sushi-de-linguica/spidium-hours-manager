@@ -38,8 +38,8 @@ const data = {
           url: "#",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Gerenciar membros",
+          url: "/events/members",
         },
       ],
     },
