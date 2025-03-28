@@ -59,18 +59,24 @@ export default function AddRunPage() {
     return <div>Evento não encontrado</div>;
   }
 
+  const editRun = params.runId
+    ? event.runs?.find((run) => run.id === params.runId)
+    : null;
+
   // State for the form
   const [runs, setRuns] = useState<IRun[]>([
     {
-      id: randomUUID(),
-      runners: [],
-      hosts: [],
-      comments: [],
-      estimate: "",
-      game: "",
-      category: "",
-      platform: "",
-      imageFile: null,
+      ...(editRun ?? {
+        id: randomUUID(),
+        runners: [],
+        hosts: [],
+        comments: [],
+        estimate: "",
+        game: "",
+        category: "",
+        platform: "",
+        imageFile: null,
+      }),
     },
   ]);
 
@@ -97,6 +103,24 @@ export default function AddRunPage() {
   };
 
   const handleRemoveRun = (id: string) => {
+    if (editRun) {
+      if (confirm("Você tem certeza que deseja remover essa run?")) {
+        updateEvent({
+          ...event,
+          runs: event.runs.filter((run) => run.id !== id),
+        });
+
+        toast({
+          title: "Sucesso!",
+          description: "Run removida com sucesso.",
+        });
+
+        navigate(`/events/${event.id}/runs`);
+      }
+
+      return;
+    }
+
     if (runs.length === 1) {
       toast({
         title: "Ops",
@@ -203,6 +227,27 @@ export default function AddRunPage() {
       return;
     }
 
+    if (editRun) {
+      console.log("Updating runs:", runs);
+      updateEvent({
+        ...event,
+        runs: event.runs.map((run) => {
+          if (run.id === editRun.id) {
+            return { ...run, ...runs[0] };
+          }
+          return run;
+        }),
+      });
+
+      toast({
+        title: "Sucesso!",
+        description: `${runs.length} run(s) foram adicionadas ao evento.`,
+      });
+
+      navigate(`/events/${event.id}/runs`);
+      return;
+    }
+
     console.log("Submitting runs:", runs);
     updateEvent({
       ...event,
@@ -223,13 +268,19 @@ export default function AddRunPage() {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar para: {event.name}
       </Button>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Adicionar Runs</h1>
-        <Button onClick={handleAddRun}>
-          <Plus className="mr-2 h-4 w-4" />
-          Adicionar runs
-        </Button>
-      </div>
+      {editRun ? (
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Editando run: #{editRun.game}</h1>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Adicionar Runs</h1>
+          <Button onClick={handleAddRun}>
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar runs
+          </Button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         {runs.map((run, index) => (
@@ -237,7 +288,7 @@ export default function AddRunPage() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
                 <CardTitle>Run #{index + 1}</CardTitle>
-                <CardDescription>Add details for this speedrun</CardDescription>
+                <CardDescription>Dados da run</CardDescription>
               </div>
               <Button
                 variant="ghost"
@@ -529,11 +580,11 @@ export default function AddRunPage() {
 
         <div className="flex justify-end gap-4">
           <Button variant="outline" type="button">
-            Cancel
+            Cancelar
           </Button>
           <Button type="submit">
             <Save className="mr-2 h-4 w-4" />
-            Save Runs
+            {editRun ? "Salvar" : "Adicionar runs"}
           </Button>
         </div>
       </form>

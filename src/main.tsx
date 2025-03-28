@@ -50,6 +50,10 @@ const Router = () => {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/members" element={<MembersPage />} />
               <Route path="/events/:id/runs/add" element={<AddRunPage />} />
+              <Route
+                path="/events/:id/runs/:runId/edit"
+                element={<AddRunPage />}
+              />
               <Route path="/events/:id/runs" element={<EventRunsPage />} />
               <Route path="/settings/title" element={<TitlePage />} />
               <Route path="/old-times" element={<RunManagerPage />} />

@@ -34,6 +34,7 @@ import { useEvents } from "@/hooks/use-events";
 import { useNavigate, useParams } from "react-router";
 
 interface SortableRunItemProps {
+  eventId: string;
   run: IRun;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -42,6 +43,7 @@ interface SortableRunItemProps {
 }
 
 function SortableRunItem({
+  eventId,
   run,
   onMoveUp,
   onMoveDown,
@@ -50,6 +52,7 @@ function SortableRunItem({
 }: SortableRunItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: run.id! });
+  const navigate = useNavigate();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -103,7 +106,13 @@ function SortableRunItem({
                 <ArrowDown className="h-4 w-4" />
               </Button>
             </div>
-            <Button variant="outline" size="sm">
+            <Button
+              onClick={() => {
+                navigate(`/events/${eventId}/runs/${run.id}/edit`);
+              }}
+              variant="outline"
+              size="sm"
+            >
               Editar
             </Button>
           </div>
@@ -329,6 +338,7 @@ export default function EventRunsPage() {
                 (run, index) => (
                   <SortableRunItem
                     key={run.id}
+                    eventId={event.id!}
                     run={run}
                     onMoveUp={() => handleMoveUp(index)}
                     onMoveDown={() => handleMoveDown(index)}
