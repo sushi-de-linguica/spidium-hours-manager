@@ -12,6 +12,9 @@ import { IntegrationObsPage } from "./pages/v1/settings/integration/obs/page";
 import { Toaster } from "./components/ui/toaster";
 import { TitlePage } from "./pages/v1/settings/integration/title/page";
 import { MembersPage } from "./pages/v1/events/members/page";
+import { EventsPage } from "./pages/v1/events/page";
+import EventRunsPage from "./pages/v1/events/runs/page";
+import AddRunPage from "./pages/v1/events/runs/add/page";
 
 const Router = () => {
   const [showOldPage, setShowOldPage] = React.useState(false);
@@ -44,8 +47,11 @@ const Router = () => {
                 path="/settings/integration/obs"
                 element={<IntegrationObsPage />}
               />
-              <Route path="/settings/title" element={<TitlePage />} />
+              <Route path="/events" element={<EventsPage />} />
               <Route path="/events/members" element={<MembersPage />} />
+              <Route path="/events/:id/runs/add" element={<AddRunPage />} />
+              <Route path="/events/:id/runs" element={<EventRunsPage />} />
+              <Route path="/settings/title" element={<TitlePage />} />
               <Route path="/old-times" element={<RunManagerPage />} />
             </Route>
           </Routes>

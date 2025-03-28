@@ -35,7 +35,7 @@ const data = {
       items: [
         {
           title: "Gerenciar eventos",
-          url: "#",
+          url: "/events",
         },
         {
           title: "Gerenciar membros",

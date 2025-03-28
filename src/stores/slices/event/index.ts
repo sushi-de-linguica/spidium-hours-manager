@@ -106,30 +106,23 @@ const useEventStore = create<IEventStore, any>(
         })),
       removeEvent: (eventId: string) =>
         set((store) => {
-          const eventIndex = store.state.events.findIndex(
-            ({ id }) => id === eventId
+          const newEvents = store.state.events.filter(
+            ({ id }) => id !== eventId
           );
 
-          if (eventIndex === undefined || eventIndex === null) {
+          if (newEvents.length === store.state.events.length) {
             return store;
           }
 
           const newStore = {
+            ...store,
             state: {
               ...store.state,
-              events: [...store.state.events],
+              events: [...newEvents],
             },
           };
 
-          newStore.state.events[eventIndex].deleted_at = new Date();
-          if (
-            newStore.state.events[eventIndex].id ===
-            newStore.state.current_event_id
-          ) {
-            newStore.state.current_event_id = null;
-          }
-
-          return { ...store, ...newStore };
+          return newStore;
         }),
       setCurrentEvent: (eventId: string | null) =>
         set((store) => ({
