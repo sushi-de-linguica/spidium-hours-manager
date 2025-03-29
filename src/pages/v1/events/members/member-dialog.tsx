@@ -144,15 +144,17 @@ export function MemberDialog({
                 onValueChange={(value: any) => handleChange("gender", value)}
               >
                 <SelectTrigger id="gender" className="col-span-3">
-                  <SelectValue placeholder="Select gender" />
+                  <SelectValue placeholder="Selecione o pronome" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="he/him">he/him</SelectItem>
-                  <SelectItem value="she/her">she/her</SelectItem>
-                  <SelectItem value="they/them">they/them</SelectItem>
+                  <SelectItem value="ele/dele">ele/dele</SelectItem>
+                  <SelectItem value="ela/dela">ela/dela</SelectItem>
+                  <SelectItem value="elu/delu">elu/delu</SelectItem>
+                  <SelectItem value="ile/dile">ile/dile</SelectItem>
                   <SelectItem value="other">other</SelectItem>
                 </SelectContent>
               </Select>
+
               {errors.gender && (
                 <p className="col-span-3 col-start-2 text-sm text-red-500">
                   {errors.gender}
@@ -204,7 +206,26 @@ export function MemberDialog({
               </Label>
               <Select
                 value={formData.streamAt || "primary"}
-                onValueChange={(value: any) => handleChange("streamAt", value)}
+                onValueChange={(value: any) => {
+                  if (!value) {
+                    return;
+                  }
+                  const twitchsBySource: Record<
+                    "primary" | "secondary",
+                    string | undefined
+                  > = {
+                    primary: formData.primaryTwitch,
+                    secondary: formData.secondaryTwitch,
+                  };
+
+                  const selectedTwitch = twitchsBySource[value];
+
+                  if (!selectedTwitch) {
+                    return;
+                  }
+
+                  handleChange("streamAt", value);
+                }}
                 disabled={!formData.primaryTwitch && !formData.secondaryTwitch}
               >
                 <SelectTrigger id="streamAt" className="col-span-3">
