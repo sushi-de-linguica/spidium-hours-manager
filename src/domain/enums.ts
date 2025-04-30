@@ -15,6 +15,7 @@ export enum EIpcEvents {
   FILE_REMOVE = "IPC:FILE_REMOVE",
   COPY_FILE = "IPC:COPY_FILE",
   RESET_IMAGES = "IPC:RESET_IMAGES",
+  DATABASE_INIT = "IPC:DATABASE_INIT",
 }
 
 export enum ECustomEvents {

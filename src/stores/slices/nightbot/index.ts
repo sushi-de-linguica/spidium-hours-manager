@@ -1,5 +1,5 @@
+import { persistMiddleware } from "@/lib/database";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface INightbot {
   access_token: string;
@@ -16,6 +16,7 @@ export interface INightbotStore {
   appendState: (newState: Partial<INightbot>) => void;
   setState: (newState: INightbot) => void;
   setIsConnected: (connected: boolean) => void;
+  setFullState: (newState: any) => void;
   reset: () => void;
 }
 
@@ -28,50 +29,51 @@ const DEFAULT_STATE: INightbot = {
 };
 
 const useNightbot = create<INightbotStore, any>(
-  persist(
-    (set) => ({
-      isValidToken: false,
-      isConnected: false,
-      state: {
-        ...DEFAULT_STATE,
-      },
-      appendState: (newState: Partial<INightbot>) => {
-        set((state) => ({
-          ...state,
-          state: {
-            ...state.state,
-            ...newState,
-          },
-        }));
-      },
-      setState: (newState: INightbot) => {
-        set((state) => ({
-          ...state,
-          isValidToken: newState.access_token !== "",
-          state: {
-            ...newState,
-          },
-        }));
-      },
-      reset: () =>
-        set((state) => ({
-          ...state,
-          isValidToken: state.state.access_token !== "",
-          state: {
-            ...DEFAULT_STATE,
-          },
-        })),
-      setIsConnected: (value: boolean) => {
-        set((state) => ({
-          ...state,
-          isConnected: value,
-        }));
-      },
-    }),
-    {
-      name: "SPIDIUM_NIGHTBOT_STORE",
-    }
-  )
+  persistMiddleware("NIGHTBOT_STORE", (set) => ({
+    isValidToken: false,
+    isConnected: false,
+    state: {
+      ...DEFAULT_STATE,
+    },
+    appendState: (newState: Partial<INightbot>) => {
+      set((state) => ({
+        ...state,
+        state: {
+          ...state.state,
+          ...newState,
+        },
+      }));
+    },
+    setState: (newState: INightbot) => {
+      set((state) => ({
+        ...state,
+        isValidToken: newState.access_token !== "",
+        state: {
+          ...newState,
+        },
+      }));
+    },
+    reset: () =>
+      set((state) => ({
+        ...state,
+        isValidToken: state.state.access_token !== "",
+        state: {
+          ...DEFAULT_STATE,
+        },
+      })),
+    setIsConnected: (value: boolean) => {
+      set((state) => ({
+        ...state,
+        isConnected: value,
+      }));
+    },
+    setFullState: (newState: any) => {
+      set((state) => ({
+        ...state,
+        ...newState,
+      }));
+    },
+  }))
 );
 
 export { useNightbot };

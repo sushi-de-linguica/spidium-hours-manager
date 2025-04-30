@@ -1,22 +1,36 @@
+import { loadStoreState } from "@/lib/database";
 import { NightbotApiService } from "@/services/nightbot-service";
 import { useNightbot as useNightbotStore } from "@/stores";
 import { useEffect } from "react";
 
 export const useNightbot = () => {
-  const { state: nightbotState, isConnected } = useNightbotStore();
+  const {
+    state: nightbotState,
+    isConnected,
+    setFullState,
+  } = useNightbotStore();
 
   const testConnection = () => {
     const service = new NightbotApiService();
-    return service.testConnection();
+    return service.testConnection().finally(() =>
+      window.dispatchEvent(new Event("status-update"))
+    );
   };
 
-  useEffect(() => {
-    console.log("testConnection", isConnected);
-  }, [isConnected]);
+  const init = async () => {
+    const data = await loadStoreState("NIGHTBOT_STORE");
+
+    if (!data) {
+      return;
+    }
+
+    setFullState(data.state);
+  };
 
   return {
     nightbotState,
     isConnected,
     testConnection,
+    init,
   };
 };

@@ -1,27 +1,24 @@
-import { ECustomEvents } from "@/domain";
-import { ObsWebsocketService } from "@/services/obs-service";
-import { IObs, useObsStore } from "@/stores/slices/obs";
+import { loadStoreState } from "@/lib/database";
+import { GlobalContext } from "@/stores/context/global";
+import { IObsStore, useObsStore } from "@/stores/slices/obs";
 import { ipcRenderer } from "electron";
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 export const useObs = () => {
+  const globalContext = useContext(GlobalContext);
   const [listenersAttached, setListenersAttached] = useState(false);
-  const { version } = useObsStore((store) => store.state);
+  const {
+    setState: setObsStoreState,
+    setFullState,
+    state: obsStoreState,
+  } = useObsStore();
 
-  const { setState: setObsStoreState, state: obsStoreState } = useObsStore();
-  const [obsIsReady, setObsIsReady] = useState(
-    obsStoreState?.isConnected ?? false
-  );
-
-  useEffect(() => {
-    setObsStoreState({
-      ...obsStoreState,
-      isConnected: obsIsReady,
-    });
-  }, [obsIsReady]);
-
-  const handleObsReady = () => setObsIsReady(true);
-  const handleObsNotReady = () => setObsIsReady(false);
+  const handleObsReady = () => {
+    globalContext.obsIsReady = true;
+  };
+  const handleObsNotReady = () => {
+    globalContext.obsIsReady = false;
+  };
 
   const handleAttachListeners = () => {
     if (!listenersAttached) {
@@ -33,7 +30,7 @@ export const useObs = () => {
       ipcRenderer.on("error", handleObsNotReady);
 
       ipcRenderer.on("DESTROY_OBS", () => {
-        setObsIsReady(false);
+        handleObsNotReady();
       });
 
       setListenersAttached(true);
@@ -49,34 +46,32 @@ export const useObs = () => {
     setListenersAttached(false);
   };
 
-  const handleReloadPage = () => {
-    window.document.location.reload();
-  };
-
-  useEffect(() => {
-    console.log("Starting useObs", version);
-    handleAttachListeners();
-
-    window.addEventListener(ECustomEvents.RELOAD_APPLICATION, handleReloadPage);
-
-    if (!window.obsService) {
-      window.obsService = new ObsWebsocketService(version);
+  const init = async () => {
+    const data: null | IObsStore = await loadStoreState("OBS_STORE");
+    if (!data) {
+      return;
     }
 
-    return () => {
-      handleRemoveAttachedListeners();
+    console.log("initial DATA FULL from storage", data);
+    console.log("initial data from storage", data.state.version);
 
-      window.removeEventListener(
-        ECustomEvents.RELOAD_APPLICATION,
-        handleReloadPage
-      );
-    };
-  }, []);
+    setFullState(data);
+  };
+
+  const setObsIsReady = (isReady: boolean) => {
+    globalContext.obsIsReady = isReady;
+  };
 
   return {
-    obsIsReady,
-    version,
+    obsIsReady: globalContext.obsIsReady,
+    setObsIsReady,
+    version: obsStoreState.version,
     setObsStoreState,
     obsStoreState,
+    init,
+    listeners: {
+      handleRemoveAttachedListeners,
+      handleAttachListeners,
+    },
   };
 };

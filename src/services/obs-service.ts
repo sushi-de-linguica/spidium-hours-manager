@@ -1,7 +1,6 @@
 import { ipcRenderer } from "electron";
 import { useConfigurationStore } from "../stores";
 import { EWsEvents } from "@/domain/enums";
-import { toast } from "react-toastify";
 
 export class ObsWebsocketService {
   constructor(version: number) {
@@ -26,6 +25,8 @@ export class ObsWebsocketService {
     } catch (error) {
       console.error("[OBS] error: ", error);
       return Promise.reject(error);
+    } finally {
+      window.dispatchEvent(new Event("status-update"));
     }
   }
 

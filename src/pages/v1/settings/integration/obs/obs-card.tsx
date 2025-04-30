@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,16 +8,18 @@ import IntegrationCard from "@/components/integrations-card";
 import { Monitor, Save, RefreshCcw } from "lucide-react";
 import { useObs } from "@/hooks/use-obs";
 import { useConfiguration } from "@/hooks/use-configuration";
-import { NightbotApiService } from "@/services/nightbot-service";
 
 const OBSIntegration = () => {
   const [websocketAddress, setWebsocketAddress] = useState("");
   const [websocketPassword, setWebsocketPassword] = useState("");
-  const [version, setVersion] = useState("4");
 
   const { toast } = useToast();
   const { appendConfiguration, configuration } = useConfiguration();
-  const { obsIsReady, setObsStoreState, obsStoreState } = useObs();
+  const { obsIsReady, setObsStoreState, obsStoreState, setObsIsReady } =
+    useObs();
+  const [version, setVersion] = useState(
+    obsStoreState.version.toString() ?? "4"
+  );
 
   useEffect(() => {
     if (obsStoreState.version) {
@@ -30,8 +32,8 @@ const OBSIntegration = () => {
       window.obsService
         .connect()
         .then((result) => {
-          console.log("chegou ", result);
           if (result === true) {
+            setObsIsReady(true);
             toast({
               title: "OBS",
               description: "Conexão com OBS estabelecida com sucesso!",
@@ -45,6 +47,7 @@ const OBSIntegration = () => {
             errorMessage += result.error;
           }
 
+          setObsIsReady(false);
           toast({
             title: "Erro ao conectar",
             description: errorMessage,
@@ -52,6 +55,7 @@ const OBSIntegration = () => {
           });
         })
         .catch(() => {
+          setObsIsReady(false);
           toast({
             title: "Erro ao conectar",
             description: "Erro ao estabelecer conexão com OBS",
