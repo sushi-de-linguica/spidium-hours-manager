@@ -16,6 +16,7 @@ export interface IFileStore {
   addTag: (tag: IFileTag) => void;
   updateTag: (tag: IFileTag) => void;
   removeTag: (tag: IFileTag) => void;
+  updateTagOrder: (tags: IFileTag[]) => void;
   addFile: (file: IExportFileRun) => void;
   updateFile: (file: IExportFileRun) => void;
   removeFile: (file: IExportFileRun) => void;
@@ -36,26 +37,11 @@ const useFileStore = create<IFileStore, any>(
     },
     setActiveTag: (tagId: string, runId: string) => {
       set((store) => {
-        let filtered = [];
-        if (
-          store.state.activated === undefined ||
-          store.state.activated === null
-        ) {
-          store.state.activated = [];
-          filtered.push({ runId, tagId });
-        } else {
-          filtered = store.state.activated.filter(
-            (activated) => activated.tagId !== tagId
-          );
-
-          filtered.push({ runId, tagId });
-        }
-
         return {
           ...store,
           state: {
             ...store.state,
-            activated: [...filtered],
+            activated: [{ runId, tagId }],
           },
         };
       });
@@ -130,9 +116,6 @@ const useFileStore = create<IFileStore, any>(
           return store;
         }
 
-        // store.state.tags = store.state.tags.filter(({ id }) => id !== tag.id);
-        // store.state.tags.push(tag);
-
         const newTags = [...store.state.tags];
         newTags[tagIndex] = tag;
 
@@ -140,6 +123,17 @@ const useFileStore = create<IFileStore, any>(
         newState.state = { ...store.state };
 
         return { ...newState };
+      });
+    },
+    updateTagOrder: (tags: IFileTag[]) => {
+      set((store) => {
+        return {
+          ...store,
+          state: {
+            ...store.state,
+            tags: [...tags],
+          },
+        };
       });
     },
     addFile: (file: IExportFileRun) => {

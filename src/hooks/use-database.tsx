@@ -4,6 +4,7 @@ import { useObs } from "./use-obs";
 import { useConfiguration } from "./use-configuration";
 import { useNightbot } from "./use-nightbot";
 import { useTwitch } from "./use-twitch";
+import { useFile } from "./use-file";
 
 export const useDatabase = () => {
   const configuration = useConfiguration();
@@ -13,6 +14,7 @@ export const useDatabase = () => {
   const obs = useObs();
   const nightbot = useNightbot();
   const twitch = useTwitch();
+  const file = useFile();
 
   const init = async () => {
     console.log("Initializing database...");
@@ -26,6 +28,7 @@ export const useDatabase = () => {
       obs.init().then(() => console.log("OBS initialized")),
       nightbot.init().then(() => console.log("Nightbot initialized")),
       twitch.init().then(() => console.log("Twitch initialized")),
+      file.init().then(() => console.log("File initialized")),
     ];
 
     return await Promise.allSettled(promisses);

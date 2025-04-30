@@ -6,6 +6,7 @@ import {
   Lightbulb,
   LucideLayoutDashboard,
   Network,
+  Settings as SettingsIcon,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/sidebar";
 
 import HeaderImage from "/icon-144x144.png?url";
-import { Settings } from "@mui/icons-material";
 
 const data = {
   navMain: [
@@ -67,12 +67,16 @@ const data = {
     {
       title: "Configurações",
       url: "#",
-      icon: Settings,
+      icon: SettingsIcon,
       isActive: false,
       items: [
         {
           title: "Título da live",
           url: "/settings/title",
+        },
+        {
+          title: "Botões de ação",
+          url: "/settings/action-buttons",
         },
         {
           title: "Old Times",
