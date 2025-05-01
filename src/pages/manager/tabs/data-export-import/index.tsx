@@ -62,11 +62,11 @@ const DataExportImportTab = () => {
           const newRuns =
             runs.length > 0
               ? runs.map((run) => {
-                  return {
-                    ...run,
-                    id: run?.id ? run.id : randomUUID(),
-                  };
-                })
+                return {
+                  ...run,
+                  id: run?.id ? run.id : randomUUID(),
+                };
+              })
               : [];
           return {
             ...event,
@@ -74,7 +74,7 @@ const DataExportImportTab = () => {
             id: event.id ? event.id : randomUUID(),
           };
         });
-        eventStore.updateFullEventState(newEventData);
+        eventStore.updateFullEventState(newEventData, null);
       }
 
       if (json.configuration) {

@@ -292,7 +292,7 @@ export default function AddRunPage() {
         if (run.id === runId) {
           return {
             ...run,
-            images: run.images.filter((img) => img.id !== imageId),
+            images: run.images?.filter((img) => img.id !== imageId) ?? [],
           };
         }
         return run;

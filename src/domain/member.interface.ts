@@ -15,4 +15,5 @@ export interface IMember {
   streamAt?: string;
   link?: string;
   images?: IMemberImage[];
+  imageFile?: any;
 }

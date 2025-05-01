@@ -137,7 +137,7 @@ const handleUpdateMembersOnAllRuns = (member: IMember) => {
   });
 
   if (updated > 0) {
-    updateFullEventState(newEventState);
+    updateFullEventState(newEventState, null);
   }
 };
 
@@ -188,7 +188,7 @@ const handleRemoveMemberOnAllRuns = (member: IMember) => {
   });
 
   if (removed > 0) {
-    updateFullEventState(newEventState);
+    updateFullEventState(newEventState, null);
   }
 };
 

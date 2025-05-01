@@ -352,10 +352,10 @@ class ActionRunnerService {
           });
 
           // Check if there are any images to export in the run
-          const hasImagesToExport = this.run.images?.length > 0;
-          const hasMemberImagesToExport = this.run.runners.some(m => m.images && m.images.length > 0) ||
-            this.run.hosts.some(m => m.images && m.images.length > 0) ||
-            this.run.comments.some(m => m.images && m.images.length > 0);
+          const hasImagesToExport = (this.run?.images?.length ?? 0) > 0;
+          const hasMemberImagesToExport = this.run?.runners?.some(m => m.images && m.images.length > 0) ||
+            this.run?.hosts?.some(m => m.images && m.images.length > 0) ||
+            this.run?.comments?.some(m => m.images && m.images.length > 0);
 
           if (!hasImagesToExport && !hasMemberImagesToExport) {
             toast.warning("Nenhuma imagem encontrada para exportar");

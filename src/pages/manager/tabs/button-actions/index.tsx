@@ -31,7 +31,7 @@ import { ActionForm } from '../../components/action-form';
 import { toast } from 'react-toastify';
 
 export const ButtonActionsTab = () => {
-  const { tags, removeTag, addTag } = useFileStore();
+  const { removeTag, addTag, state: { tags } } = useFileStore();
   const [selectedAction, setSelectedAction] = useState<IFileTag | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -81,7 +81,7 @@ export const ButtonActionsTab = () => {
           />
           <CardContent>
             <Grid container spacing={2}>
-              {tags.map((action) => (
+              {tags.map((action: IFileTag) => (
                 <Grid item xs={12} sm={6} md={4} key={action.id}>
                   <Paper
                     elevation={2}
@@ -130,7 +130,7 @@ export const ButtonActionsTab = () => {
                       </Typography>
                     )}
                     <List dense>
-                      {action.actions.map((a, index) => (
+                      {action.actions.map((a: any, index: number) => (
                         <ListItem key={index}>
                           <ListItemIcon>
                             {a.isEnabled ? (

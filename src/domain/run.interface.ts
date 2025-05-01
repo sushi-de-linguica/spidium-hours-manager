@@ -17,7 +17,7 @@ export interface IRun {
   category: string;
   platform: string;
   year?: string;
-  images: IRunImage[];
+  images?: IRunImage[];
   seoTitle?: string;
   seoGame?: string;
 
