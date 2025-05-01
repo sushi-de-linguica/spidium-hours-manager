@@ -427,7 +427,7 @@ export function EventDialog({
                     <Button
                       type="button"
                       onClick={handleImportRunsFromHoraro}
-                      disabled={loadingImport || !formData.scheduleLink?.startsWith("https://horaro.org/")}
+                      disabled={loadingImport || !formData.scheduleLink?.startsWith("https://horaro.org/") || !!event}
                     >
                       <Import className="mr-2 h-4 w-4" />
                       {loadingImport ? "Importando..." : "Importar"}
@@ -436,6 +436,7 @@ export function EventDialog({
                       type="button"
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
+                      disabled={!!event}
                     >
                       <FileJson className="mr-2 h-4 w-4" />
                       Importar JSON
@@ -446,6 +447,7 @@ export function EventDialog({
                       onChange={handleImportFromJson}
                       accept=".json"
                       className="hidden"
+                      disabled={!!event}
                     />
                   </div>
                 </div>
