@@ -1,4 +1,5 @@
 import { loadStoreState } from "@/lib/database";
+import { ObsWebsocketService } from "@/services/obs-service";
 import { GlobalContext } from "@/stores/context/global";
 import { IObsStore, useObsStore } from "@/stores/slices/obs";
 import { ipcRenderer } from "electron";
@@ -62,6 +63,16 @@ export const useObs = () => {
     globalContext.obsIsReady = isReady;
   };
 
+  const testConnection = () => {
+    const service = new ObsWebsocketService(obsStoreState.version);
+
+    service.connect().then(() => {
+      setObsIsReady(true);
+    }).catch(() => {
+      setObsIsReady(false);
+    });
+  }
+
   return {
     obsIsReady: globalContext.obsIsReady,
     setObsIsReady,
@@ -73,5 +84,6 @@ export const useObs = () => {
       handleRemoveAttachedListeners,
       handleAttachListeners,
     },
+    testConnection,
   };
 };

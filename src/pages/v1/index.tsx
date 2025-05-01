@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -16,9 +15,16 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { useProtocolData } from "@/hooks/use-protocol-data";
 import { Status } from "./status";
 import { Link, useLocation } from "react-router";
+import { useIntegrations } from "@/hooks/use-integrations";
+import { useEffect } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   useProtocolData();
+  const { testAllConnections } = useIntegrations();
+
+  useEffect(() => {
+    testAllConnections();
+  }, [])
 
   const { pathname } = useLocation();
 
