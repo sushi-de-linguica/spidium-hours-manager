@@ -353,8 +353,11 @@ class ActionRunnerService {
 
           // Check if there are any images to export in the run
           const hasImagesToExport = this.run.images?.length > 0;
+          const hasMemberImagesToExport = this.run.runners.some(m => m.images && m.images.length > 0) ||
+            this.run.hosts.some(m => m.images && m.images.length > 0) ||
+            this.run.comments.some(m => m.images && m.images.length > 0);
 
-          if (!hasImagesToExport) {
+          if (!hasImagesToExport && !hasMemberImagesToExport) {
             toast.warning("Nenhuma imagem encontrada para exportar");
             return;
           }
@@ -382,6 +385,37 @@ class ActionRunnerService {
                 console.error(`Error writing image ${image.name}:`, error);
               }
             });
+
+            // Export member images
+            const exportMemberImages = (member: IMember, prefix: string, index: number) => {
+              if (!member.images?.length) {
+                return;
+              }
+
+              member.images.forEach((image, imageIndex) => {
+                if (!image.file?.base64) {
+                  console.warn(`Image ${image.name} for member ${member.name} has no base64 data`);
+                  return;
+                }
+
+                try {
+                  const base64Data = image.file.base64.replace(/^data:image\/\w+;base64,/, '');
+                  const buffer = Buffer.from(base64Data, 'base64');
+                  const uint8Array = new Uint8Array(buffer);
+
+                  const fileName = `${prefix}${index}-${image.name.replace(/\s+/g, '_')}.png`;
+                  const filePath = `${module.value}/${fileName}`;
+                  fs.writeFileSync(filePath, uint8Array);
+                } catch (error) {
+                  console.error(`Error writing image ${image.name} for member ${member.name}:`, error);
+                }
+              });
+            };
+
+            // Export images for all member types
+            this.run.runners.forEach((member, index) => exportMemberImages(member, 'runner', index));
+            this.run.hosts.forEach((member, index) => exportMemberImages(member, 'host', index));
+            this.run.comments.forEach((member, index) => exportMemberImages(member, 'commentator', index));
 
             toast.success("Arquivos exportados!");
           };

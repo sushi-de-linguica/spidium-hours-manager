@@ -20,8 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { IMember } from "@/domain";
+import { IMember, IMemberImage } from "@/domain";
+import { IFile } from "@/domain/file.interface";
 import { ImageUpload } from "@/components/image-upload";
+import { randomUUID } from "crypto";
+import { Image as ImageIcon, Plus, Trash2 } from "lucide-react";
 
 interface MemberDialogProps {
   isOpen: boolean;
@@ -43,7 +46,7 @@ export function MemberDialog({
     secondaryTwitch: "",
     streamAt: "primary",
     link: "",
-    imageFile: null,
+    images: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,7 +66,7 @@ export function MemberDialog({
         secondaryTwitch: "",
         streamAt: "primary",
         link: "",
-        imageFile: null,
+        images: [],
       });
     }
     setErrors({});
@@ -78,8 +81,108 @@ export function MemberDialog({
     }
   };
 
-  const handleImageUpload = (file: any | null) => {
-    setFormData({ ...formData, imageFile: file });
+  const handleAddImage = async () => {
+    // Create a hidden file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+
+    // Add it to the document
+    document.body.appendChild(input);
+
+    // Trigger the file selection dialog
+    input.click();
+
+    // Handle the file selection
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Check if file is an image
+      if (!file.type.match("image.*")) {
+        alert("Por favor, selecione um arquivo de imagem");
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Check file size (limit to 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert("O tamanho do arquivo não deve exceder 2MB");
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          const newFile: IFile = {
+            type: file.type,
+            path: file.name,
+            lastModified: file.lastModified,
+            base64: e.target.result as string,
+          };
+
+          // Add the new image
+          setFormData(prev => ({
+            ...prev,
+            images: [
+              ...(prev.images || []),
+              {
+                id: randomUUID(),
+                name: file.name.split('.')[0], // Use filename as default name
+                file: newFile,
+              },
+            ],
+          }));
+        }
+        document.body.removeChild(input);
+      };
+      reader.readAsDataURL(file);
+    };
+  };
+
+  const handleRemoveImage = (imageId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter(img => img.id !== imageId) || [],
+    }));
+  };
+
+  const handleImageNameChange = (imageId: string, name: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.map(img => {
+        if (img.id === imageId) {
+          return { ...img, name };
+        }
+        return img;
+      }),
+    }));
+  };
+
+  const handleImageUpload = (imageId: string, file: IFile | null) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.map(img => {
+        if (img.id === imageId) {
+          return {
+            ...img,
+            file: file || {
+              type: "",
+              path: "",
+              lastModified: 0,
+              base64: "",
+            }
+          };
+        }
+        return img;
+      }),
+    }));
   };
 
   const validateForm = (): boolean => {
@@ -214,7 +317,7 @@ export function MemberDialog({
               </Label>
               <Select
                 value={formData.streamAt || "primary"}
-                onValueChange={(value: any) => {
+                onValueChange={(value: "primary" | "secondary") => {
                   if (!value) {
                     return;
                   }
@@ -274,13 +377,58 @@ export function MemberDialog({
               )}
             </div>
 
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label className="text-right pt-2">Profile Image</Label>
-              <div className="col-span-3">
-                <ImageUpload
-                  currentImage={formData.imageFile}
-                  onImageUpload={handleImageUpload}
-                />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <ImageIcon className="h-4 w-4" />
+                  <Label>Imagens</Label>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddImage}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar imagem
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {formData.images?.map((image) => (
+                  <div key={image.id} className="flex items-start gap-4">
+                    <div className="flex-1 flex items-center gap-4">
+                      <ImageUpload
+                        currentImage={image.file}
+                        onImageUpload={(file) =>
+                          handleImageUpload(image.id, file)
+                        }
+                      />
+                      <div className="flex flex-row items-center gap-4 mb-2 w-full">
+                        <Label htmlFor={`image-name-${image.id}`} className="text-right">
+                          Nome da imagem
+                        </Label>
+                        <Input
+                          id={`image-name-${image.id}`}
+                          value={image.name}
+                          onChange={(e) =>
+                            handleImageNameChange(image.id, e.target.value)
+                          }
+                          className="col-span-3"
+                          placeholder="Nome para exportação"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveImage(image.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
