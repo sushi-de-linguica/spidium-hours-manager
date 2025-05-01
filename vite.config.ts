@@ -15,8 +15,17 @@ export default defineConfig(({ command }) => {
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG;
 
   return {
+    base: './',
     build: {
       ...(isServe ? { commonjsOptions: { include: [] } } : {}),
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+        },
+        output: {
+          format: 'es',
+        },
+      },
     },
     optimizeDeps: {
       disabled: !isServe ? true : false,
@@ -50,6 +59,9 @@ export default defineConfig(({ command }) => {
                 external: Object.keys(
                   "dependencies" in pkg ? pkg.dependencies : {}
                 ),
+                output: {
+                  format: 'cjs',
+                },
               },
             },
           },

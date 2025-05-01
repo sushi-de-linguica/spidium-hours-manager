@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./samples/node-api";
 import "./index.scss";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { HashRouter, Route, Routes } from "react-router";
 import { Toaster } from "./components/ui/toaster";
 
 import Dashboard from "./pages/v1/dashboard";
@@ -45,7 +45,7 @@ const Router = () => {
 
   return (
     <>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route element={<App />}>
             <Route path="/" element={<Dashboard />} />
@@ -76,7 +76,7 @@ const Router = () => {
             <Route path="/old-times" element={<RunManagerPage />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
       <Toaster />
     </>
   );

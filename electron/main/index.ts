@@ -71,9 +71,6 @@ async function createWindow() {
     icon: join(process.env.PUBLIC, "icon-144x144.png"),
     webPreferences: {
       preload,
-      // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
-      // Consider using contextBridge.exposeInMainWorld
-      // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
       contextIsolation: false,
     },
@@ -85,7 +82,10 @@ async function createWindow() {
     // Open devTool if the app is not packaged
     win.webContents.openDevTools();
   } else {
-    win.loadFile(indexHtml);
+    // In production, we need to use file:// protocol with proper path formatting
+    const filePath = `file://${indexHtml.replace(/\\/g, '/')}`;
+    console.log('Loading file:', filePath);
+    win.loadURL(filePath);
   }
 
   // Test actively push message to the Electron-Renderer
