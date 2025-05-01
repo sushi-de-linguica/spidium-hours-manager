@@ -84,8 +84,8 @@ const data = {
           url: "/settings/files",
         },
         {
-          title: "Old Times",
-          url: "/old-times",
+          title: "Atualizações",
+          url: "/settings/update",
         },
       ],
     },

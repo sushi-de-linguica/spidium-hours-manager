@@ -21,6 +21,7 @@ import { GlobalContext } from "./stores/context/global";
 import RunManagerPage from "./pages/manager/index";
 import ActionButtonsSettings from "./pages/v1/settings/action-buttons";
 import { FilesSettings } from "./pages/v1/settings/files";
+import UpdatePage from "./pages/v1/settings/update";
 
 const Router = () => {
   const database = useDatabase();
@@ -71,6 +72,7 @@ const Router = () => {
             <Route path="/settings/title" element={<TitlePage />} />
             <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
             <Route path="/settings/files" element={<FilesSettings />} />
+            <Route path="/settings/update" element={<UpdatePage />} />
             <Route path="/old-times" element={<RunManagerPage />} />
           </Route>
         </Routes>
