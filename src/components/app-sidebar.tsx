@@ -18,7 +18,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-import HeaderImage from "/icon-144x144.png?url";
+import HeaderImage from "/gl.png?url";
 
 const data = {
   navMain: [

@@ -68,7 +68,7 @@ let database: any = null;
 async function createWindow() {
   win = new BrowserWindow({
     title: `Spidium Hours Manager - SHM v${packageJson.version}`,
-    icon: join(process.env.PUBLIC, "icon-144x144.png"),
+    icon: join(process.env.PUBLIC, "favicon.ico"),
     webPreferences: {
       preload,
       nodeIntegration: true,
