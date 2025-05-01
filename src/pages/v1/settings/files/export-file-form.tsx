@@ -18,15 +18,18 @@ export const ExportFileForm = ({ showEditMode, file, onClose }: ExportFileFormPr
   const { addFile, updateFile } = useFileStore();
   const [name, setName] = useState(file?.name || "");
   const [template, setTemplate] = useState(file?.template || "");
+  const [maxCharsPerLine, setMaxCharsPerLine] = useState<number | undefined>(file?.maxCharsPerLine);
   const { toast } = useToast();
 
   useEffect(() => {
     if (file) {
       setName(file.name);
       setTemplate(file.template);
+      setMaxCharsPerLine(file.maxCharsPerLine);
     } else {
       setName("");
       setTemplate("");
+      setMaxCharsPerLine(undefined);
     }
   }, [file]);
 
@@ -38,6 +41,7 @@ export const ExportFileForm = ({ showEditMode, file, onClose }: ExportFileFormPr
         ...file,
         name,
         template,
+        maxCharsPerLine,
       });
       toast({
         title: "Sucesso",
@@ -48,6 +52,7 @@ export const ExportFileForm = ({ showEditMode, file, onClose }: ExportFileFormPr
         id: randomUUID(),
         name,
         template,
+        maxCharsPerLine,
       });
       toast({
         title: "Sucesso",
@@ -83,6 +88,17 @@ export const ExportFileForm = ({ showEditMode, file, onClose }: ExportFileFormPr
               onChange={(e) => setTemplate(e.target.value)}
               placeholder="Digite o template"
               required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxCharsPerLine">Máximo de caracteres por linha</Label>
+            <Input
+              id="maxCharsPerLine"
+              type="number"
+              value={maxCharsPerLine || ""}
+              onChange={(e) => setMaxCharsPerLine(e.target.value ? parseInt(e.target.value) : undefined)}
+              placeholder="Digite o máximo de caracteres por linha (opcional)"
+              min="0"
             />
           </div>
           <DialogFooter>
