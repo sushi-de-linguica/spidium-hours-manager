@@ -220,7 +220,7 @@ export function MemberDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
@@ -361,7 +361,7 @@ export function MemberDialog({
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="link" className="text-right">
-                Link <span className="text-red-500">*</span>
+                Link
               </Label>
               <Input
                 id="link"

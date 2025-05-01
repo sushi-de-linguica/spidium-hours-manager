@@ -144,11 +144,11 @@ export default function Dashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Ações</TableHead>
                         <TableHead>Game</TableHead>
                         <TableHead>Runners</TableHead>
                         <TableHead className="hidden lg:table-cell">
-                          Commentators
+                          Comentários
                         </TableHead>
                         <TableHead>
                           <div className="flex items-center">
@@ -156,7 +156,7 @@ export default function Dashboard() {
                             Estimate
                           </div>
                         </TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="text-right">#</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

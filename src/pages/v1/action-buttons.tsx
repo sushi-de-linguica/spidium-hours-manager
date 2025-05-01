@@ -67,7 +67,7 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
               variant={isActivatedButton ? "default" : "outline"}
               className={`${isActivatedButton
                 ? `bg-${tag.color}-500 hover:bg-${tag.color}-600 text-white`
-                : `border-${tag.color}-500 text-${tag.color}-500 hover:bg-${tag.color}-50`
+                : `border-${tag.color}-500 text-${tag.color}-500 hover:bg-${tag.color}-50 dark:hover:bg-transparent`
                 }`}
               onClick={() => {
                 if (tag.isRequiredConfirmation) {
