@@ -4,20 +4,22 @@ import { useFileStore } from "@/stores";
 import { filesToDataGridRows } from "@/helpers/files-to-datagrid-rows";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, RotateCcw } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExportFileForm } from "./export-file-form";
 import { useToast } from "@/hooks/use-toast";
+import { getDefaultFiles } from "./default_files";
 
 export const FilesSettings = () => {
   const { files } = useFileStore((store) => store.state);
-  const { removeFile } = useFileStore();
+  const { removeFile, setState } = useFileStore();
   const { toast } = useToast();
 
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [fileToRemove, setFileToRemove] = useState<IExportFileRun | null>(null);
   const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
   const [fileToEdit, setFileToEdit] = useState<IExportFileRun | null>(null);
+  const [isOpenResetDialog, setIsOpenResetDialog] = useState(false);
 
   const handleCancelDialog = () => {
     setFileToRemove(null);
@@ -34,6 +36,15 @@ export const FilesSettings = () => {
     setIsOpenFormDialog(true);
   };
 
+  const handleResetFiles = () => {
+    setState({ files: getDefaultFiles() });
+    setIsOpenResetDialog(false);
+    toast({
+      title: "Sucesso",
+      description: "Arquivos resetados para o padrão com sucesso",
+    });
+  };
+
   const rows = filesToDataGridRows(files);
 
   return (
@@ -44,6 +55,10 @@ export const FilesSettings = () => {
           <Button onClick={handleAddFile} className="gap-2">
             <Plus className="h-4 w-4" />
             Adicionar arquivo
+          </Button>
+          <Button variant="outline" onClick={() => setIsOpenResetDialog(true)} className="gap-2">
+            <RotateCcw className="h-4 w-4" />
+            Resetar arquivos
           </Button>
         </div>
       </div>
@@ -74,6 +89,28 @@ export const FilesSettings = () => {
               }}
             >
               Sim, excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isOpenResetDialog} onOpenChange={setIsOpenResetDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar reset</DialogTitle>
+            <DialogDescription>
+              Você está prestes a resetar todos os arquivos para o padrão, essa alteração não pode ser revertida, tem certeza?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOpenResetDialog(false)}>
+              Não, cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleResetFiles}
+            >
+              Sim, resetar
             </Button>
           </DialogFooter>
         </DialogContent>
