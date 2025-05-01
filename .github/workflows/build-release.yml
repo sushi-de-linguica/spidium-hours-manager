@@ -4,6 +4,7 @@ on: workflow_dispatch
 
 jobs:
   release:
+    permissions: write-all
     runs-on: ${{ matrix.os }}
     environment: production
 
