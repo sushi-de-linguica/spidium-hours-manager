@@ -20,6 +20,7 @@ import { useObsGlobalService } from "./hooks/use-obs-global-service";
 import { GlobalContext } from "./stores/context/global";
 import RunManagerPage from "./pages/manager/index";
 import ActionButtonsSettings from "./pages/v1/settings/action-buttons";
+import { FilesSettings } from "./pages/v1/settings/files";
 
 const Router = () => {
   const database = useDatabase();
@@ -69,6 +70,7 @@ const Router = () => {
             <Route path="/events/:id/runs" element={<EventRunsPage />} />
             <Route path="/settings/title" element={<TitlePage />} />
             <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
+            <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/old-times" element={<RunManagerPage />} />
           </Route>
         </Routes>

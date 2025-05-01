@@ -7,6 +7,7 @@ import {
   LucideLayoutDashboard,
   Network,
   Settings as SettingsIcon,
+  FileText,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -77,6 +78,10 @@ const data = {
         {
           title: "Botões de ação",
           url: "/settings/action-buttons",
+        },
+        {
+          title: "Arquivos",
+          url: "/settings/files",
         },
         {
           title: "Old Times",

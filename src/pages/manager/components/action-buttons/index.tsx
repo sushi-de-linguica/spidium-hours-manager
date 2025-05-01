@@ -62,7 +62,7 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
 
           return (
             <Chip
-              color={tag.color as any}
+              color={'primary'}
               variant={isActivatedButton ? "filled" : "outlined"}
               label={tag.label}
               size="small"
