@@ -39,29 +39,22 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
   const handleFile = (file: File) => {
     // Check if file is an image
     if (!file.type.match("image.*")) {
-      alert("Por favor, selecione um arquivo de imagem");
+      alert("Please select an image file");
       return;
     }
 
     // Check file size (limit to 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert("O tamanho do arquivo não deve exceder 2MB");
+      alert("File size should not exceed 2MB");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        const newFile: IFile = {
-          type: file.type,
-          path: file.name,
-          lastModified: file.lastModified,
-          base64: e.target.result as string,
-        };
-        onImageUpload(newFile);
-      }
+    const newFile: IFile = {
+      type: file.type,
+      path: file.path,
+      lastModified: file.lastModified,
     };
-    reader.readAsDataURL(file);
+    onImageUpload(newFile);
   };
 
   const removeImage = () => {
@@ -69,11 +62,11 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
   };
 
   return (
-    <div>
-      {currentImage && currentImage.base64 ? (
+    <div className="w-full">
+      {currentImage ? (
         <div className="relative w-32 h-32">
           <img
-            src={currentImage.base64}
+            src={currentImage.path}
             alt="Uploaded"
             className="w-full h-full object-cover rounded-md"
           />
@@ -90,8 +83,8 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
       ) : (
         <div
           className={`border-2 border-dashed rounded-md p-6 text-center ${isDragging
-            ? "border-primary bg-primary/10"
-            : "border-muted-foreground/20"
+              ? "border-primary bg-primary/10"
+              : "border-muted-foreground/20"
             }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -100,12 +93,12 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
           <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
           <div className="mt-2">
             <p className="text-sm text-muted-foreground">
-              Arraste e solte uma imagem, ou{" "}
+              Drag and drop an image, or{" "}
               <label
                 htmlFor="file-upload"
                 className="relative cursor-pointer text-primary hover:underline"
               >
-                <span>procure</span>
+                <span>browse</span>
                 <input
                   id="file-upload"
                   name="file-upload"
@@ -117,11 +110,11 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
               </label>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              PNG, JPG, GIF até 2MB
+              PNG, JPG, GIF up to 2MB
             </p>
           </div>
         </div>
       )}
     </div>
   );
-}
+} 

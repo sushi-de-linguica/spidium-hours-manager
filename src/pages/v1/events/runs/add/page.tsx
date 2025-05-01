@@ -8,9 +8,9 @@ import {
   Plus,
   Save,
   Trash2,
-  User,
   Users,
   X,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useParams } from "react-router";
 import { useEvents } from "@/hooks/use-events";
 import { IRun } from "@/domain";
 import { useMembers } from "@/hooks/use-members";
+import { IFile } from "@/domain";
+import { ImageUpload } from "@/components/image-upload";
 
 interface Runner {
   id: string;
@@ -46,6 +46,12 @@ interface Runner {
 interface Game {
   id: string;
   name: string;
+}
+
+interface RunImage {
+  id: string;
+  name: string;
+  file: IFile | null;
 }
 
 export default function AddRunPage() {
@@ -75,7 +81,7 @@ export default function AddRunPage() {
         game: "",
         category: "",
         platform: "",
-        imageFile: null,
+        images: [],
       }),
     },
   ]);
@@ -96,10 +102,82 @@ export default function AddRunPage() {
         game: "",
         category: "",
         platform: "",
-        imageFile: null,
+        images: [],
         order: 0,
       },
     ]);
+  };
+
+  const handleAddImage = async (runId: string) => {
+    // Create a hidden file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+
+    // Add it to the document
+    document.body.appendChild(input);
+
+    // Trigger the file selection dialog
+    input.click();
+
+    // Handle the file selection
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Check if file is an image
+      if (!file.type.match("image.*")) {
+        alert("Por favor, selecione um arquivo de imagem");
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Check file size (limit to 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert("O tamanho do arquivo não deve exceder 2MB");
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          const newFile: IFile = {
+            type: file.type,
+            path: file.name,
+            lastModified: file.lastModified,
+            base64: e.target.result as string,
+          };
+
+          // Add the new image row
+          setRuns(
+            runs.map((run) => {
+              if (run.id === runId) {
+                return {
+                  ...run,
+                  images: [
+                    ...(run.images || []),
+                    {
+                      id: randomUUID(),
+                      name: file.name.split('.')[0], // Use filename as default name
+                      file: newFile,
+                    },
+                  ],
+                };
+              }
+              return run;
+            })
+          );
+        }
+        document.body.removeChild(input);
+      };
+      reader.readAsDataURL(file);
+    };
   };
 
   const handleRemoveRun = (id: string) => {
@@ -200,6 +278,65 @@ export default function AddRunPage() {
           return {
             ...run,
             comments: newComments,
+          };
+        }
+        return run;
+      })
+    );
+  };
+
+  const handleRemoveImage = (runId: string, imageId: string) => {
+    setRuns(
+      runs.map((run) => {
+        if (run.id === runId) {
+          return {
+            ...run,
+            images: run.images.filter((img) => img.id !== imageId),
+          };
+        }
+        return run;
+      })
+    );
+  };
+
+  const handleImageNameChange = (runId: string, imageId: string, name: string) => {
+    setRuns(
+      runs.map((run) => {
+        if (run.id === runId) {
+          return {
+            ...run,
+            images: run.images?.map((img) => {
+              if (img.id === imageId) {
+                return { ...img, name };
+              }
+              return img;
+            }),
+          };
+        }
+        return run;
+      })
+    );
+  };
+
+  const handleImageUpload = (runId: string, imageId: string, file: IFile | null) => {
+    setRuns(
+      runs.map((run) => {
+        if (run.id === runId) {
+          return {
+            ...run,
+            images: run.images?.map((img) => {
+              if (img.id === imageId) {
+                return {
+                  ...img, file: file || {
+                    type: "",
+                    path: "",
+                    lastModified: 0,
+                    base64: "",
+                  }
+                };
+              }
+              return img;
+            }),
           };
         }
         return run;
@@ -572,6 +709,61 @@ export default function AddRunPage() {
                         ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <ImageIcon className="h-4 w-4" />
+                    <Label>Imagens</Label>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddImage(run.id!)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar imagem
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  {run.images?.map((image) => (
+                    <div key={image.id} className="flex items-start gap-4">
+                      <div className="flex-1 flex items-center gap-4">
+                        <ImageUpload
+                          currentImage={image.file}
+                          onImageUpload={(file) =>
+                            handleImageUpload(run.id!, image.id, file)
+                          }
+                        />
+                        <div className="flex flex-row items-center gap-4 mb-2 w-full">
+                          <Label htmlFor={`image-name-${image.id}`} className="text-right">
+                            Nome da imagem
+                          </Label>
+                          <Input
+                            id={`image-name-${image.id}`}
+                            value={image.name}
+                            onChange={(e) =>
+                              handleImageNameChange(run.id!, image.id, e.target.value)
+                            }
+                            className="col-span-3"
+                            placeholder="Nome para exportação"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveImage(run.id!, image.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>

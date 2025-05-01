@@ -16,6 +16,7 @@ export enum EIpcEvents {
   COPY_FILE = "IPC:COPY_FILE",
   RESET_IMAGES = "IPC:RESET_IMAGES",
   DATABASE_INIT = "IPC:DATABASE_INIT",
+  GET_ASSETS_PATH = "IPC:GET_ASSETS_PATH",
 }
 
 export enum ECustomEvents {

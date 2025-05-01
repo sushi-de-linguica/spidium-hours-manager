@@ -303,6 +303,10 @@ const startCustomEvents = () => {
       console.log("\n");
     });
   });
+
+  ipcMain.handle(EIpcEvents.GET_ASSETS_PATH, () => {
+    return path_assets;
+  });
 };
 
 initElectron();
