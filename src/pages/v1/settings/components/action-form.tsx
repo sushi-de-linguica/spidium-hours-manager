@@ -214,7 +214,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
       </Button>
 
       <Dialog open={isOpen || showEditMode} onOpenChange={handleClose}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {showEditMode ? "Edit Action Button" : "Add Action Button"}
@@ -326,6 +326,8 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                       variant={variant as any}
                       data-variant={variant}
                       data-color={color}
+                      type="button"
+                      onClick={() => { }}
                       className={getButtonStyles(variant, color)}
                     >
                       {formContext.watch("label") || "Button"}
@@ -334,6 +336,8 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                       variant={variant as any}
                       data-variant={variant}
                       data-color={color}
+                      type="button"
+                      onClick={() => { }}
                       className={getButtonStyles(variant, color)}
                     >
                       <Check className="mr-2 h-4 w-4" />

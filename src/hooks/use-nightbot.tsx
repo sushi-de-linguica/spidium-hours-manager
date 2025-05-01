@@ -27,10 +27,16 @@ export const useNightbot = () => {
     setFullState(data.state);
   };
 
+  const getCommands = async () => {
+    const service = new NightbotApiService();
+    return service.getCommands();
+  };
+
   return {
     nightbotState,
     isConnected,
     testConnection,
+    getCommands,
     init,
   };
 };

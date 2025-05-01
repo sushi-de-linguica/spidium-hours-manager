@@ -6,20 +6,13 @@ import { ipcRenderer } from "electron";
 import { useEffect } from "react";
 
 export const useProtocolData = () => {
-  const nightbotStore = useNightbot();
-  const twitchStore = useTwitch();
-  const { appendConfiguration } = useConfigurationStore();
-
   const handleProtocolCallback = (callback: string, value: string) => {
     switch (callback) {
       case "nightbot_token":
-        console.log("updating nightbot token from shm protocol callback");
+        console.log("updating nightbot token from shm protocol callback", callback, value);
 
-        appendConfiguration({
-          nightbot_token: value,
-        });
-
-        nightbotStore.appendState({
+        useConfigurationStore.getState().updateConfigurationField("nightbot_token", value);
+        useNightbot.getState().appendState({
           access_token: value,
         });
 
@@ -36,12 +29,8 @@ export const useProtocolData = () => {
         break;
       case "twitch_token":
         console.log("updating twitch token from shm protocol callback");
-
-        appendConfiguration({
-          twitch_token: value,
-        });
-
-        twitchStore.appendState({
+        useConfigurationStore.getState().updateConfigurationField("twitch_token", value);
+        useTwitch.getState().appendState({
           access_token: value,
         });
 
@@ -87,6 +76,14 @@ export const useProtocolData = () => {
 
     ipcRenderer.on(EProtocolEvents.SHM_PROTOCOL_DATA, handleShmProtocolData);
     window.addEventListener(ECustomEvents.RELOAD_APPLICATION, handleReloadPage);
+
+    (window as any).setNightbotToken = (token: string) => {
+      handleProtocolCallback("nightbot_token", token);
+    };
+
+    (window as any).setTwitchToken = (token: string) => {
+      handleProtocolCallback("twitch_token", token);
+    };
 
     return () => {
       window.removeEventListener(

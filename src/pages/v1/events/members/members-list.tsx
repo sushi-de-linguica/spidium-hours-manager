@@ -57,7 +57,7 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
               <TableCell>
                 <Avatar>
                   <AvatarImage
-                    src={member.imageFile?.url || ""}
+                    src={member.images?.[0]?.file?.base64 || ""}
                     alt={member.name}
                   />
                   <AvatarFallback>

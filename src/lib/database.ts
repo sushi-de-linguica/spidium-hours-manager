@@ -44,12 +44,6 @@ export function persistMiddleware<T extends object>(
           )
         );
 
-        if (storeName === "OBS_STORE") {
-          console.log("-- STATE", state);
-          console.log("-- PURE STATE", pureState);
-          console.log("-------------");
-        }
-
         saveStoreState(storeName, pureState);
       },
       get,
