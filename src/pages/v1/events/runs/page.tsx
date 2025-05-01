@@ -75,7 +75,7 @@ function SortableRunItem({
             <div>
               <h3 className="font-bold">{run.game}</h3>
               <p className="text-sm text-muted-foreground">
-                {run.category} by{" "}
+                {run.category} por{" "}
                 {run.runners.map((runner) => runner.name).join(", ")}
               </p>
             </div>

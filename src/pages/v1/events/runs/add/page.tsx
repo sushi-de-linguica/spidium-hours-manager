@@ -350,7 +350,7 @@ export default function AddRunPage() {
 
     const isValid = runs.every(
       (run) =>
-        run.game && run.category && run.runners.length > 0 && run.estimate
+        run.game && run.category && run.estimate
     );
 
     console.log("Current runs", runs);
@@ -506,7 +506,7 @@ export default function AddRunPage() {
                   <div className="flex items-center space-x-2">
                     <Users className="h-4 w-4" />
                     <Label htmlFor={`runners-${run.id}`}>
-                      Runners <span className="text-red-500">*</span>
+                      Runners
                     </Label>
                   </div>
                 </div>
