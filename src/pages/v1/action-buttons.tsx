@@ -4,6 +4,8 @@ import Icon from "@mui/icons-material/CheckOutlined";
 import { IFileTag, IRun } from "@/domain";
 import { useMemo, useState } from "react";
 import { ActionRunnerService } from "@/services/action-runner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
 interface IActionButtonsProps {
@@ -13,7 +15,8 @@ interface IActionButtonsProps {
 const ActionButtons = ({ row }: IActionButtonsProps) => {
   const { tags, activated } = useFileStore((store) => store.state);
   const { setActiveTag, state } = useFileStore();
-  const [tagToHandler, setTagToHandler] = useState<null | IFileTag>(null);
+  const [tagToHandler, setTagToHandler] = useState<IFileTag | null>(null);
+  const { toast } = useToast();
 
   const handleActions = (tag: IFileTag) => {
     try {
@@ -42,7 +45,7 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
 
         return tagActive.runId === (row.id as string);
       })
-      .map((tag) => tag.id);
+      .map((tag) => tag.id as string);
 
     return active;
   }, [activated, tags, row]);
@@ -57,7 +60,7 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
             return;
           }
 
-          const isActivatedButton = memorizedTagButtonActives.includes(tag.id);
+          const isActivatedButton = memorizedTagButtonActives.includes(tag.id as string);
 
           return (
             <Button
@@ -82,6 +85,29 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
           );
         })}
       </Box>
+
+      <ConfirmDialog
+        isOpen={tagToHandler !== null}
+        data={tagToHandler}
+        handleConfirm={(data) => {
+          handleActions(data);
+          setTagToHandler(null);
+          toast({
+            title: "Ação executada",
+            description: `Executando: ${data.label}`,
+            variant: "default",
+          });
+        }}
+        cancelText="não, cancelar"
+        confirmText={`executar ${tagToHandler?.label}`}
+        confirmColor={tagToHandler?.color}
+        handleCancel={() => {
+          setTagToHandler(null);
+        }}
+      >
+        Você está prestes a executar a ação [{tagToHandler?.label}], tem
+        certeza?
+      </ConfirmDialog>
     </>
   );
 };
