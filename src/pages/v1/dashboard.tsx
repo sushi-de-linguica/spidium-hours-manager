@@ -1,18 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import {
   Clock,
   Edit,
-  Eye,
-  Filter,
-  MoreHorizontal,
-  Plus,
   Search,
-  Trash,
   Tv,
-  Settings,
-  CheckCircle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,18 +14,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -73,10 +58,19 @@ export default function Dashboard() {
 
   const handleUpdateCurrentPageEvent = () => {
     const event = eventsStore?.events.find(({ id }) => id === eventsStore?.current_event_id) ?? null
+    console.log("event", event);
     setCurrentPageEvent(event);
   }
 
-  useEffect(handleUpdateCurrentPageEvent, []);
+  useEffect(() => {
+    handleUpdateCurrentPageEvent();
+  }, []);
+
+  useEffect(() => {
+    if (eventsStore?.current_event_id) {
+      handleUpdateCurrentPageEvent();
+    }
+  }, [eventsStore?.current_event_id]);
 
   const runs: IRun[] = getDatagridDataByEventId(eventsStore?.current_event_id);
 
@@ -208,7 +202,20 @@ export default function Dashboard() {
                             <div className="flex flex-wrap gap-1">
                               {run.runners.map((runner, index) => (
                                 <Badge key={index} variant="outline">
-                                  {runner.name}
+                                  {runner.streamAt ? (
+                                    <a
+                                      href={`https://twitch.tv/${runner.streamAt}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1 hover:underline"
+                                      title={runner.streamAt}
+                                    >
+                                      {runner.name}
+                                      <Tv className="h-3 w-3" />
+                                    </a>
+                                  ) : (
+                                    runner.name
+                                  )}
                                 </Badge>
                               ))}
                             </div>
@@ -225,31 +232,12 @@ export default function Dashboard() {
                           <TableCell>{run.estimate}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="icon" onClick={() => { }}>
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">View</span>
-                              </Button>
-                              <Button variant="ghost" size="icon" onClick={() => { }}>
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">More</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    className="text-destructive"
-                                    onClick={() => { }}
-                                  >
-                                    <Trash className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <Link to={`/events/${eventsStore?.current_event_id}/runs/${run.id}/edit`}>
+                                <Button variant="ghost" size="icon">
+                                  <Edit className="h-4 w-4" />
+                                  <span className="sr-only">Edit</span>
+                                </Button>
+                              </Link>
                             </div>
                           </TableCell>
                         </TableRow>

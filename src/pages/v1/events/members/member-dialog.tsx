@@ -50,7 +50,11 @@ export function MemberDialog({
 
   useEffect(() => {
     if (member) {
-      setFormData(member);
+      const memberData = {
+        ...member,
+        streamAt: member.streamAt === member.primaryTwitch ? "primary" : "secondary"
+      };
+      setFormData(memberData);
     } else {
       setFormData({
         gender: "",
@@ -103,7 +107,11 @@ export function MemberDialog({
     e.preventDefault();
 
     if (validateForm()) {
-      onSave(formData);
+      const memberToSave = {
+        ...formData,
+        streamAt: formData.streamAt === "primary" ? formData.primaryTwitch : formData.secondaryTwitch
+      };
+      onSave(memberToSave);
     }
   };
 
