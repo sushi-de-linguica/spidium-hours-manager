@@ -169,7 +169,7 @@ const ActionButtonsSettings = () => {
   return (
     <div className="container mx-auto md:gap-8 md:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold">Eventos</h1>
+        <h1 className="text-3xl font-bold">Botões de ação</h1>
         <div className="flex w-full sm:w-auto gap-4">
           <ActionForm
             showEditMode={isFormOpen}
