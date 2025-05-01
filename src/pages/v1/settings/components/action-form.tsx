@@ -263,7 +263,8 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="isRequiredConfirmation"
-                    {...formContext.register("isRequiredConfirmation")}
+                    checked={formContext.watch("isRequiredConfirmation")}
+                    onCheckedChange={(checked) => formContext.setValue("isRequiredConfirmation", checked)}
                   />
                   <Label htmlFor="isRequiredConfirmation">
                     Show Action Confirmation Alert
@@ -273,7 +274,8 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="isShow"
-                    {...formContext.register("isShow")}
+                    checked={formContext.watch("isShow")}
+                    onCheckedChange={(checked) => formContext.setValue("isShow", checked)}
                   />
                   <Label htmlFor="isShow">Show Button</Label>
                 </div>
