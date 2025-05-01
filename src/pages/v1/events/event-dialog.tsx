@@ -152,7 +152,7 @@ export function EventDialog({
   const parseRunners = (runnersText: string): string[] => {
     // Split by common separators and clean up
     return runnersText
-      .split(/[,;]| vs | e | e\s| e$|, e |, e$|, e\s| e,| e,/i)
+      .split(/[,;]| vs | e | e\s| e$|, e |, e$|, e\s| e,| e,| x | x\s| x$|, x |, x$|, x\s| x,| x,/i)
       .map(runner => runner.trim())
       .filter(runner => runner.length > 0);
   };
