@@ -37,6 +37,7 @@ import { IRun } from "@/domain";
 import { useMembers } from "@/hooks/use-members";
 import { IFile } from "@/domain";
 import { ImageUpload } from "@/components/image-upload";
+import { MAX_IMAGE_SIZE_BYTES, MAX_IMAGE_SIZE_MB } from "@/constants/file";
 
 interface Runner {
   id: string;
@@ -136,9 +137,9 @@ export default function AddRunPage() {
         return;
       }
 
-      // Check file size (limit to 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        alert("O tamanho do arquivo não deve exceder 2MB");
+      // Check file size (limit to 10MB)
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        alert(`O tamanho do arquivo não deve exceder ${MAX_IMAGE_SIZE_MB}MB`);
         document.body.removeChild(input);
         return;
       }

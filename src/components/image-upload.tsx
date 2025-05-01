@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IFile } from "@/domain";
+import { MAX_IMAGE_SIZE_BYTES, MAX_IMAGE_SIZE_MB } from "@/constants/file";
 
 interface ImageUploadProps {
   currentImage: IFile | null;
@@ -43,9 +44,9 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
       return;
     }
 
-    // Check file size (limit to 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      alert("O tamanho do arquivo não deve exceder 2MB");
+    // Check file size (limit to 10MB)
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      alert(`O tamanho do arquivo não deve exceder ${MAX_IMAGE_SIZE_MB}MB`);
       return;
     }
 
@@ -117,7 +118,7 @@ export function ImageUpload({ currentImage, onImageUpload }: ImageUploadProps) {
               </label>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              PNG, JPG, GIF até 2MB
+              PNG, JPG, GIF até ${MAX_IMAGE_SIZE_MB}MB
             </p>
           </div>
         </div>
