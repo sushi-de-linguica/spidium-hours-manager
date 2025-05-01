@@ -1,6 +1,6 @@
 import { IConfiguration } from "@/domain";
+import { persistMiddleware } from "@/lib/database";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface IConfigurationStore {
   state: IConfiguration;
@@ -38,47 +38,47 @@ const DEFAULT_STATE: IConfiguration = {
 export { DEFAULT_STATE as CONFIGURATION_DEFAULT_STATE };
 
 const useConfigurationStore = create<IConfigurationStore, any>(
-  persist(
-    (set) => ({
-      state: {
-        ...DEFAULT_STATE,
-      },
-      appendConfiguration: (configuration: Partial<IConfiguration>) =>
-        set((state) => {
-          state.state = {
-            ...state.state,
-            ...configuration,
-          };
+  persistMiddleware("CONFIGURATION_STORE", (set) => ({
+    state: {
+      ...DEFAULT_STATE,
+    },
+    appendConfiguration: (configuration: Partial<IConfiguration>) =>
+      set((state) => {
+        state.state = {
+          ...state.state,
+          ...configuration,
+        };
 
-          return state;
-        }),
-      updateConfiguration: (configuration: IConfiguration) =>
-        set((state) => {
-          state.state = {
-            ...configuration,
-          };
+        return state;
+      }),
+    updateConfiguration: (configuration: IConfiguration) =>
+      set((state) => {
+        state.state = {
+          ...configuration,
+        };
 
-          return {
-            ...state,
-          };
-        }),
-      updateConfigurationField: (field: keyof IConfiguration, value: any) =>
-        set((state: any) => {
-          state.state[field] = value;
+        return {
+          ...state,
+        };
+      }),
+    updateConfigurationField: (field: keyof IConfiguration, value: any) =>
+      set((state: any) => {
+        state.state[field] = value;
 
-          return state;
-        }),
-      reset: () =>
-        set(() => ({
-          state: {
-            ...DEFAULT_STATE,
-          },
-        })),
-    }),
-    {
-      name: "SPIDIUM_CONFIGURATION_STORE",
-    }
-  )
+        return state;
+      }),
+    reset: () =>
+      set(() => ({
+        state: {
+          ...DEFAULT_STATE,
+        },
+      })),
+    setState: (state: IConfiguration) => {
+      set(() => ({
+        state,
+      }));
+    },
+  }))
 );
 
 export { useConfigurationStore };

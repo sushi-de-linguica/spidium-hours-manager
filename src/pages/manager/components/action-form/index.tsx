@@ -349,9 +349,9 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                       // variant={formContext.watch("variant") as any}
                       variant={"outlined"}
                       size="small"
-                      color={formContext.watch("color") as any}
+                      // color={formContext.watch("color") as any}
                       label={formContext.watch("label")}
-                      onClick={() => {}}
+                      onClick={() => { }}
                     />
                   </Paper>
                   <Paper elevation={0}>
@@ -360,9 +360,9 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                       // variant={formContext.watch("variant") as any}
                       variant={"filled"}
                       size="small"
-                      color={formContext.watch("color") as any}
+                      // color={formContext.watch("color") as any}
                       label={formContext.watch("label")}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       icon={<Icon />}
                     />
                   </Paper>
@@ -448,13 +448,13 @@ const ActionForm = ({ showEditMode, action, onClose }: IRunFormProps) => {
                           )}
                           {field.module.action ===
                             EFileTagAction.EXPORT_FILES && (
-                            <ActionExportFiles
-                              action={field as any}
-                              index={index}
-                              fieldArray={fieldArray}
-                              key={randomUUID()}
-                            />
-                          )}
+                              <ActionExportFiles
+                                action={field as any}
+                                index={index}
+                                fieldArray={fieldArray}
+                                key={randomUUID()}
+                              />
+                            )}
                         </Paper>
                       ))}
                     </Grid>

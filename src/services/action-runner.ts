@@ -23,6 +23,7 @@ import { getTwitchLinkByMember } from "@/helpers/get-twitch-link-by-member";
 import { NightbotApiService } from "./nightbot-service";
 import { toast } from "react-toastify";
 import { TwitchApiService } from "./twitch-service";
+import fs from "fs";
 
 interface INightbotText {
   command: any;
@@ -334,34 +335,87 @@ class ActionRunnerService {
     const handleExportAll = async (module: IFileTagExportFilesModule) => {
       try {
         if (module.value && this.files.length > 0) {
+          // Remove all PNG files from the target folder
+          try {
+            const files = fs.readdirSync(module.value);
+            files.forEach(file => {
+              if (file.endsWith('.png')) {
+                fs.unlinkSync(`${module.value}/${file}`);
+              }
+            });
+          } catch (error) {
+            console.error("Error removing old PNG files:", error);
+          }
+
           ipcRenderer.invoke(EIpcEvents.RESET_IMAGES, {
             path: module.value,
           });
 
+          // Check if there are any images to export in the run
+          const hasImagesToExport = (this.run?.images?.length ?? 0) > 0;
+          const hasMemberImagesToExport = this.run?.runners?.some(m => m.images && m.images.length > 0) ||
+            this.run?.hosts?.some(m => m.images && m.images.length > 0) ||
+            this.run?.comments?.some(m => m.images && m.images.length > 0);
+
+          if (!hasImagesToExport && !hasMemberImagesToExport) {
+            toast.warning("Nenhuma imagem encontrada para exportar");
+            return;
+          }
+
           FileExporter.exportFilesToPath(this.files, module.value, this.run);
 
           const handleFinishExport = () => {
-            if (this.run.imageFile) {
-              handleCopyImage(
-                this.run.id as string,
-                module.value,
-                this.path_assets,
-                "game"
-              );
-            }
+            // Export run images
+            this.run.images?.forEach((image) => {
+              if (!image.file?.base64) {
+                console.warn(`Image ${image.name} has no base64 data`);
+                return;
+              }
 
-            const runnerWithImage = this.run.runners.filter(
-              (runner) => runner.imageFile
-            );
+              try {
+                // Convert base64 to file
+                const base64Data = image.file.base64.replace(/^data:image\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                const uint8Array = new Uint8Array(buffer);
 
-            runnerWithImage.forEach((member, index) => {
-              handleCopyImage(
-                member.id as string,
-                module.value,
-                this.path_assets,
-                `runner-${index + 1}`
-              );
+                // Write the file
+                const filePath = `${module.value}/${image.name}.png`;
+                fs.writeFileSync(filePath, uint8Array);
+              } catch (error) {
+                console.error(`Error writing image ${image.name}:`, error);
+              }
             });
+
+            // Export member images
+            const exportMemberImages = (member: IMember, prefix: string, index: number) => {
+              if (!member.images?.length) {
+                return;
+              }
+
+              member.images.forEach((image, imageIndex) => {
+                if (!image.file?.base64) {
+                  console.warn(`Image ${image.name} for member ${member.name} has no base64 data`);
+                  return;
+                }
+
+                try {
+                  const base64Data = image.file.base64.replace(/^data:image\/\w+;base64,/, '');
+                  const buffer = Buffer.from(base64Data, 'base64');
+                  const uint8Array = new Uint8Array(buffer);
+
+                  const fileName = `${prefix}${index}-${image.name.replace(/\s+/g, '_')}.png`;
+                  const filePath = `${module.value}/${fileName}`;
+                  fs.writeFileSync(filePath, uint8Array);
+                } catch (error) {
+                  console.error(`Error writing image ${image.name} for member ${member.name}:`, error);
+                }
+              });
+            };
+
+            // Export images for all member types
+            this.run.runners.forEach((member, index) => exportMemberImages(member, 'runner', index));
+            this.run.hosts.forEach((member, index) => exportMemberImages(member, 'host', index));
+            this.run.comments.forEach((member, index) => exportMemberImages(member, 'commentator', index));
 
             toast.success("Arquivos exportados!");
           };

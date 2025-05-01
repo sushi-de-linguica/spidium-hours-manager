@@ -1,6 +1,12 @@
 import { IFile } from "./file.interface";
 import { IMember } from "./member.interface";
 
+export interface IRunImage {
+  id: string;
+  name: string;
+  file: IFile;
+}
+
 export interface IRun {
   id?: string;
   runners: IMember[];
@@ -11,8 +17,7 @@ export interface IRun {
   category: string;
   platform: string;
   year?: string;
-  imageFile?: IFile | null;
-
+  images?: IRunImage[];
   seoTitle?: string;
   seoGame?: string;
 

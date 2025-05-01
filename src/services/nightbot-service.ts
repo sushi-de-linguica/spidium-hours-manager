@@ -3,7 +3,7 @@ import {
   INightbotApiCommandResponse,
   INightbotCommand,
 } from "@/domain";
-import { useNightbot } from "@/stores";
+import { useConfigurationStore, useNightbot } from "@/stores";
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -47,10 +47,10 @@ export class NightbotApiService {
   async request<T = unknown>(
     config: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
-    const nightbotStore = useNightbot.getState();
+    const configurationStore = useConfigurationStore.getState().state
     const headers = {
       ...config.headers,
-      Authorization: `Bearer ${nightbotStore.state.access_token}`,
+      Authorization: `Bearer ${configurationStore.nightbot_token}`,
     };
     const updatedConfig = { ...config, headers };
     return this.client.request<T>(updatedConfig);
@@ -61,6 +61,19 @@ export class NightbotApiService {
       url: "/commands",
       method: "GET",
     });
+  }
+
+  async testConnection() {
+    const nightbotStore = useNightbot.getState();
+    try {
+      await this.getCommands();
+      nightbotStore.setIsConnected(true);
+      return true;
+    } catch (err) {
+      console.error(err);
+      nightbotStore.setIsConnected(false);
+      return false;
+    }
   }
 
   async updateCustomCommandById(

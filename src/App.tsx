@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import "./App.scss";
-import RunManagerPage from "./pages/manager";
+import Layout from "./pages/v1";
+import { Outlet } from "react-router";
 
 console.log(
   "[App.tsx]",
@@ -7,10 +9,21 @@ console.log(
 );
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (!theme) {
+      return;
+    }
+
+    document.body.classList.add(theme);
+  }, []);
+
   return (
-    <>
-      <RunManagerPage />
-    </>
+    <div className="flex flex-col w-full min-h-screen">
+      <Layout>
+        <Outlet />
+      </Layout>
+    </div>
   );
 }
 

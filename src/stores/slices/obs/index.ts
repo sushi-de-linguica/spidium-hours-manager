@@ -1,5 +1,5 @@
+import { persistMiddleware } from "@/lib/database";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface IObs {
   version: number;
@@ -9,6 +9,9 @@ export interface IObs {
 export interface IObsStore {
   state: IObs;
   setState: (newState: IObs) => void;
+  setFullState: (newState: any) => void;
+  setVersion: (version: number) => void;
+  setIsConnected: (isConnected: boolean) => void;
   reset: () => void;
 }
 
@@ -18,41 +21,51 @@ const DEFAULT_STATE: IObs = {
 };
 
 const useObsStore = create<IObsStore, any>(
-  persist(
-    (set) => ({
-      state: {
-        ...DEFAULT_STATE,
-      },
-      setVersion: (version: number) => {
-        set((state) => {
-          return {
-            ...state,
-            state: {
-              ...state.state,
-              version,
-            },
-          };
-        });
-      },
-      setState: (newState: IObs) => {
-        set((state) => ({
-          state: {
-            ...newState,
-          },
-        }));
-      },
-      reset: () =>
-        set((state) => ({
+  persistMiddleware("OBS_STORE", (set) => ({
+    state: {
+      ...DEFAULT_STATE,
+    },
+    setVersion: (version: number) => {
+      set((state) => {
+        return {
           ...state,
           state: {
-            ...DEFAULT_STATE,
+            ...state.state,
+            version,
           },
-        })),
-    }),
-    {
-      name: "SPIDIUM_OBS_STORE",
-    }
-  )
+        };
+      });
+    },
+    setIsConnected: (isConnected: boolean) => {
+      set((state) => ({
+        ...state,
+        state: {
+          ...state.state,
+          isConnected,
+        },
+      }));
+    },
+    setState: (newState: IObs) => {
+      set((state) => ({
+        state: {
+          ...newState,
+        },
+      }));
+    },
+    setFullState: (newState: any) => {
+      set((state) => ({
+        ...state,
+        ...newState,
+      }));
+    },
+    reset: () =>
+      set((state) => ({
+        ...state,
+        state: {
+          ...DEFAULT_STATE,
+        },
+      })),
+  }))
 );
 
 export { useObsStore };

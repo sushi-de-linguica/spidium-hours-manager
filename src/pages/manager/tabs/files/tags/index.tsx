@@ -45,7 +45,7 @@ const FilesTabTags = () => {
         return (
           <Chip
             label={row.label}
-            color={row.color as any}
+            // color={row.color as any}
             variant="outlined"
             size="small"
           />

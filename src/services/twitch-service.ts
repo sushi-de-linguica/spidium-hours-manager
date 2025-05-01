@@ -76,6 +76,20 @@ class TwitchApiService {
     return this.client.get("/users");
   }
 
+  async testConnection() {
+    const twitchState = useTwitch.getState();
+
+    try {
+      await this.getUserData();
+      twitchState.setIsConnected(true);
+      return true;
+    } catch (err) {
+      console.error(err);
+      twitchState.setIsConnected(false);
+      return false;
+    }
+  }
+
   private getRequestDataWithBroadcast(data: any) {
     return {
       broadcaster_id: this.broadcaster_id,

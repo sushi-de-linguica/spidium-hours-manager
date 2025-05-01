@@ -136,6 +136,7 @@ const OptionsForm = () => {
   };
 
   const handleChangeRadio = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event);
     setObsVersion(parseInt(event.target.value));
   };
 

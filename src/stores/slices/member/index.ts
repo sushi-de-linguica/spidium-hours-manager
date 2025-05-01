@@ -1,14 +1,8 @@
 import { IMember, IRun } from "@/domain";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { randomUUID } from "crypto";
 import { useEventStore } from "@/stores";
-import { environment } from "@/application";
-
-let storageName = "SPIDIUM_MEMBER_STORE";
-if (environment.isTest) {
-  storageName = `${storageName}${environment.testSufix}`;
-}
+import { persistMiddleware } from "@/lib/database";
 
 export interface IMemberStore {
   state: {
@@ -26,85 +20,78 @@ const DEFAULT_STATE = {
 };
 
 const useMemberStore = create<IMemberStore, any>(
-  persist(
-    (set) => ({
-      state: {
-        ...DEFAULT_STATE,
-      },
-      addMember: (member: IMember): IMember => {
-        if (!member.id) {
-          member.id = randomUUID();
+  persistMiddleware("MEMBER_STORE", (set) => ({
+    state: {
+      ...DEFAULT_STATE,
+    },
+    addMember: (member: IMember): IMember => {
+      if (!member.id) {
+        member.id = randomUUID();
+      }
+
+      set((state) => {
+        const alreadyExist = state.state.members.find(
+          (currentMember) => currentMember.id === member.id
+        );
+
+        if (alreadyExist) {
+          return state;
         }
 
-        set((state) => {
-          const alreadyExist = state.state.members.find(
-            (currentMember) => currentMember.id === member.id
-          );
-
-          if (alreadyExist) {
-            return state;
-          }
-
-          return {
-            ...state,
-            state: {
-              ...state.state,
-              members: [...state.state.members, member],
-            },
-          };
-        });
-
-        return member;
-      },
-      updateMember: (member: IMember) => {
-        set((state) => {
-          const newState = {
-            ...state,
-          };
-
-          const newMembers = [...state.state.members];
-
-          const updateIndex = newMembers.findIndex(
-            ({ id }) => id === member.id
-          );
-          if (updateIndex === null || updateIndex === undefined) {
-            return state;
-          }
-
-          handleUpdateMembersOnAllRuns(member);
-
-          newState.state.members[updateIndex] = member;
-          newState.state.members = [...newState.state.members];
-
-          return { ...newState };
-        });
-      },
-      removeMember: (member: IMember) => {
-        handleRemoveMemberOnAllRuns(member);
-        set((state) => ({
+        return {
           ...state,
           state: {
-            members: state.state.members.filter(({ id }) => id !== member.id),
+            ...state.state,
+            members: [...state.state.members, member],
           },
-        }));
-      },
-      setState: (members: IMember[]) =>
-        set(() => ({
-          state: {
-            members,
-          },
-        })),
-      reset: () =>
-        set(() => ({
-          state: {
-            ...DEFAULT_STATE,
-          },
-        })),
-    }),
-    {
-      name: storageName,
-    }
-  )
+        };
+      });
+
+      return member;
+    },
+    updateMember: (member: IMember) => {
+      set((state) => {
+        const newState = {
+          ...state,
+        };
+
+        const newMembers = [...state.state.members];
+
+        const updateIndex = newMembers.findIndex(({ id }) => id === member.id);
+        if (updateIndex === null || updateIndex === undefined) {
+          return state;
+        }
+
+        handleUpdateMembersOnAllRuns(member);
+
+        newState.state.members[updateIndex] = member;
+        newState.state.members = [...newState.state.members];
+
+        return { ...newState };
+      });
+    },
+    removeMember: (member: IMember) => {
+      handleRemoveMemberOnAllRuns(member);
+      set((state) => ({
+        ...state,
+        state: {
+          members: state.state.members.filter(({ id }) => id !== member.id),
+        },
+      }));
+    },
+    setState: (members: IMember[]) =>
+      set(() => ({
+        state: {
+          members,
+        },
+      })),
+    reset: () =>
+      set(() => ({
+        state: {
+          ...DEFAULT_STATE,
+        },
+      })),
+  }))
 );
 
 const handleUpdateMembersOnAllRuns = (member: IMember) => {
@@ -150,7 +137,7 @@ const handleUpdateMembersOnAllRuns = (member: IMember) => {
   });
 
   if (updated > 0) {
-    updateFullEventState(newEventState);
+    updateFullEventState(newEventState, null);
   }
 };
 
@@ -201,7 +188,7 @@ const handleRemoveMemberOnAllRuns = (member: IMember) => {
   });
 
   if (removed > 0) {
-    updateFullEventState(newEventState);
+    updateFullEventState(newEventState, null);
   }
 };
 

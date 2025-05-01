@@ -3,6 +3,7 @@ export interface IFile {
   path: string;
   lastModified: number;
   removed?: boolean;
+  base64?: string;
 }
 
 export interface ITagActive {

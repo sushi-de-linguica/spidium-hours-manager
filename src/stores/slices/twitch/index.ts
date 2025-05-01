@@ -1,5 +1,5 @@
+import { persistMiddleware } from "@/lib/database";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface ITwitch {
   access_token: string;
@@ -11,9 +11,11 @@ export interface ITwitch {
 
 export interface ITwitchStore {
   state: ITwitch;
+  isConnected: boolean;
   appendState: (newState: Partial<ITwitch>) => void;
   setState: (newState: ITwitch) => void;
   setBroadcasterId: (value: string) => void;
+  setIsConnected: (connected: boolean) => void;
   reset: () => void;
 }
 
@@ -24,46 +26,48 @@ const DEFAULT_STATE: ITwitch = {
 };
 
 const useTwitch = create<ITwitchStore, any>(
-  persist(
-    (set) => ({
-      state: {
-        ...DEFAULT_STATE,
-      },
-      setBroadcasterId: (broadcaster_id: string) => {
-        set((store) => ({
-          state: {
-            ...store.state,
-            broadcaster_id,
-          },
-        }));
-      },
-      setState: (newState: ITwitch) => {
-        set(() => ({
-          state: {
-            ...newState,
-          },
-        }));
-      },
-      appendState: (newState: Partial<ITwitch>) => {
-        set((store) => ({
-          ...store,
-          state: {
-            ...store.state,
-            ...newState,
-          },
-        }));
-      },
-      reset: () =>
-        set(() => ({
-          state: {
-            ...DEFAULT_STATE,
-          },
-        })),
-    }),
-    {
-      name: "SPIDIUM_TWITCH_STORE",
-    }
-  )
+  persistMiddleware("TWITCH_STORE", (set) => ({
+    isConnected: false,
+    state: {
+      ...DEFAULT_STATE,
+    },
+    setBroadcasterId: (broadcaster_id: string) => {
+      set((store) => ({
+        state: {
+          ...store.state,
+          broadcaster_id,
+        },
+      }));
+    },
+    setState: (newState: ITwitch) => {
+      set(() => ({
+        state: {
+          ...newState,
+        },
+      }));
+    },
+    appendState: (newState: Partial<ITwitch>) => {
+      set((store) => ({
+        ...store,
+        state: {
+          ...store.state,
+          ...newState,
+        },
+      }));
+    },
+    reset: () =>
+      set(() => ({
+        state: {
+          ...DEFAULT_STATE,
+        },
+      })),
+    setIsConnected: (connected: boolean) => {
+      set((state) => ({
+        ...state,
+        isConnected: connected,
+      }));
+    },
+  }))
 );
 
 export { useTwitch };
