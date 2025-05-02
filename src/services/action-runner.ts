@@ -335,6 +335,8 @@ class ActionRunnerService {
     const handleExportAll = async (module: IFileTagExportFilesModule) => {
       try {
         if (module.value && this.files.length > 0) {
+          FileExporter.exportFilesToPath(this.files, module.value, this.run);
+
           // Remove all PNG files from the target folder
           try {
             const files = fs.readdirSync(module.value);
@@ -361,8 +363,6 @@ class ActionRunnerService {
             toast.warning("Nenhuma imagem encontrada para exportar");
             return;
           }
-
-          FileExporter.exportFilesToPath(this.files, module.value, this.run);
 
           const handleFinishExport = () => {
             // Export run images
