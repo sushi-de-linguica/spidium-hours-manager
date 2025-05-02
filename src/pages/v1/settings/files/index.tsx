@@ -52,13 +52,13 @@ export const FilesSettings = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold">Arquivos de Exportação</h1>
         <div className="flex w-full sm:w-auto gap-4">
-          <Button onClick={handleAddFile} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Adicionar arquivo
-          </Button>
           <Button variant="outline" onClick={() => setIsOpenResetDialog(true)} className="gap-2">
             <RotateCcw className="h-4 w-4" />
             Resetar arquivos
+          </Button>
+          <Button onClick={handleAddFile} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Adicionar arquivo
           </Button>
         </div>
       </div>
