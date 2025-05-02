@@ -19,10 +19,10 @@ export interface IExportFileRun {
 
 export interface IFileTagActionModule<
   T =
-    | IFileTagNightbotModule
-    | IFileTagTwitchModule
-    | IFileTagObsModule
-    | IFileTagExportFilesModule
+  | IFileTagNightbotModule
+  | IFileTagTwitchModule
+  | IFileTagObsModule
+  | IFileTagExportFilesModule
 > {
   isEnabled: boolean;
   module: T;

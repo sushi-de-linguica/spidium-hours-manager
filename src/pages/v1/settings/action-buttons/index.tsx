@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useFileStore } from '@/stores';
 import { IFileTag } from '@/domain';
 import { ActionForm } from '../components/action-form';
-import { Plus, Edit2, Trash2, GripVertical, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, GripVertical, Save, RotateCcw } from 'lucide-react';
+import { getDefaultActionButtons } from './default_actions';
 import {
   Dialog,
   DialogContent,
@@ -98,13 +99,14 @@ function SortableActionButton({ tag, onEdit, onDelete }: SortableActionButtonPro
 }
 
 const ActionButtonsSettings = () => {
-  const { filesStore, removeTag, updateTagOrder } = useFile();
+  const { filesStore, removeTag, updateTagOrder, setState } = useFile();
   const [selectedAction, setSelectedAction] = useState<IFileTag | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [actionToDelete, setActionToDelete] = useState<IFileTag | null>(null);
   const [orderedTags, setOrderedTags] = useState<IFileTag[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -166,11 +168,27 @@ const ActionButtonsSettings = () => {
     toast.success("Action buttons order saved successfully");
   };
 
+  const handleResetToDefault = () => {
+    const defaultTags = getDefaultActionButtons();
+    setState({ tags: defaultTags });
+    setOrderedTags(defaultTags);
+    setResetDialogOpen(false);
+    toast.success("Action buttons reset to default successfully");
+  };
+
   return (
     <div className="container mx-auto md:gap-8 md:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-3xl font-bold">Botões de ação</h1>
         <div className="flex w-full sm:w-auto gap-4">
+          <Button
+            variant="outline"
+            onClick={() => setResetDialogOpen(true)}
+            className="gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Resetar botões de ação
+          </Button>
           <ActionForm
             showEditMode={isFormOpen}
             action={selectedAction}
@@ -211,6 +229,25 @@ const ActionButtonsSettings = () => {
           </Button>
         </div>
       )}
+
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resetar botões de ação</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja resetar todos os botões de ação para o estado padrão? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleResetToDefault}>
+              Resetar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={handleDeleteCancel}>
         <DialogContent>

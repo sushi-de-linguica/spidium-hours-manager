@@ -27,6 +27,7 @@ export const useFile = () => {
     updateTag,
     removeTag,
     updateTagOrder,
+    setState,
     init,
   };
 };
