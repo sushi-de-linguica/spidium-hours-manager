@@ -210,28 +210,28 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
         onClick={() => setIsOpen(true)}
       >
         <Plus className="h-4 w-4" />
-        Add Action Button
+        Add botão de ação
       </Button>
 
       <Dialog open={isOpen || showEditMode} onOpenChange={handleClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {showEditMode ? "Edit Action Button" : "Add Action Button"}
+              {showEditMode ? "Editar botão de ação" : "Add botão de ação"}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={formContext.handleSubmit(onSubmit)}>
             <Tabs value={selectedTab} onValueChange={setSelectedTab}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="data">Data</TabsTrigger>
-                <TabsTrigger value="style">Button Style</TabsTrigger>
-                <TabsTrigger value="actions">Actions</TabsTrigger>
+                <TabsTrigger value="data">Dados</TabsTrigger>
+                <TabsTrigger value="style">Estilo</TabsTrigger>
+                <TabsTrigger value="actions">Ações</TabsTrigger>
               </TabsList>
 
               <TabsContent value="data" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="label">Button Name</Label>
+                  <Label htmlFor="label">Nome do botão</Label>
                   <Input
                     id="label"
                     {...formContext.register("label")}
@@ -240,7 +240,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Label htmlFor="description">Descrição (Opcional)</Label>
                   <Input
                     id="description"
                     {...formContext.register("description")}
@@ -250,7 +250,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
 
                 <div className="space-y-2">
                   <Label htmlFor="minimumRunnersToShow">
-                    Minimum Runners to Show Button
+                    Minimo de runners para mostrar o botão
                   </Label>
                   <Input
                     id="minimumRunnersToShow"
@@ -267,7 +267,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                     onCheckedChange={(checked) => formContext.setValue("isRequiredConfirmation", checked)}
                   />
                   <Label htmlFor="isRequiredConfirmation">
-                    Show Action Confirmation Alert
+                    Mostrar alerta de confirmação da ação
                   </Label>
                 </div>
 
@@ -277,13 +277,13 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                     checked={formContext.watch("isShow")}
                     onCheckedChange={(checked) => formContext.setValue("isShow", checked)}
                   />
-                  <Label htmlFor="isShow">Show Button</Label>
+                  <Label htmlFor="isShow">Mostrar botão</Label>
                 </div>
               </TabsContent>
 
               <TabsContent value="style" className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="variant">Button Variant</Label>
+                  <Label htmlFor="variant">Variante do botão</Label>
                   <Select
                     value={variant}
                     onValueChange={(value) => formContext.setValue("variant", value)}
@@ -300,7 +300,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="color">Button Color</Label>
+                  <Label htmlFor="color">Cor do botão</Label>
                   <Select
                     value={color}
                     onValueChange={(value) => formContext.setValue("color", value)}
@@ -320,7 +320,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Button Preview</Label>
+                  <Label>Visualização do botão</Label>
                   <div className="flex gap-4">
                     <Button
                       variant={variant as any}
@@ -330,7 +330,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                       onClick={() => { }}
                       className={getButtonStyles(variant, color)}
                     >
-                      {formContext.watch("label") || "Button"}
+                      {formContext.watch("label") || "Botão"}
                     </Button>
                     <Button
                       variant={variant as any}
@@ -341,7 +341,7 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                       className={getButtonStyles(variant, color)}
                     >
                       <Check className="mr-2 h-4 w-4" />
-                      {formContext.watch("label") || "Button"}
+                      {formContext.watch("label") || "Botão"}
                     </Button>
                   </div>
                 </div>
@@ -439,11 +439,11 @@ export const ActionForm = ({ showEditMode, action, onClose }: ActionFormProps) =
                   onClick={() => setShowCloneConfirm(true)}
                 >
                   <Copy className="h-4 w-4" />
-                  Clone Button
+                  Clonar botão
                 </Button>
               )}
               <Button type="submit">
-                {showEditMode ? "Save Changes" : "Create Button"}
+                {showEditMode ? "Salvar alterações" : "Criar botão"}
               </Button>
             </DialogFooter>
           </form>
