@@ -1,4 +1,4 @@
-import { Edit, ExternalLink, Trash2, Twitch } from "lucide-react";
+import { Edit, Trash2, Twitch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -47,7 +47,6 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
             <TableHead>Pronome</TableHead>
             <TableHead>Twitchs</TableHead>
             <TableHead>Stream em</TableHead>
-            <TableHead>Link</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -98,19 +97,6 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
                 </div>
               </TableCell>
               <TableCell>{member.streamAt}</TableCell>
-              <TableCell>
-                {member.link && (
-                  <a
-                    href={member.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-600 hover:underline"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Link
-                  </a>
-                )}
-              </TableCell>
               <TableCell className="text-right">
                 <TooltipProvider>
                   <Tooltip>
