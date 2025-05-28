@@ -8,6 +8,7 @@ export const useMembers = () => {
     removeMember,
     updateMember,
     setState,
+    reset,
   } = useMemberStore();
 
   const init = async () => {
@@ -26,5 +27,6 @@ export const useMembers = () => {
     removeMember,
     updateMember,
     init,
+    resetMembers: reset,
   };
 };

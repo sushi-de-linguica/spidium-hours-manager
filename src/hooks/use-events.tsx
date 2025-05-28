@@ -13,6 +13,7 @@ export const useEvents = () => {
     updateRun,
     setCurrentEvent,
     updateFullEventState,
+    reset,
   } = useEventStore();
 
   const getEventById = (id: string): IEvent | undefined => {
@@ -40,5 +41,6 @@ export const useEvents = () => {
     setCurrentEvent,
     getEventById,
     init,
+    resetEvents: reset,
   };
 };
