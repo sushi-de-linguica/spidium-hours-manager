@@ -50,10 +50,25 @@ const Router = () => {
         <Routes>
           <Route element={<App />}>
             <Route path="/" element={<Dashboard />} />
+            <Route
+              path="/settings/integration/twitch"
+              element={<IntegrationTwitchPage />}
+            />
+            <Route
+              path="/settings/integration/nightbot"
+              element={<IntegrationNightbotPage />}
+            />
+            <Route
+              path="/settings/integration/obs"
+              element={<IntegrationObsPage />}
+            />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/members" element={<MembersPage />} />
-            <Route path="/events/runs" element={<EventRunsPage />} />
-            <Route path="/events/runs/add" element={<AddRunPage />} />
+            <Route path="/events/:id/runs/add" element={<AddRunPage />} />
+            <Route
+              path="/events/:id/runs/:runId/edit"
+              element={<AddRunPage />}
+            />
             <Route path="/settings/integration/twitch" element={<IntegrationTwitchPage />} />
             <Route path="/settings/integration/nightbot" element={<IntegrationNightbotPage />} />
             <Route path="/settings/integration/obs" element={<IntegrationObsPage />} />
@@ -62,7 +77,6 @@ const Router = () => {
             <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/settings/update" element={<UpdatePage />} />
             <Route path="/settings/data" element={<DataPage />} />
-            <Route path="/manager" element={<RunManagerPage />} />
           </Route>
         </Routes>
       </HashRouter>
