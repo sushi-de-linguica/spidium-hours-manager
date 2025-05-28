@@ -7,7 +7,6 @@ import {
   LucideLayoutDashboard,
   Network,
   Settings as SettingsIcon,
-  FileText,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -17,6 +16,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+
+import packageJson from "../../package.json";
 
 import HeaderImage from "/gl.png?url";
 
@@ -110,7 +111,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex flex-col text-wrap group-data-[collapsible=icon]:hidden">
             <strong>Spidium Hours Manager</strong>
             <div className="flex flex-row gap-2 items-center justify-start">
-              <small>v1.0.0</small>
+              <small>{packageJson?.version ? `v${packageJson.version}` : ''}</small>
               <Lightbulb
                 className="w-3 h-3 hover:cursor-pointer"
                 onClick={toggleTheme}

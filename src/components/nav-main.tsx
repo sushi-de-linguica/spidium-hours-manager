@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, PanelLeftOpen, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router";
+import { Button } from "./ui/button";
 
 export function NavMain({
   items,
@@ -34,7 +35,15 @@ export function NavMain({
     }[];
   }[];
 }) {
-  const { open } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
+
+  if (!open) {
+    return (
+      <Button variant={"ghost"} onClick={toggleSidebar}>
+        <PanelLeftOpen />
+      </Button>)
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Spidium Baby!</SidebarGroupLabel>

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IMember } from "@/domain";
+import { twJoin } from "tailwind-merge";
 
 interface MembersListProps {
   members: IMember[];
@@ -46,7 +47,6 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
             <TableHead>Name</TableHead>
             <TableHead>Pronome</TableHead>
             <TableHead>Twitchs</TableHead>
-            <TableHead>Stream em</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,10 +75,10 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
                   {member.primaryTwitch && (
                     <div className="flex items-center gap-1">
                       <Twitch className="h-4 w-4 text-purple-500" />
-                      <span>{member.primaryTwitch}</span>
-                      {member.streamAt === "primary" && (
+                      <span className={twJoin((member.streamAt === "secondary" || member.streamAt === member.primaryTwitch) && "font-bold")}>{member.primaryTwitch}</span>
+                      {(member.streamAt === "primary" || member.streamAt === member.primaryTwitch) && (
                         <span className="ml-1 text-xs bg-green-100 text-green-800 px-1 rounded">
-                          Ativo
+                          Stream
                         </span>
                       )}
                     </div>
@@ -86,17 +86,16 @@ export function MembersList({ members, onEdit, onDelete }: MembersListProps) {
                   {member.secondaryTwitch && (
                     <div className="flex items-center gap-1">
                       <Twitch className="h-4 w-4 text-purple-500" />
-                      <span>{member.secondaryTwitch}</span>
-                      {member.streamAt === "secondary" && (
+                      <span className={twJoin((member.streamAt === "secondary" || member.streamAt === member.secondaryTwitch) && "font-bold")}>{member.secondaryTwitch}</span>
+                      {(member.streamAt === "secondary" || member.streamAt === member.secondaryTwitch) && (
                         <span className="ml-1 text-xs bg-green-100 text-green-800 px-1 rounded">
-                          Ativo
+                          Stream
                         </span>
                       )}
                     </div>
                   )}
                 </div>
               </TableCell>
-              <TableCell>{member.streamAt}</TableCell>
               <TableCell className="text-right">
                 <TooltipProvider>
                   <Tooltip>
