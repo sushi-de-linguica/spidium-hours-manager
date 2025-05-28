@@ -71,10 +71,6 @@ const Router = () => {
             />
             <Route path="/events/:id/runs" element={<EventRunsPage />} />
             <Route path="/settings/title" element={<TitlePage />} />
-            <Route path="/settings/integration/twitch" element={<IntegrationTwitchPage />} />
-            <Route path="/settings/integration/nightbot" element={<IntegrationNightbotPage />} />
-            <Route path="/settings/integration/obs" element={<IntegrationObsPage />} />
-            <Route path="/settings/integration/title" element={<TitlePage />} />
             <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
             <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/settings/update" element={<UpdatePage />} />
