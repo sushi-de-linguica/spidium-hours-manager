@@ -78,7 +78,7 @@ export const DataPage = () => {
           return !eventsStore.events.some((existingEvent) => existingEvent.id === importedEvent.id);
         });
 
-        newEvents.forEach((event) => {
+        newEvents.forEach((event: IEvent) => {
           addEvent({
             ...event,
             id: event.id || crypto.randomUUID(),
