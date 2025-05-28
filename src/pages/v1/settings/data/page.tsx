@@ -7,16 +7,22 @@ import { useToast } from "@/hooks/use-toast";
 import { IMember, IEvent } from "@/domain";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileJson, Download } from "lucide-react";
+import { FileJson, Download, RefreshCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export const DataPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [importMembers, setImportMembers] = useState(true);
   const [importEvents, setImportEvents] = useState(true);
-  const { membersStore, addMember } = useMembers();
-  const { eventsStore, addEvent } = useEvents();
+  const [exportMembers, setExportMembers] = useState(true);
+  const [exportEvents, setExportEvents] = useState(true);
+  const [resetMembers, setResetMembers] = useState(false);
+  const [resetEvents, setResetEvents] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const { membersStore, addMember, resetMembers: resetMembersStore } = useMembers();
+  const { eventsStore, addEvent, resetEvents: resetEventsStore } = useEvents();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,12 +120,26 @@ export const DataPage = () => {
   };
 
   const handleExport = () => {
-    const data = {
-      member: {
+    const data: any = {};
+
+    if (exportMembers) {
+      data.member = {
         members: membersStore.members,
-      },
-      events: eventsStore.events,
-    };
+      };
+    }
+
+    if (exportEvents) {
+      data.events = eventsStore.events;
+    }
+
+    if (!exportMembers && !exportEvents) {
+      toast({
+        title: "Aviso",
+        description: "Por favor, selecione pelo menos uma opção para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -137,14 +157,96 @@ export const DataPage = () => {
     });
   };
 
+  const handleReset = async () => {
+    if (!resetMembers && !resetEvents) {
+      toast({
+        title: "Aviso",
+        description: "Por favor, selecione pelo menos uma opção para resetar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResetDialogOpen(true);
+  };
+
+  const handleConfirmReset = async () => {
+    try {
+      if (resetMembers) {
+        resetMembersStore();
+      }
+      if (resetEvents) {
+        resetEventsStore();
+      }
+
+      toast({
+        title: "Reset concluído",
+        description: `Dados resetados com sucesso: ${resetMembers ? "Membros" : ""} ${resetEvents ? "Eventos" : ""}`,
+      });
+
+      setResetMembers(false);
+      setResetEvents(false);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao resetar os dados",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetDialogOpen(false);
+    }
+  };
+
   return (
     <div className="container mx-auto md:gap-8 md:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <Tabs defaultValue="import" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="import">Importar</TabsTrigger>
             <TabsTrigger value="export">Exportar</TabsTrigger>
+            <TabsTrigger value="general">Geral</TabsTrigger>
           </TabsList>
+          <TabsContent value="general">
+            <Card>
+              <CardHeader>
+                <CardTitle>Resetar Dados</CardTitle>
+                <CardDescription>
+                  Resetar dados do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="reset-members"
+                        checked={resetMembers}
+                        onCheckedChange={(checked) => setResetMembers(checked as boolean)}
+                      />
+                      <Label htmlFor="reset-members">Resetar Membros</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="reset-events"
+                        checked={resetEvents}
+                        onCheckedChange={(checked) => setResetEvents(checked as boolean)}
+                      />
+                      <Label htmlFor="reset-events">Resetar Eventos</Label>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleReset}
+                    disabled={!resetMembers && !resetEvents}
+                    className="w-full"
+                    variant="destructive"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Resetar Dados
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
           <TabsContent value="import">
             <Card>
               <CardHeader>
@@ -197,13 +299,32 @@ export const DataPage = () => {
               <CardHeader>
                 <CardTitle>Exportar Dados</CardTitle>
                 <CardDescription>
-                  Exporte todos os dados do sistema para um arquivo JSON
+                  Exporte dados do sistema para um arquivo JSON
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="export-members"
+                        checked={exportMembers}
+                        onCheckedChange={(checked) => setExportMembers(checked as boolean)}
+                      />
+                      <Label htmlFor="export-members">Exportar Membros</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="export-events"
+                        checked={exportEvents}
+                        onCheckedChange={(checked) => setExportEvents(checked as boolean)}
+                      />
+                      <Label htmlFor="export-events">Exportar Eventos</Label>
+                    </div>
+                  </div>
                   <Button
                     onClick={handleExport}
+                    disabled={!exportMembers && !exportEvents}
                     className="w-full"
                   >
                     <Download className="mr-2 h-4 w-4" />
@@ -215,6 +336,26 @@ export const DataPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ConfirmDialog
+        isOpen={isResetDialogOpen}
+        data={[]}
+        handleConfirm={handleConfirmReset}
+        handleCancel={() => setIsResetDialogOpen(false)}
+        title="Confirmar Reset"
+        confirmText="Resetar"
+        cancelText="Cancelar"
+        confirmColor="destructive"
+      >
+        <p>
+          Tem certeza que deseja resetar os seguintes dados?
+          {resetMembers && <div className="mt-2">- Todos os membros</div>}
+          {resetEvents && <div className="mt-2">- Todos os eventos</div>}
+          <div className="mt-4 text-red-500 font-bold">
+            Esta ação não pode ser desfeita!
+          </div>
+        </p>
+      </ConfirmDialog>
     </div>
   );
 }; 
