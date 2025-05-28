@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Dont update files at /src/pages/manager.
+To new screens, use /src/pages/v1

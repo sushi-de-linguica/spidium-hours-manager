@@ -22,6 +22,7 @@ import RunManagerPage from "./pages/manager/index";
 import ActionButtonsSettings from "./pages/v1/settings/action-buttons";
 import { FilesSettings } from "./pages/v1/settings/files";
 import UpdatePage from "./pages/v1/settings/update";
+import { ImportPage } from "./pages/v1/settings/import/page";
 
 const Router = () => {
   const database = useDatabase();
@@ -49,31 +50,19 @@ const Router = () => {
         <Routes>
           <Route element={<App />}>
             <Route path="/" element={<Dashboard />} />
-            <Route
-              path="/settings/integration/twitch"
-              element={<IntegrationTwitchPage />}
-            />
-            <Route
-              path="/settings/integration/nightbot"
-              element={<IntegrationNightbotPage />}
-            />
-            <Route
-              path="/settings/integration/obs"
-              element={<IntegrationObsPage />}
-            />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/members" element={<MembersPage />} />
-            <Route path="/events/:id/runs/add" element={<AddRunPage />} />
-            <Route
-              path="/events/:id/runs/:runId/edit"
-              element={<AddRunPage />}
-            />
-            <Route path="/events/:id/runs" element={<EventRunsPage />} />
-            <Route path="/settings/title" element={<TitlePage />} />
+            <Route path="/events/runs" element={<EventRunsPage />} />
+            <Route path="/events/runs/add" element={<AddRunPage />} />
+            <Route path="/settings/integration/twitch" element={<IntegrationTwitchPage />} />
+            <Route path="/settings/integration/nightbot" element={<IntegrationNightbotPage />} />
+            <Route path="/settings/integration/obs" element={<IntegrationObsPage />} />
+            <Route path="/settings/integration/title" element={<TitlePage />} />
             <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
             <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/settings/update" element={<UpdatePage />} />
-            <Route path="/old-times" element={<RunManagerPage />} />
+            <Route path="/settings/import" element={<ImportPage />} />
+            <Route path="/manager" element={<RunManagerPage />} />
           </Route>
         </Routes>
       </HashRouter>

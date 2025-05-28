@@ -85,6 +85,10 @@ const data = {
           url: "/settings/files",
         },
         {
+          title: "Importar",
+          url: "/settings/import",
+        },
+        {
           title: "Atualizações",
           url: "/settings/update",
         },
