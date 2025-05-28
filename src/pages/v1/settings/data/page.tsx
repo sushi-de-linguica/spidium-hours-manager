@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMembers } from "@/hooks/use-members";
@@ -18,6 +18,7 @@ export const DataPage = () => {
   const { membersStore, addMember } = useMembers();
   const { eventsStore, addEvent } = useEvents();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -100,6 +101,9 @@ export const DataPage = () => {
       });
 
       setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (error) {
       toast({
         title: "Erro",
@@ -170,6 +174,7 @@ export const DataPage = () => {
                     </div>
                   </div>
                   <Input
+                    ref={fileInputRef}
                     type="file"
                     accept=".json"
                     onChange={handleFileChange}
