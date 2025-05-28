@@ -134,80 +134,82 @@ export const DataPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <Tabs defaultValue="import" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="import">Importar</TabsTrigger>
-          <TabsTrigger value="export">Exportar</TabsTrigger>
-        </TabsList>
-        <TabsContent value="import">
-          <Card>
-            <CardHeader>
-              <CardTitle>Importar Dados</CardTitle>
-              <CardDescription>
-                Importe dados de um arquivo JSON
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="import-members"
-                      checked={importMembers}
-                      onCheckedChange={(checked) => setImportMembers(checked as boolean)}
-                    />
-                    <Label htmlFor="import-members">Importar Membros</Label>
+    <div className="container mx-auto md:gap-8 md:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+        <Tabs defaultValue="import" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="import">Importar</TabsTrigger>
+            <TabsTrigger value="export">Exportar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="import">
+            <Card>
+              <CardHeader>
+                <CardTitle>Importar Dados</CardTitle>
+                <CardDescription>
+                  Importe dados de um arquivo JSON
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="import-members"
+                        checked={importMembers}
+                        onCheckedChange={(checked) => setImportMembers(checked as boolean)}
+                      />
+                      <Label htmlFor="import-members">Importar Membros</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="import-events"
+                        checked={importEvents}
+                        onCheckedChange={(checked) => setImportEvents(checked as boolean)}
+                      />
+                      <Label htmlFor="import-events">Importar Eventos</Label>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="import-events"
-                      checked={importEvents}
-                      onCheckedChange={(checked) => setImportEvents(checked as boolean)}
-                    />
-                    <Label htmlFor="import-events">Importar Eventos</Label>
-                  </div>
+                  <Input
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileChange}
+                    className="w-full"
+                  />
+                  <Button
+                    onClick={handleImport}
+                    disabled={!file || (!importMembers && !importEvents)}
+                    className="w-full"
+                  >
+                    <FileJson className="mr-2 h-4 w-4" />
+                    Importar Dados
+                  </Button>
                 </div>
-                <Input
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileChange}
-                  className="w-full"
-                />
-                <Button
-                  onClick={handleImport}
-                  disabled={!file || (!importMembers && !importEvents)}
-                  className="w-full"
-                >
-                  <FileJson className="mr-2 h-4 w-4" />
-                  Importar Dados
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="export">
-          <Card>
-            <CardHeader>
-              <CardTitle>Exportar Dados</CardTitle>
-              <CardDescription>
-                Exporte todos os dados do sistema para um arquivo JSON
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Button
-                  onClick={handleExport}
-                  className="w-full"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar Dados
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="export">
+            <Card>
+              <CardHeader>
+                <CardTitle>Exportar Dados</CardTitle>
+                <CardDescription>
+                  Exporte todos os dados do sistema para um arquivo JSON
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Button
+                    onClick={handleExport}
+                    className="w-full"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Exportar Dados
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }; 
