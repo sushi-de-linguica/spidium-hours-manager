@@ -22,8 +22,7 @@ import RunManagerPage from "./pages/manager/index";
 import ActionButtonsSettings from "./pages/v1/settings/action-buttons";
 import { FilesSettings } from "./pages/v1/settings/files";
 import UpdatePage from "./pages/v1/settings/update";
-import { ImportPage } from "./pages/v1/settings/import/page";
-import { ExportPage } from "./pages/v1/settings/export/page";
+import { DataPage } from "@/pages/v1/settings/data/page";
 
 const Router = () => {
   const database = useDatabase();
@@ -62,8 +61,7 @@ const Router = () => {
             <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
             <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/settings/update" element={<UpdatePage />} />
-            <Route path="/settings/import" element={<ImportPage />} />
-            <Route path="/settings/export" element={<ExportPage />} />
+            <Route path="/settings/data" element={<DataPage />} />
             <Route path="/manager" element={<RunManagerPage />} />
           </Route>
         </Routes>

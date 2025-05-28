@@ -85,12 +85,8 @@ const data = {
           url: "/settings/files",
         },
         {
-          title: "Importar",
-          url: "/settings/import",
-        },
-        {
-          title: "Exportar",
-          url: "/settings/export",
+          title: "Dados (import/export)",
+          url: "/settings/data",
         },
         {
           title: "Atualizações",
