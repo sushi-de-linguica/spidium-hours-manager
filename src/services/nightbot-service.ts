@@ -1,6 +1,8 @@
 import {
   INightbotApiCommandListResponse,
   INightbotApiCommandResponse,
+  INightbotApiTokenRequest,
+  INightbotApiTokenResponse,
   INightbotCommand,
 } from "@/domain";
 import { useConfigurationStore, useNightbot } from "@/stores";
@@ -12,12 +14,20 @@ import axios, {
 } from "axios";
 
 const NIGHTBOT_API_URL = "https://api.nightbot.tv/1/";
+const NIGHTBOT_OAUTH2_URL = "https://nightbot.tv/oauth2";
+const NIGHTBOT_API_OAUTH2_URL = "https://api.nightbot.tv/oauth2";
 
 export const getUrlToGetTokenFromNightbot = ({
   redirect_uri,
   client_id,
 }: any) =>
-  `https://nightbot.tv/oauth2/authorize?response_type=token&redirect_uri=${redirect_uri}&client_id=${client_id}&state&scope=commands`;
+  `${NIGHTBOT_OAUTH2_URL}/authorize?response_type=code&redirect_uri=${redirect_uri}&client_id=${client_id}&state&scope=commands`;
+
+export const parseObjectToUrlEncoded = (obj: Record<any, string>) => {
+  return new URLSearchParams(
+    Object.entries(obj).map(([key, value]) => [key, value]),
+  ).toString();
+};
 
 export class NightbotApiService {
   private readonly client: AxiosInstance;
@@ -40,14 +50,14 @@ export class NightbotApiService {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
   async request<T = unknown>(
-    config: AxiosRequestConfig
+    config: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    const configurationStore = useConfigurationStore.getState().state
+    const configurationStore = useConfigurationStore.getState().state;
     const headers = {
       ...config.headers,
       Authorization: `Bearer ${configurationStore.nightbot_token}`,
@@ -78,12 +88,26 @@ export class NightbotApiService {
 
   async updateCustomCommandById(
     commandId: string,
-    data: Partial<INightbotCommand>
+    data: Partial<INightbotCommand>,
   ) {
     return this.request<INightbotApiCommandResponse>({
       method: "PUT",
       url: `/commands/${commandId}`,
       data,
+    });
+  }
+
+  async getTokenFromCode(data: INightbotApiTokenRequest) {
+    console.log("[getTokenFromCode] request:", JSON.stringify(data, null, 2));
+
+    return this.client.request<INightbotApiTokenResponse>({
+      method: "POST",
+      baseURL: NIGHTBOT_API_OAUTH2_URL,
+      url: "/token",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      data: parseObjectToUrlEncoded(data as any),
     });
   }
 }

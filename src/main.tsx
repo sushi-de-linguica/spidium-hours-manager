@@ -41,7 +41,12 @@ const Router = () => {
   }, []);
 
   if (isLoading) {
-    return <>Carregando....</>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+        <div className="text-2xl font-bold">Carregando...</div>
+      </div>
+    );
   }
 
   return (
@@ -71,7 +76,10 @@ const Router = () => {
             />
             <Route path="/events/:id/runs" element={<EventRunsPage />} />
             <Route path="/settings/title" element={<TitlePage />} />
-            <Route path="/settings/action-buttons" element={<ActionButtonsSettings />} />
+            <Route
+              path="/settings/action-buttons"
+              element={<ActionButtonsSettings />}
+            />
             <Route path="/settings/files" element={<FilesSettings />} />
             <Route path="/settings/update" element={<UpdatePage />} />
             <Route path="/settings/data" element={<DataPage />} />
@@ -88,7 +96,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <GlobalContext.Provider value={{ obsIsReady: false }}>
       <Router />
     </GlobalContext.Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 postMessage({ payload: "removeLoading" }, "*");

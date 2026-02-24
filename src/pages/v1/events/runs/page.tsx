@@ -137,7 +137,7 @@ export default function EventRunsPage() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   useEffect(() => {
@@ -250,7 +250,7 @@ export default function EventRunsPage() {
     if (hasChanges) {
       if (
         confirm(
-          "Você tem certeza que deseja voltar? As alterações não salvas serão perdidas."
+          "Você tem certeza que deseja voltar? As alterações não salvas serão perdidas.",
         )
       ) {
         navigate("/events");
@@ -263,7 +263,8 @@ export default function EventRunsPage() {
   if (loading) {
     return (
       <div className="container mx-auto py-6">
-        <p>carregando...</p>
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+        <div className="text-2xl font-bold">Carregando...</div>
       </div>
     );
   }
@@ -329,7 +330,7 @@ export default function EventRunsPage() {
             <SortableContext
               items={
                 (orderedRuns.length > 0 ? orderedRuns : runs)?.map(
-                  (run) => run.id!
+                  (run) => run.id!,
                 ) ?? []
               }
               strategy={verticalListSortingStrategy}
@@ -345,7 +346,7 @@ export default function EventRunsPage() {
                     isFirst={index === 0}
                     isLast={index === runs.length - 1}
                   />
-                )
+                ),
               )}
             </SortableContext>
           </DndContext>
