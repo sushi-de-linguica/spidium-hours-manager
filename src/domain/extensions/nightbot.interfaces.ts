@@ -13,8 +13,7 @@ export interface INightbotCommand {
 }
 
 export interface INightbotCommandModel
-  extends INightbotModel,
-    INightbotCommand {}
+  extends INightbotModel, INightbotCommand {}
 
 export interface INightbotApiCommandResponse {
   status: number;
@@ -24,4 +23,20 @@ export interface INightbotApiCommandResponse {
 export interface INightbotApiCommandListResponse {
   _total: number;
   commands: INightbotCommandModel[];
+}
+
+export interface INightbotApiTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+}
+
+export interface INightbotApiTokenRequest {
+  grant_type: string;
+  code: string;
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
 }

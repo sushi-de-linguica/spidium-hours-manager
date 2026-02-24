@@ -4,32 +4,59 @@ import { TwitchApiService } from "@/services/twitch-service";
 import { useConfigurationStore, useNightbot, useTwitch } from "@/stores";
 import { ipcRenderer } from "electron";
 import { useEffect } from "react";
+import axios from "axios";
 
 export const useProtocolData = () => {
   const handleProtocolCallback = (callback: string, value: string) => {
     switch (callback) {
-      case "nightbot_token":
-        console.log("updating nightbot token from shm protocol callback", callback, value);
+      case "nightbot_code":
+        console.log(
+          "updating nightbot token from shm protocol callback",
+          callback,
+          value,
+        );
+        const configuration = useConfigurationStore.getState().state;
+        const service = new NightbotApiService();
 
-        useConfigurationStore.getState().updateConfigurationField("nightbot_token", value);
-        useNightbot.getState().appendState({
-          access_token: value,
-        });
-
-        setTimeout(async () => {
-          const service = new NightbotApiService();
-
-          await service.getCommands().finally(() => {
-            window.dispatchEvent(
-              new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+        service
+          .getTokenFromCode({
+            grant_type: "authorization_code",
+            code: value,
+            client_id: configuration.nightbot_client_id,
+            client_secret: configuration.nightbot_client_secret,
+            redirect_uri: configuration.nightbot_redirect_uri,
+          })
+          .then((response) => {
+            console.log(
+              "[getTokenFromCode] response:",
+              JSON.stringify(response.data, null, 2),
             );
+            useConfigurationStore
+              .getState()
+              .updateConfigurationField(
+                "nightbot_token",
+                response.data.access_token,
+              );
+
+            useNightbot.getState().appendState({
+              access_token: value,
+            });
+
+            setTimeout(async () => {
+              await service.getCommands().finally(() => {
+                window.dispatchEvent(
+                  new CustomEvent(ECustomEvents.RELOAD_APPLICATION),
+                );
+              });
+            }, 1500);
           });
-        }, 1500);
 
         break;
       case "twitch_token":
         console.log("updating twitch token from shm protocol callback");
-        useConfigurationStore.getState().updateConfigurationField("twitch_token", value);
+        useConfigurationStore
+          .getState()
+          .updateConfigurationField("twitch_token", value);
         useTwitch.getState().appendState({
           access_token: value,
         });
@@ -39,7 +66,7 @@ export const useProtocolData = () => {
 
           service.updateBroadcastId().finally(() => {
             window.dispatchEvent(
-              new CustomEvent(ECustomEvents.RELOAD_APPLICATION)
+              new CustomEvent(ECustomEvents.RELOAD_APPLICATION),
             );
           });
         }, 1500);
@@ -78,7 +105,7 @@ export const useProtocolData = () => {
     window.addEventListener(ECustomEvents.RELOAD_APPLICATION, handleReloadPage);
 
     (window as any).setNightbotToken = (token: string) => {
-      handleProtocolCallback("nightbot_token", token);
+      handleProtocolCallback("nightbot_code", token);
     };
 
     (window as any).setTwitchToken = (token: string) => {
@@ -88,7 +115,7 @@ export const useProtocolData = () => {
     return () => {
       window.removeEventListener(
         ECustomEvents.RELOAD_APPLICATION,
-        handleReloadPage
+        handleReloadPage,
       );
     };
   }, []);
