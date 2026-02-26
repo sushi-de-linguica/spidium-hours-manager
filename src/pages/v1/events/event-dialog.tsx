@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IEvent, IRun, IMember } from "@/domain";
 import { Import, FileJson } from "lucide-react";
-import { HoraroImportService } from "@/services/horaro-import-service";
+import { HoraroImportService, REGEX } from "@/services/horaro-import-service";
 import { toast } from "react-toastify";
 import { convertTime } from "@/helpers/convert-time";
 import { getMDString } from "@/helpers/get-md-string";
@@ -108,68 +108,86 @@ export function EventDialog({
     }
   };
 
-  const findExistingMember = (name: string, twitchUsername?: string): IMember | null => {
+  const findExistingMember = (
+    name: string,
+    twitchUsername?: string,
+  ): IMember | null => {
     const normalizedName = sanitizeString(name.toLowerCase());
 
-    return state.members.find((member: IMember) => {
-      // Check member name
-      const normalizedMemberName = sanitizeString(member.name.toLowerCase());
-      if (normalizedMemberName === normalizedName) {
-        return true;
-      }
-
-      // Check primary Twitch
-      if (member.primaryTwitch) {
-        const normalizedPrimaryTwitch = sanitizeString(member.primaryTwitch.toLowerCase());
-        if (normalizedPrimaryTwitch === normalizedName) {
+    return (
+      state.members.find((member: IMember) => {
+        // Check member name
+        const normalizedMemberName = sanitizeString(member.name.toLowerCase());
+        if (normalizedMemberName === normalizedName) {
           return true;
         }
-      }
 
-      // Check secondary Twitch
-      if (member.secondaryTwitch) {
-        const normalizedSecondaryTwitch = sanitizeString(member.secondaryTwitch.toLowerCase());
-        if (normalizedSecondaryTwitch === normalizedName) {
-          return true;
+        // Check primary Twitch
+        if (member.primaryTwitch) {
+          const normalizedPrimaryTwitch = sanitizeString(
+            member.primaryTwitch.toLowerCase(),
+          );
+          if (normalizedPrimaryTwitch === normalizedName) {
+            return true;
+          }
         }
-      }
 
-      // If twitchUsername is provided, check against member's Twitch usernames
-      if (twitchUsername) {
-        const normalizedTwitch = sanitizeString(twitchUsername.toLowerCase());
-        const memberPrimaryTwitch = member.primaryTwitch ? sanitizeString(member.primaryTwitch.toLowerCase()) : '';
-        const memberSecondaryTwitch = member.secondaryTwitch ? sanitizeString(member.secondaryTwitch.toLowerCase()) : '';
-
-        if (normalizedTwitch === memberPrimaryTwitch || normalizedTwitch === memberSecondaryTwitch) {
-          return true;
+        // Check secondary Twitch
+        if (member.secondaryTwitch) {
+          const normalizedSecondaryTwitch = sanitizeString(
+            member.secondaryTwitch.toLowerCase(),
+          );
+          if (normalizedSecondaryTwitch === normalizedName) {
+            return true;
+          }
         }
-      }
 
-      return false;
-    }) || null;
+        // If twitchUsername is provided, check against member's Twitch usernames
+        if (twitchUsername) {
+          const normalizedTwitch = sanitizeString(twitchUsername.toLowerCase());
+          const memberPrimaryTwitch = member.primaryTwitch
+            ? sanitizeString(member.primaryTwitch.toLowerCase())
+            : "";
+          const memberSecondaryTwitch = member.secondaryTwitch
+            ? sanitizeString(member.secondaryTwitch.toLowerCase())
+            : "";
+
+          if (
+            normalizedTwitch === memberPrimaryTwitch ||
+            normalizedTwitch === memberSecondaryTwitch
+          ) {
+            return true;
+          }
+        }
+
+        return false;
+      }) || null
+    );
   };
 
   const parseRunners = (runnersText: string): string[] => {
     // Split by common separators and clean up
     return runnersText
-      .split(/[,;]| vs | e | e\s| e$|, e |, e$|, e\s| e,| e,| x | x\s| x$|, x |, x$|, x\s| x,| x,/i)
-      .map(runner => runner.trim())
-      .filter(runner => runner.length > 0);
+      .split(
+        /[,;]| vs | e | e\s| e$|, e |, e$|, e\s| e,| e,| x | x\s| x$|, x |, x$|, x\s| x,| x,/i,
+      )
+      .map((runner) => runner.trim())
+      .filter((runner) => runner.length > 0);
   };
 
   const formatTimeToHHMMSS = (time: string): string => {
     // Remove PT prefix if present
-    time = time.replace('PT', '');
+    time = time.replace("PT", "");
 
     // Extract hours, minutes, and seconds
-    const hours = time.match(/(\d+)H/)?.[1] || '00';
-    const minutes = time.match(/(\d+)M/)?.[1] || '00';
-    const seconds = time.match(/(\d+)S/)?.[1] || '00';
+    const hours = time.match(/(\d+)H/)?.[1] || "00";
+    const minutes = time.match(/(\d+)M/)?.[1] || "00";
+    const seconds = time.match(/(\d+)S/)?.[1] || "00";
 
     // Pad with zeros if needed
-    const paddedHours = hours.padStart(2, '0');
-    const paddedMinutes = minutes.padStart(2, '0');
-    const paddedSeconds = seconds.padStart(2, '0');
+    const paddedHours = hours.padStart(2, "0");
+    const paddedMinutes = minutes.padStart(2, "0");
+    const paddedSeconds = seconds.padStart(2, "0");
 
     return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
   };
@@ -183,8 +201,13 @@ export function EventDialog({
       try {
         const jsonData = JSON.parse(e.target?.result as string);
 
-        if (!jsonData.schedule?.items || !Array.isArray(jsonData.schedule.items)) {
-          toast.error("Formato de arquivo JSON inválido. O arquivo deve ser um JSON exportado do Horaro.");
+        if (
+          !jsonData.schedule?.items ||
+          !Array.isArray(jsonData.schedule.items)
+        ) {
+          toast.error(
+            "Formato de arquivo JSON inválido. O arquivo deve ser um JSON exportado do Horaro.",
+          );
           return;
         }
 
@@ -194,7 +217,9 @@ export function EventDialog({
         const runnerIndex = columns.indexOf("Runner");
 
         if (gameIndex === -1 || categoryIndex === -1 || runnerIndex === -1) {
-          toast.error("Colunas necessárias não encontradas no JSON. Verifique se o arquivo contém as colunas 'Jogo', 'Categoria' e 'Runner'.");
+          toast.error(
+            "Colunas necessárias não encontradas no JSON. Verifique se o arquivo contém as colunas 'Jogo', 'Categoria' e 'Runner'.",
+          );
           return;
         }
 
@@ -207,34 +232,36 @@ export function EventDialog({
           const category = item.data[categoryIndex] || "";
           const runnersData = item.data[runnerIndex] || "";
 
-          const runners = parseRunners(runnersData).map((runnerName: string) => {
-            const normalizedName = sanitizeString(runnerName.toLowerCase());
+          const runners = parseRunners(runnersData).map(
+            (runnerName: string) => {
+              const normalizedName = sanitizeString(runnerName.toLowerCase());
 
-            // Check if we already have this member in our map
-            if (uniqueMembers.has(normalizedName)) {
-              return uniqueMembers.get(normalizedName)!;
-            }
+              // Check if we already have this member in our map
+              if (uniqueMembers.has(normalizedName)) {
+                return uniqueMembers.get(normalizedName)!;
+              }
 
-            const existingMember = findExistingMember(runnerName);
+              const existingMember = findExistingMember(runnerName);
 
-            if (existingMember) {
+              if (existingMember) {
+                // Add to our map to reuse later
+                uniqueMembers.set(normalizedName, existingMember);
+                return existingMember;
+              }
+
+              const newMember: IMember = {
+                id: randomUUID(),
+                name: runnerName,
+                gender: "",
+                primaryTwitch: runnerName.toLowerCase().replace(/\s+/g, ""),
+                streamAt: runnerName.toLowerCase().replace(/\s+/g, ""),
+              };
+              addMember(newMember);
               // Add to our map to reuse later
-              uniqueMembers.set(normalizedName, existingMember);
-              return existingMember;
-            }
-
-            const newMember: IMember = {
-              id: randomUUID(),
-              name: runnerName,
-              gender: "",
-              primaryTwitch: runnerName.toLowerCase().replace(/\s+/g, ''),
-              streamAt: runnerName.toLowerCase().replace(/\s+/g, ''),
-            };
-            addMember(newMember);
-            // Add to our map to reuse later
-            uniqueMembers.set(normalizedName, newMember);
-            return newMember;
-          });
+              uniqueMembers.set(normalizedName, newMember);
+              return newMember;
+            },
+          );
 
           return {
             id: randomUUID(),
@@ -263,7 +290,10 @@ export function EventDialog({
   };
 
   const handleImportRunsFromHoraro = async () => {
-    if (!formData.scheduleLink || !formData.scheduleLink.startsWith("https://horaro.org/")) {
+    if (
+      !formData.scheduleLink ||
+      !REGEX.HORARO_URL_EVENT_AND_PATH.exec(formData.scheduleLink)
+    ) {
       toast.error("Por favor, insira um link do Horaro válido");
       return;
     }
@@ -281,16 +311,16 @@ export function EventDialog({
 
       const runnerColumnIndex = schedule.columns.findIndex((column: string) =>
         ["runners", "runner", "corredor", "corredores"].includes(
-          column.toLowerCase()
-        )
+          column.toLowerCase(),
+        ),
       );
       const gameColumnIndex = schedule.columns.findIndex((column: string) =>
-        ["jogo", "jogos", "game", "games"].includes(column.toLowerCase())
+        ["jogo", "jogos", "game", "games"].includes(column.toLowerCase()),
       );
       const categoryColumnIndex = schedule.columns.findIndex((column: string) =>
         ["categoria", "categorias", "category", "categories"].includes(
-          column.toLowerCase()
-        )
+          column.toLowerCase(),
+        ),
       );
 
       const isValidColumns =
@@ -300,7 +330,7 @@ export function EventDialog({
 
       if (!isValidColumns) {
         toast.error(
-          "Parace que as colunas necessárias 'Runner', 'Jogo' ou 'Categoria' não foram identificadas"
+          "Parace que as colunas necessárias 'Runner', 'Jogo' ou 'Categoria' não foram identificadas",
         );
         return;
       }
@@ -310,7 +340,8 @@ export function EventDialog({
 
       const runs = schedule.items
         .filter(
-          (run: any) => run.data[gameColumnIndex] && run.data[categoryColumnIndex]
+          (run: any) =>
+            run.data[gameColumnIndex] && run.data[categoryColumnIndex],
         )
         .map((run: any) => {
           const estimate = formatTimeToHHMMSS(run.length);
@@ -321,7 +352,9 @@ export function EventDialog({
           const mappedRunners = getMDString(runnersData);
           const runners = mappedRunners.flatMap((runner: any) => {
             const runnerText = runner.text;
-            const twitchUsername = runner.value ? runner.value.split("twitch.tv/")[1] : "";
+            const twitchUsername = runner.value
+              ? runner.value.split("twitch.tv/")[1]
+              : "";
 
             return parseRunners(runnerText).map((runnerName: string) => {
               const normalizedName = sanitizeString(runnerName.toLowerCase());
@@ -331,7 +364,10 @@ export function EventDialog({
                 return uniqueMembers.get(normalizedName)!;
               }
 
-              const existingMember = findExistingMember(runnerName, twitchUsername);
+              const existingMember = findExistingMember(
+                runnerName,
+                twitchUsername,
+              );
 
               if (existingMember) {
                 // Add to our map to reuse later
@@ -343,8 +379,12 @@ export function EventDialog({
                 id: randomUUID(),
                 name: runnerName,
                 gender: "",
-                primaryTwitch: twitchUsername || runnerName.toLowerCase().replace(/\s+/g, ''),
-                streamAt: twitchUsername || runnerName.toLowerCase().replace(/\s+/g, ''),
+                primaryTwitch:
+                  twitchUsername ||
+                  runnerName.toLowerCase().replace(/\s+/g, ""),
+                streamAt:
+                  twitchUsername ||
+                  runnerName.toLowerCase().replace(/\s+/g, ""),
               };
               addMember(newMember);
               // Add to our map to reuse later
@@ -427,7 +467,13 @@ export function EventDialog({
                     <Button
                       type="button"
                       onClick={handleImportRunsFromHoraro}
-                      disabled={loadingImport || !formData.scheduleLink?.startsWith("https://horaro.org/") || !!event}
+                      disabled={
+                        loadingImport ||
+                        !REGEX.HORARO_URL_EVENT_AND_PATH.exec(
+                          formData.scheduleLink || "",
+                        ) ||
+                        !!event
+                      }
                     >
                       <Import className="mr-2 h-4 w-4" />
                       {loadingImport ? "Importando..." : "Importar"}
@@ -465,7 +511,8 @@ export function EventDialog({
               </div>
               {importedRuns.length > 0 && (
                 <div className="col-span-3 col-start-2 text-xs text-green-500">
-                  {importedRuns.length} runs prontas para serem adicionadas ao evento.
+                  {importedRuns.length} runs prontas para serem adicionadas ao
+                  evento.
                 </div>
               )}
             </div>

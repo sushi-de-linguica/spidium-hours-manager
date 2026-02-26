@@ -1,9 +1,9 @@
 import { environment } from "@/application";
 import axios, { AxiosInstance } from "axios";
 
-const REGEX = {
+export const REGEX = {
   HORARO_URL_EVENT_AND_PATH:
-    /https:\/\/horaro.org\/(?<eventSlug>.+)(\/(?<scheduleSlug>[\w\d-_\.]+))\/?/,
+    /https:\/\/horaro.(org|net)\/(?<eventSlug>.+)(\/(?<scheduleSlug>[\w\d-_\.]+))\/?/,
 };
 
 interface IHoraroEventItem {
@@ -49,10 +49,10 @@ class HoraroImportService {
 
   private async getScheduleBySlug(
     eventId: string,
-    scheduleSlug: string
+    scheduleSlug: string,
   ): Promise<IHoraroEventDataResponse | null> {
     const schedulesRequest = await this.httpClient.get(
-      `/events/${eventId}/schedules`
+      `/events/${eventId}/schedules`,
     );
 
     if (schedulesRequest.status !== 200) {
@@ -62,7 +62,7 @@ class HoraroImportService {
     const { data } = schedulesRequest.data;
 
     const schedule = data.find(
-      (schedule: any) => schedule.slug === scheduleSlug
+      (schedule: any) => schedule.slug === scheduleSlug,
     );
 
     return schedule;
