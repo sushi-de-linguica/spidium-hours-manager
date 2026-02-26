@@ -52,7 +52,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
   const [loadingImport, setLoadingImport] = useState(false);
 
   const [currentData, setCurrentData] = useState<IEvent>(
-    showEditMode && event ? { ...event } : { ...defaultData }
+    showEditMode && event ? { ...event } : { ...defaultData },
   );
 
   const isDisabledToImport = useMemo(() => {
@@ -110,12 +110,15 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
   const handleImportRunsFromHoraro = async () => {
     setLoadingImport(true);
 
-    const horaroService = new HoraroImportService(currentData.scheduleLink!);
+    const horaroService = new HoraroImportService(
+      currentData.scheduleLink!,
+      currentData.horaroHiddenKey,
+    );
 
     const schedule: any = await horaroService
       .getSchedule()
       .catch(() =>
-        toast.error("não foi possível importar dados do horaro.org :(")
+        toast.error("não foi possível importar dados do horaro.org :("),
       )
       .finally(() => {
         setLoadingImport(false);
@@ -128,16 +131,16 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
     const runnerColumnIndex = schedule.columns.findIndex((column: string) =>
       ["runners", "runner", "corredor", "corredores"].includes(
-        column.toLowerCase()
-      )
+        column.toLowerCase(),
+      ),
     );
     const gameColumnIndex = schedule.columns.findIndex((column: string) =>
-      ["jogo", "jogos", "game", "games"].includes(column.toLowerCase())
+      ["jogo", "jogos", "game", "games"].includes(column.toLowerCase()),
     );
     const categoryColumnIndex = schedule.columns.findIndex((column: string) =>
       ["categoria", "categorias", "category", "categories"].includes(
-        column.toLowerCase()
-      )
+        column.toLowerCase(),
+      ),
     );
     const platformColumnIndex = schedule.columns.findIndex((column: string) =>
       [
@@ -147,11 +150,11 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
         "platforms",
         "console",
         "consoles",
-      ].includes(column.toLowerCase())
+      ].includes(column.toLowerCase()),
     );
 
     const yearColumnIndex = schedule.columns.findIndex((column: string) =>
-      ["ano", "year"].includes(column.toLowerCase())
+      ["ano", "year"].includes(column.toLowerCase()),
     );
 
     const commentsColumnIndex = schedule.columns.findIndex((column: string) =>
@@ -161,7 +164,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
         "comentaristas",
         "comments",
         "commentators",
-      ].includes(column.toLowerCase())
+      ].includes(column.toLowerCase()),
     );
 
     const isValidColumns =
@@ -171,7 +174,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
     if (!isValidColumns) {
       toast.error(
-        "Parace que as colunas necessárias 'Runner', 'Jogo' ou 'Categoria' não foram identificadas"
+        "Parace que as colunas necessárias 'Runner', 'Jogo' ou 'Categoria' não foram identificadas",
       );
       return;
     }
@@ -198,7 +201,7 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
             .find(
               (member) =>
                 sanitizeString(findPrimaryTwitch).toLowerCase() ===
-                member.primaryTwitch?.toLowerCase()
+                member.primaryTwitch?.toLowerCase(),
             );
 
           if (!runner) {
@@ -232,7 +235,8 @@ const EventForm = ({ showEditMode, event, onClose }: IRunFormProps) => {
 
     const runs = schedule.items
       .filter(
-        (run: any) => run.data[gameColumnIndex] && run.data[categoryColumnIndex]
+        (run: any) =>
+          run.data[gameColumnIndex] && run.data[categoryColumnIndex],
       )
       .map((run: any) => {
         const estimate = convertTime(run.length);

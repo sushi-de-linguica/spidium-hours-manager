@@ -17,12 +17,18 @@ export interface IHoraroEventDataResponse {
   items: IHoraroEventItem[];
 }
 
+export interface IHoraroScheduleJsonResponse {
+  meta: Record<string, any>;
+  schedule: IHoraroEventDataResponse;
+}
+
 class HoraroImportService {
   private httpClient: AxiosInstance;
   private eventSlug: string;
   private scheduleSlug: string;
+  private hiddenKey?: string;
 
-  constructor(horaroLink: string) {
+  constructor(horaroLink: string, hiddenKey?: string) {
     const result = REGEX.HORARO_URL_EVENT_AND_PATH.exec(horaroLink);
 
     if (!result) {
@@ -37,23 +43,26 @@ class HoraroImportService {
 
     this.eventSlug = eventSlug;
     this.scheduleSlug = scheduleSlug;
+    this.hiddenKey = hiddenKey?.trim() || undefined;
 
     this.httpClient = axios.create({
-      baseURL: "https://horaro.org/-/api/v1",
+      baseURL: "https://horaro.net",
     });
   }
 
   private getEvent() {
-    return this.httpClient!.get(`/events/${this.eventSlug}`);
+    return this.httpClient!.get(`/-/api/v1/events/${this.eventSlug}`);
   }
 
   private async getScheduleBySlug(
     eventId: string,
     scheduleSlug: string,
   ): Promise<IHoraroEventDataResponse | null> {
-    const schedulesRequest = await this.httpClient.get(
-      `/events/${eventId}/schedules`,
-    );
+    const url = this.hiddenKey
+      ? `/-/api/events/${eventId}/schedules/${scheduleSlug}?hiddenkey=${encodeURIComponent(this.hiddenKey)}`
+      : `/-/api/events/${eventId}/schedules`;
+
+    const schedulesRequest = await this.httpClient.get(url);
 
     if (schedulesRequest.status !== 200) {
       return null;
@@ -61,17 +70,21 @@ class HoraroImportService {
 
     const { data } = schedulesRequest.data;
 
-    const schedule = data.find(
-      (schedule: any) => schedule.slug === scheduleSlug,
+    if (this.hiddenKey && !Array.isArray(data)) {
+      return data as IHoraroEventDataResponse;
+    }
+
+    const schedule = (Array.isArray(data) ? data : []).find(
+      (s: any) => s.slug === scheduleSlug,
     );
 
-    return schedule;
+    return schedule ?? null;
   }
 
   async getSchedule(): Promise<IHoraroEventDataResponse | null> {
-    // if (environment.isDevelop) {
-    //   return Promise.resolve(testMockData);
-    // }
+    if (this.hiddenKey) {
+      return this.getScheduleBySlug(this.eventSlug, this.scheduleSlug);
+    }
 
     const event = await this.getEvent();
     if (!event) {
@@ -83,9 +96,24 @@ class HoraroImportService {
     }
 
     const { data } = event.data;
+    return this.getScheduleBySlug(data.id, this.scheduleSlug);
+  }
 
-    const schedule = await this.getScheduleBySlug(data.id, this.scheduleSlug);
-    return schedule;
+  async getScheduleJson(): Promise<IHoraroEventDataResponse | null> {
+    let url = `/${this.eventSlug}/${this.scheduleSlug}.json`;
+    if (this.hiddenKey) {
+      url += `?hiddenkey=${encodeURIComponent(this.hiddenKey)}`;
+    }
+
+    try {
+      const response =
+        await this.httpClient.get<IHoraroScheduleJsonResponse>(url);
+
+      return response.data.schedule;
+    } catch (error) {
+      console.error("Error importing from Horaro:", error);
+      return null;
+    }
   }
 }
 
