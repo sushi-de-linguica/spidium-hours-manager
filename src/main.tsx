@@ -18,7 +18,6 @@ import AddRunPage from "./pages/v1/events/runs/add/page";
 import { useDatabase } from "./hooks/use-database";
 import { useObsGlobalService } from "./hooks/use-obs-global-service";
 import { GlobalContext } from "./stores/context/global";
-import RunManagerPage from "./pages/manager/index";
 import ActionButtonsSettings from "./pages/v1/settings/action-buttons";
 import { FilesSettings } from "./pages/v1/settings/files";
 import UpdatePage from "./pages/v1/settings/update";
