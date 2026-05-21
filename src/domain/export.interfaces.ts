@@ -46,6 +46,8 @@ export interface IFileTagObsModule {
   component: EFileTagActionComponentsObs;
   value: string;
   resourceName: string;
+  /** @deprecated Ignored — TOGGLE_ELEMENT_VISIBILITY flips current state in OBS */
+  sceneItemEnabled?: boolean;
 }
 
 export interface IFileTagExportFilesModule {

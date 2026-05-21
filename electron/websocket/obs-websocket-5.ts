@@ -1,6 +1,10 @@
 const { default: ObsWebSocket } = require("obs-websocket-js5");
 
 import { IObsWebSocket, IObsWebSocketConnectionProps } from "./interfaces";
+import {
+  processObsBatchRequests,
+  toggleSceneItemVisibilityV5,
+} from "./toggle-scene-item-visibility";
 
 export class ObsWebSocketV5 implements IObsWebSocket<any> {
   public readonly obs: any;
@@ -26,7 +30,17 @@ export class ObsWebSocketV5 implements IObsWebSocket<any> {
   }
 
   async sendBatch(requests: any[]): Promise<any> {
-    return this.obs.callBatch(requests);
+    return processObsBatchRequests(requests, {
+      useV4: false,
+      onToggleVisibilityV5: (data) =>
+        toggleSceneItemVisibilityV5(
+          (requestType, requestData) => this.obs.call(requestType, requestData),
+          data
+        ),
+      onToggleVisibilityV4: async () => undefined,
+      onBatchable: (batchable) =>
+        this.obs.callBatch(batchable, { haltOnFailure: true }),
+    });
   }
 
   emit(requestType: any, requestData?: any): boolean {

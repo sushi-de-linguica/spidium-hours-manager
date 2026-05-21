@@ -41,6 +41,7 @@ export enum EFileTagActionComponentsNightbot {
 export enum EFileTagActionComponentsObs {
   CHANGE_SCENE = "CHANGE_SCENE",
   SET_BROWSER_SOURCE = "SET_BROWSER_SOURCE",
+  TOGGLE_ELEMENT_VISIBILITY = "TOGGLE_ELEMENT_VISIBILITY",
 }
 
 export enum EFileTagActionComponentsTwitch {

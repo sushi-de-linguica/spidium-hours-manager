@@ -3,15 +3,22 @@ import {
   IObsWebSocketConnectionProps,
   IObsWsEventSetInputSettings,
 } from "./interfaces";
+
 import ObsWebSocket4 from "obs-websocket-js";
 
 import { handleParseEventsToOBSWS4 } from "./parse-events-to-obsws4";
+
+import {
+  processObsBatchRequests,
+  toggleSceneItemVisibilityV4,
+} from "./toggle-scene-item-visibility";
 
 export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
   public readonly obs: ObsWebSocket4;
 
   constructor(props?: IObsWebSocketConnectionProps) {
     console.log("new instance of ObsWebSocket4");
+
     this.obs = new ObsWebSocket4();
 
     if (props) {
@@ -21,10 +28,12 @@ export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
 
   async connect({
     address,
+
     password,
   }: IObsWebSocketConnectionProps): Promise<any> {
     return this.obs.connect({
       address,
+
       password,
     });
   }
@@ -38,11 +47,29 @@ export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
   }
 
   async sendBatch(requests: IObsWsEventSetInputSettings[]): Promise<any> {
-    return new Promise(async (resolve) => {
-      for (const request of handleParseEventsToOBSWS4(requests)) {
-        await this.send(request.requestType, request.requestData);
-      }
-      resolve(true);
+    return processObsBatchRequests(requests, {
+      useV4: true,
+
+      onToggleVisibilityV4: (data) =>
+        toggleSceneItemVisibilityV4(
+          (requestType, requestData) => this.send(requestType, requestData),
+
+          data,
+        ),
+
+      onToggleVisibilityV5: async () => undefined,
+
+      onBatchable: async (batchable) => {
+        const parsed = handleParseEventsToOBSWS4(
+          batchable as IObsWsEventSetInputSettings[],
+        );
+
+        for (const request of parsed) {
+          await this.send(request.requestType, request.requestData);
+        }
+
+        return true;
+      },
     });
   }
 

@@ -24,6 +24,7 @@ import { NightbotApiService } from "./nightbot-service";
 import { toast } from "react-toastify";
 import { TwitchApiService } from "./twitch-service";
 import fs from "fs";
+import { buildToggleSceneItemVisibilityBatchRequests } from "@/helpers/obs-toggle-visibility-batch";
 
 interface INightbotText {
   command: any;
@@ -161,6 +162,19 @@ class ActionRunnerService {
       });
     };
 
+    const handleToggleElementVisibility = (action: IFileTagObsModule) => {
+      if (!action.value || !action.resourceName) {
+        return;
+      }
+
+      batchRequests.push(
+        ...buildToggleSceneItemVisibilityBatchRequests({
+          sceneName: action.value.trim(),
+          sourceName: action.resourceName.trim(),
+        })
+      );
+    };
+
     actions.forEach((act) => {
       switch (true) {
         case act.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE:
@@ -170,12 +184,56 @@ class ActionRunnerService {
         case act.component === EFileTagActionComponentsObs.CHANGE_SCENE:
           handleChangeScene(act);
           break;
+
+        case act.component ===
+          EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY:
+          handleToggleElementVisibility(act);
+          break;
       }
     });
 
     console.log("[OBS] batchRequests", batchRequests);
     if (batchRequests.length > 0) {
-      ipcRenderer.send(EWsEvents.SEND_BATCH_EVENT_OBS, batchRequests);
+      void this.sendObsBatch(batchRequests);
+    }
+  }
+
+  private async sendObsBatch(batchRequests: unknown[]) {
+    try {
+      const result = await ipcRenderer.invoke(
+        EWsEvents.SEND_BATCH_EVENT_OBS,
+        batchRequests
+      );
+
+      if (
+        result &&
+        typeof result === "object" &&
+        "sceneItemEnabled" in result &&
+        typeof (result as { sceneItemEnabled: boolean }).sceneItemEnabled ===
+          "boolean"
+      ) {
+        const visible = (result as { sceneItemEnabled: boolean }).sceneItemEnabled;
+        toast.success(
+          `OBS: item ${visible ? "exibido" : "ocultado"} (toggle)`
+        );
+        return;
+      }
+
+      toast.success("OBS: comandos executados com sucesso");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (message.includes("No handler registered")) {
+        console.warn("[OBS] invoke failed, using ipc send — reinicie o Electron");
+        ipcRenderer.send(EWsEvents.SEND_BATCH_EVENT_OBS, batchRequests);
+        toast.warning(
+          "OBS: comando enviado. Reinicie o app (npm run dev) para ver erros e confirmações."
+        );
+        return;
+      }
+
+      console.error("[OBS] batch error", error);
+      toast.error(message.startsWith("OBS") ? message : `OBS: ${message}`);
     }
   }
 

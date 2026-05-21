@@ -24,16 +24,19 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
   const [value, setValue] = useState(action.module.value ?? "");
   const [resourceName, setResourceName] = useState(action.module.resourceName ?? "");
 
+  const component = action.module.component;
+  const isBrowserSource =
+    component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE;
+  const isToggleVisibility =
+    component === EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY;
+
   const handleChangeSwitch = (checked: boolean) => {
     action.isEnabled = checked;
     fieldArray.update(index, action);
   };
 
-  const handleChangeRadioButton = (value: string) => {
-    action.module.component =
-      value === EFileTagActionComponentsObs.CHANGE_SCENE
-        ? EFileTagActionComponentsObs.CHANGE_SCENE
-        : EFileTagActionComponentsObs.SET_BROWSER_SOURCE;
+  const handleChangeRadioButton = (selected: string) => {
+    action.module.component = selected as EFileTagActionComponentsObs;
     fieldArray.update(index, action);
   };
 
@@ -58,6 +61,14 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
   const handleRemove = () => {
     fieldArray.remove(index);
   };
+
+  const valueLabel = isBrowserSource
+    ? "Browser URL Template (Optional)"
+    : "Scene Name";
+
+  const valuePlaceholder = isBrowserSource
+    ? "Default is multitwitch player"
+    : "Enter scene name in OBS";
 
   return (
     <Card>
@@ -84,9 +95,9 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
         <div className="space-y-2">
           <Label>Action Type</Label>
           <RadioGroup
-            value={action.module.component}
+            value={component}
             onValueChange={handleChangeRadioButton}
-            className="grid grid-cols-2 gap-2"
+            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem
@@ -104,43 +115,57 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
               />
               <Label htmlFor={`obs-scene-${index}`}>Change Scene</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY}
+                id={`obs-toggle-${index}`}
+                disabled={!action.isEnabled}
+              />
+              <Label htmlFor={`obs-toggle-${index}`}>Toggle Visibility</Label>
+            </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`obs-value-${index}`}>
-            {action.module.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE
-              ? "Browser URL Template (Optional)"
-              : "Scene Name"}
-          </Label>
+          <Label htmlFor={`obs-value-${index}`}>{valueLabel}</Label>
           <Input
             id={`obs-value-${index}`}
             value={value}
             onChange={handleChangeValue}
             onBlur={handleBlurValue}
             disabled={!action.isEnabled}
-            placeholder={
-              action.module.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE
-                ? "Default is multitwitch player"
-                : "Enter scene name in OBS"
-            }
+            placeholder={valuePlaceholder}
           />
         </div>
 
-        {action.module.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE && (
+        {(isBrowserSource || isToggleVisibility) && (
           <div className="space-y-2">
-            <Label htmlFor={`obs-resource-${index}`}>Browser Source Name</Label>
+            <Label htmlFor={`obs-resource-${index}`}>
+              {isBrowserSource ? "Browser Source Name" : "Scene Item / Source Name"}
+            </Label>
             <Input
               id={`obs-resource-${index}`}
               value={resourceName}
               onChange={handleChangeResourceName}
               onBlur={handleBlurResourceName}
               disabled={!action.isEnabled}
-              placeholder="Enter browser source name"
+              placeholder={
+                isBrowserSource
+                  ? "Enter browser source name"
+                  : "Enter scene item name in OBS"
+              }
             />
           </div>
+        )}
+
+        {isToggleVisibility && (
+          <p className="text-xs text-muted-foreground">
+            A cada execução, inverte a visibilidade atual do item no OBS (oculto ↔
+            visível). Use o nome exato da cena e do source. WebSocket versão 5 se o OBS
+            for recente.
+          </p>
         )}
       </CardContent>
     </Card>
   );
-}; 
+};
