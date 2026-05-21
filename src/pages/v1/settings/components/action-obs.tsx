@@ -28,14 +28,22 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
   const isBrowserSource =
     component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE;
   const isChangeScene = component === EFileTagActionComponentsObs.CHANGE_SCENE;
+  const isSceneItemVisibility =
+    component === EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY ||
+    component === EFileTagActionComponentsObs.SET_ELEMENT_VISIBLE ||
+    component === EFileTagActionComponentsObs.SET_ELEMENT_HIDDEN;
   const isToggleVisibility =
     component === EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY;
+  const isSetElementVisible =
+    component === EFileTagActionComponentsObs.SET_ELEMENT_VISIBLE;
+  const isSetElementHidden =
+    component === EFileTagActionComponentsObs.SET_ELEMENT_HIDDEN;
   const isToggleAudioMute =
     component === EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE;
 
-  const showValueField = isBrowserSource || isChangeScene || isToggleVisibility;
+  const showValueField = isBrowserSource || isChangeScene || isSceneItemVisibility;
   const showResourceField =
-    isBrowserSource || isToggleVisibility || isToggleAudioMute;
+    isBrowserSource || isSceneItemVisibility || isToggleAudioMute;
 
   const handleChangeSwitch = (checked: boolean) => {
     action.isEnabled = checked;
@@ -116,7 +124,7 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
           <RadioGroup
             value={component}
             onValueChange={handleChangeRadioButton}
-            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem
@@ -141,6 +149,22 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
                 disabled={!action.isEnabled}
               />
               <Label htmlFor={`obs-toggle-${index}`}>Toggle Visibility</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={EFileTagActionComponentsObs.SET_ELEMENT_VISIBLE}
+                id={`obs-show-${index}`}
+                disabled={!action.isEnabled}
+              />
+              <Label htmlFor={`obs-show-${index}`}>Force Show</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={EFileTagActionComponentsObs.SET_ELEMENT_HIDDEN}
+                id={`obs-hide-${index}`}
+                disabled={!action.isEnabled}
+              />
+              <Label htmlFor={`obs-hide-${index}`}>Force Hide</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem
@@ -183,8 +207,19 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
 
         {isToggleVisibility && (
           <p className="text-xs text-muted-foreground">
-            A cada execução, inverte a visibilidade do item na cena (oculto ↔
-            visível). Cena + nome do source/item.
+            Inverte a visibilidade atual (oculto ↔ visível) a cada execução.
+          </p>
+        )}
+
+        {isSetElementVisible && (
+          <p className="text-xs text-muted-foreground">
+            Sempre exibe o item na cena, mesmo que já esteja visível.
+          </p>
+        )}
+
+        {isSetElementHidden && (
+          <p className="text-xs text-muted-foreground">
+            Sempre oculta o item na cena, mesmo que já esteja oculto.
           </p>
         )}
 

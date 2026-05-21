@@ -25,7 +25,10 @@ import { toast } from "react-toastify";
 import { TwitchApiService } from "./twitch-service";
 import fs from "fs";
 import { buildToggleAudioMuteBatchRequests } from "@/helpers/obs-toggle-audio-mute-batch";
-import { buildToggleSceneItemVisibilityBatchRequests } from "@/helpers/obs-toggle-visibility-batch";
+import {
+  buildSetSceneItemVisibilityBatchRequests,
+  buildToggleSceneItemVisibilityBatchRequests,
+} from "@/helpers/obs-toggle-visibility-batch";
 
 interface INightbotText {
   command: any;
@@ -163,17 +166,39 @@ class ActionRunnerService {
       });
     };
 
-    const handleToggleElementVisibility = (action: IFileTagObsModule) => {
+    const pushSceneItemVisibility = (
+      action: IFileTagObsModule,
+      sceneItemEnabled?: boolean
+    ) => {
       if (!action.value || !action.resourceName) {
         return;
       }
 
+      const data = {
+        sceneName: action.value.trim(),
+        sourceName: action.resourceName.trim(),
+      };
+
       batchRequests.push(
-        ...buildToggleSceneItemVisibilityBatchRequests({
-          sceneName: action.value.trim(),
-          sourceName: action.resourceName.trim(),
-        })
+        ...(sceneItemEnabled === undefined
+          ? buildToggleSceneItemVisibilityBatchRequests(data)
+          : buildSetSceneItemVisibilityBatchRequests({
+              ...data,
+              sceneItemEnabled,
+            }))
       );
+    };
+
+    const handleToggleElementVisibility = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action);
+    };
+
+    const handleSetElementVisible = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action, true);
+    };
+
+    const handleSetElementHidden = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action, false);
     };
 
     const handleToggleAudioMute = (action: IFileTagObsModule) => {
@@ -203,6 +228,14 @@ class ActionRunnerService {
           handleToggleElementVisibility(act);
           break;
 
+        case act.component === EFileTagActionComponentsObs.SET_ELEMENT_VISIBLE:
+          handleSetElementVisible(act);
+          break;
+
+        case act.component === EFileTagActionComponentsObs.SET_ELEMENT_HIDDEN:
+          handleSetElementHidden(act);
+          break;
+
         case act.component === EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE:
           handleToggleAudioMute(act);
           break;
@@ -230,9 +263,7 @@ class ActionRunnerService {
         ) {
           const visible = (result as { sceneItemEnabled: boolean })
             .sceneItemEnabled;
-          toast.success(
-            `OBS: item ${visible ? "exibido" : "ocultado"} (toggle)`
-          );
+          toast.success(`OBS: item ${visible ? "exibido" : "ocultado"}`);
           return;
         }
 

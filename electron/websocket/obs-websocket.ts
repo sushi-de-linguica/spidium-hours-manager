@@ -11,6 +11,7 @@ import { handleParseEventsToOBSWS4 } from "./parse-events-to-obsws4";
 import { toggleAudioMuteV4 } from "./toggle-audio-mute";
 import {
   processObsBatchRequests,
+  setSceneItemVisibilityV4,
   toggleSceneItemVisibilityV4,
 } from "./toggle-scene-item-visibility";
 
@@ -58,7 +59,19 @@ export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
           data,
         ),
 
-      onToggleVisibilityV5: async () => undefined,
+      onToggleVisibilityV5: async (): Promise<never> => {
+        throw new Error("OBS v4 client does not use v5 visibility handler");
+      },
+
+      onSetVisibilityV4: (data) =>
+        setSceneItemVisibilityV4(
+          (requestType, requestData) => this.send(requestType, requestData),
+          data
+        ),
+
+      onSetVisibilityV5: async (): Promise<never> => {
+        throw new Error("OBS v4 client does not use v5 set visibility handler");
+      },
 
       onToggleAudioMuteV4: (data) =>
         toggleAudioMuteV4(
@@ -66,7 +79,9 @@ export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
           data
         ),
 
-      onToggleAudioMuteV5: async () => ({ inputMuted: false }),
+      onToggleAudioMuteV5: async (): Promise<never> => {
+        throw new Error("OBS v4 client does not use v5 audio mute handler");
+      },
 
       onBatchable: async (batchable) => {
         const parsed = handleParseEventsToOBSWS4(

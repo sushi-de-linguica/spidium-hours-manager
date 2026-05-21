@@ -4,6 +4,7 @@ import { IObsWebSocket, IObsWebSocketConnectionProps } from "./interfaces";
 import { toggleAudioMuteV5 } from "./toggle-audio-mute";
 import {
   processObsBatchRequests,
+  setSceneItemVisibilityV5,
   toggleSceneItemVisibilityV5,
 } from "./toggle-scene-item-visibility";
 
@@ -38,13 +39,25 @@ export class ObsWebSocketV5 implements IObsWebSocket<any> {
           (requestType, requestData) => this.obs.call(requestType, requestData),
           data
         ),
-      onToggleVisibilityV4: async () => undefined,
+      onToggleVisibilityV4: async (): Promise<never> => {
+        throw new Error("OBS v5 client does not use v4 visibility handler");
+      },
+      onSetVisibilityV5: (data) =>
+        setSceneItemVisibilityV5(
+          (requestType, requestData) => this.obs.call(requestType, requestData),
+          data
+        ),
+      onSetVisibilityV4: async (): Promise<never> => {
+        throw new Error("OBS v5 client does not use v4 set visibility handler");
+      },
       onToggleAudioMuteV5: (data) =>
         toggleAudioMuteV5(
           (requestType, requestData) => this.obs.call(requestType, requestData),
           data
         ),
-      onToggleAudioMuteV4: async () => ({ inputMuted: false }),
+      onToggleAudioMuteV4: async (): Promise<never> => {
+        throw new Error("OBS v5 client does not use v4 audio mute handler");
+      },
       onBatchable: (batchable) =>
         this.obs.callBatch(batchable, { haltOnFailure: true }),
     });

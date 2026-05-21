@@ -1,7 +1,8 @@
 import { isToggleAudioMuteRequest } from "../../src/helpers/obs-toggle-audio-mute-batch";
 import {
-  IObsToggleVisibilityBatchData,
+  IObsSceneItemVisibilityBatchData,
   IObsToggleVisibilityResult,
+  isForceVisibilityChain,
   isToggleVisibilityChain,
 } from "../../src/helpers/obs-toggle-visibility-batch";
 import {
@@ -10,7 +11,7 @@ import {
 } from "../../src/helpers/obs-toggle-audio-mute-batch";
 
 export type {
-  IObsToggleVisibilityBatchData,
+  IObsSceneItemVisibilityBatchData,
   IObsToggleVisibilityResult,
   IObsToggleAudioMuteBatchData,
   IObsToggleAudioMuteResult,
@@ -25,28 +26,67 @@ function formatObsError(error: unknown): string {
   return String(error);
 }
 
-export async function toggleSceneItemVisibilityV5(
+async function resolveSceneItemIdV5(
   call: ObsCall,
-  { sceneName, sourceName }: IObsToggleVisibilityBatchData
+  scene: string,
+  source: string
+): Promise<number> {
+  try {
+    const response = (await call("GetSceneItemId", {
+      sceneName: scene,
+      sourceName: source,
+    })) as { sceneItemId: number };
+    return response.sceneItemId;
+  } catch (error) {
+    throw new Error(
+      `Item "${source}" não encontrado na cena "${scene}". Verifique os nomes exatos no OBS. (${formatObsError(error)})`
+    );
+  }
+}
+
+export async function setSceneItemVisibilityV5(
+  call: ObsCall,
+  {
+    sceneName,
+    sourceName,
+    sceneItemEnabled,
+  }: IObsSceneItemVisibilityBatchData & { sceneItemEnabled: boolean }
 ): Promise<IObsToggleVisibilityResult> {
   const scene = sceneName.trim();
   const source = sourceName.trim();
 
   console.info("[obs] GetSceneItemId", { sceneName: scene, sourceName: source });
 
-  let sceneItemId: number;
+  const sceneItemId = await resolveSceneItemIdV5(call, scene, source);
+
+  console.info("[obs] SetSceneItemEnabled (force)", {
+    sceneName: scene,
+    sceneItemId,
+    sceneItemEnabled,
+  });
 
   try {
-    const response = (await call("GetSceneItemId", {
+    await call("SetSceneItemEnabled", {
       sceneName: scene,
-      sourceName: source,
-    })) as { sceneItemId: number };
-    sceneItemId = response.sceneItemId;
+      sceneItemId,
+      sceneItemEnabled,
+    });
+    return { sceneItemEnabled };
   } catch (error) {
     throw new Error(
-      `Item "${source}" não encontrado na cena "${scene}". Verifique os nomes exatos no OBS. (${formatObsError(error)})`
+      `Falha ao definir visibilidade de "${source}" na cena "${scene}". (${formatObsError(error)})`
     );
   }
+}
+
+export async function toggleSceneItemVisibilityV5(
+  call: ObsCall,
+  { sceneName, sourceName }: IObsSceneItemVisibilityBatchData
+): Promise<IObsToggleVisibilityResult> {
+  const scene = sceneName.trim();
+  const source = sourceName.trim();
+
+  const sceneItemId = await resolveSceneItemIdV5(call, scene, source);
 
   let currentEnabled: boolean;
 
@@ -85,9 +125,40 @@ export async function toggleSceneItemVisibilityV5(
   }
 }
 
+export async function setSceneItemVisibilityV4(
+  send: ObsCall,
+  {
+    sceneName,
+    sourceName,
+    sceneItemEnabled,
+  }: IObsSceneItemVisibilityBatchData & { sceneItemEnabled: boolean }
+): Promise<IObsToggleVisibilityResult> {
+  const scene = sceneName.trim();
+  const source = sourceName.trim();
+
+  console.info("[obs] SetSceneItemProperties (force v4)", {
+    sceneName: scene,
+    sourceName: source,
+    visible: sceneItemEnabled,
+  });
+
+  try {
+    await send("SetSceneItemProperties", {
+      "scene-name": scene,
+      item: source,
+      visible: sceneItemEnabled,
+    });
+    return { sceneItemEnabled };
+  } catch (error) {
+    throw new Error(
+      `Falha ao definir visibilidade de "${source}" na cena "${scene}" (OBS v4). (${formatObsError(error)})`
+    );
+  }
+}
+
 export async function toggleSceneItemVisibilityV4(
   send: ObsCall,
-  { sceneName, sourceName }: IObsToggleVisibilityBatchData
+  { sceneName, sourceName }: IObsSceneItemVisibilityBatchData
 ): Promise<IObsToggleVisibilityResult> {
   const scene = sceneName.trim();
   const source = sourceName.trim();
@@ -108,25 +179,11 @@ export async function toggleSceneItemVisibilityV4(
 
   const nextVisible = !currentVisible;
 
-  console.info("[obs] SetSceneItemProperties (toggle v4)", {
+  return setSceneItemVisibilityV4(send, {
     sceneName: scene,
     sourceName: source,
-    was: currentVisible,
-    now: nextVisible,
+    sceneItemEnabled: nextVisible,
   });
-
-  try {
-    await send("SetSceneItemProperties", {
-      "scene-name": scene,
-      item: source,
-      visible: nextVisible,
-    });
-    return { sceneItemEnabled: nextVisible };
-  } catch (error) {
-    throw new Error(
-      `Falha ao alterar visibilidade de "${source}" na cena "${scene}" (OBS v4). (${formatObsError(error)})`
-    );
-  }
 }
 
 type ObsBatchRequest = {
@@ -139,10 +196,16 @@ export async function processObsBatchRequests(
   requests: ObsBatchRequest[],
   handlers: {
     onToggleVisibilityV5: (
-      data: IObsToggleVisibilityBatchData
+      data: IObsSceneItemVisibilityBatchData
     ) => Promise<IObsToggleVisibilityResult>;
     onToggleVisibilityV4: (
-      data: IObsToggleVisibilityBatchData
+      data: IObsSceneItemVisibilityBatchData
+    ) => Promise<IObsToggleVisibilityResult>;
+    onSetVisibilityV5: (
+      data: IObsSceneItemVisibilityBatchData & { sceneItemEnabled: boolean }
+    ) => Promise<IObsToggleVisibilityResult>;
+    onSetVisibilityV4: (
+      data: IObsSceneItemVisibilityBatchData & { sceneItemEnabled: boolean }
     ) => Promise<IObsToggleVisibilityResult>;
     onToggleAudioMuteV5: (
       data: IObsToggleAudioMuteBatchData
@@ -179,13 +242,49 @@ export async function processObsBatchRequests(
       continue;
     }
 
-    if (isToggleVisibilityChain(request, next as Parameters<typeof isToggleVisibilityChain>[1])) {
+    if (
+      isForceVisibilityChain(
+        request,
+        next as Parameters<typeof isForceVisibilityChain>[1]
+      )
+    ) {
+      const getData = request.requestData as {
+        sceneName: string;
+        sourceName: string;
+      };
+      const setData = next!.requestData as { sceneItemEnabled: boolean };
+
+      const data = {
+        sceneName: getData.sceneName,
+        sourceName: getData.sourceName,
+        sceneItemEnabled: setData.sceneItemEnabled,
+      };
+
+      console.info("[obs] force visibility chain", data, {
+        protocol: handlers.useV4 ? "v4" : "v5",
+      });
+
+      const result = handlers.useV4
+        ? await handlers.onSetVisibilityV4(data)
+        : await handlers.onSetVisibilityV5(data);
+
+      specialResults.push(result);
+      i++;
+      continue;
+    }
+
+    if (
+      isToggleVisibilityChain(
+        request,
+        next as Parameters<typeof isToggleVisibilityChain>[1]
+      )
+    ) {
       const getData = request.requestData as {
         sceneName: string;
         sourceName: string;
       };
 
-      const data: IObsToggleVisibilityBatchData = {
+      const data: IObsSceneItemVisibilityBatchData = {
         sceneName: getData.sceneName,
         sourceName: getData.sourceName,
       };
