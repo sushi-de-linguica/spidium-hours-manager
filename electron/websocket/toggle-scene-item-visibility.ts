@@ -1,10 +1,20 @@
+import { isToggleAudioMuteRequest } from "../../src/helpers/obs-toggle-audio-mute-batch";
 import {
   IObsToggleVisibilityBatchData,
   IObsToggleVisibilityResult,
   isToggleVisibilityChain,
 } from "../../src/helpers/obs-toggle-visibility-batch";
+import {
+  IObsToggleAudioMuteBatchData,
+  IObsToggleAudioMuteResult,
+} from "../../src/helpers/obs-toggle-audio-mute-batch";
 
-export type { IObsToggleVisibilityBatchData, IObsToggleVisibilityResult };
+export type {
+  IObsToggleVisibilityBatchData,
+  IObsToggleVisibilityResult,
+  IObsToggleAudioMuteBatchData,
+  IObsToggleAudioMuteResult,
+};
 
 type ObsCall = (requestType: string, requestData?: unknown) => Promise<unknown>;
 
@@ -134,16 +144,40 @@ export async function processObsBatchRequests(
     onToggleVisibilityV4: (
       data: IObsToggleVisibilityBatchData
     ) => Promise<IObsToggleVisibilityResult>;
+    onToggleAudioMuteV5: (
+      data: IObsToggleAudioMuteBatchData
+    ) => Promise<IObsToggleAudioMuteResult>;
+    onToggleAudioMuteV4: (
+      data: IObsToggleAudioMuteBatchData
+    ) => Promise<IObsToggleAudioMuteResult>;
     onBatchable: (requests: ObsBatchRequest[]) => Promise<unknown>;
     useV4: boolean;
   }
 ): Promise<unknown> {
   const batchable: ObsBatchRequest[] = [];
-  const toggleResults: IObsToggleVisibilityResult[] = [];
+  const specialResults: Array<
+    IObsToggleVisibilityResult | IObsToggleAudioMuteResult
+  > = [];
 
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
     const next = requests[i + 1];
+
+    if (isToggleAudioMuteRequest(request)) {
+      const { inputName } = request.requestData as { inputName: string };
+      const data: IObsToggleAudioMuteBatchData = { inputName };
+
+      console.info("[obs] toggle audio mute", data, {
+        protocol: handlers.useV4 ? "v4" : "v5",
+      });
+
+      const result = handlers.useV4
+        ? await handlers.onToggleAudioMuteV4(data)
+        : await handlers.onToggleAudioMuteV5(data);
+
+      specialResults.push(result);
+      continue;
+    }
 
     if (isToggleVisibilityChain(request, next as Parameters<typeof isToggleVisibilityChain>[1])) {
       const getData = request.requestData as {
@@ -164,7 +198,7 @@ export async function processObsBatchRequests(
         ? await handlers.onToggleVisibilityV4(data)
         : await handlers.onToggleVisibilityV5(data);
 
-      toggleResults.push(result);
+      specialResults.push(result);
       i++;
       continue;
     }
@@ -175,12 +209,12 @@ export async function processObsBatchRequests(
   const batchResult =
     batchable.length > 0 ? await handlers.onBatchable(batchable) : [];
 
-  if (toggleResults.length === 1) {
-    return toggleResults[0];
+  if (specialResults.length === 1) {
+    return specialResults[0];
   }
 
-  if (toggleResults.length > 1) {
-    return { toggled: toggleResults };
+  if (specialResults.length > 1) {
+    return { results: specialResults };
   }
 
   return batchResult;

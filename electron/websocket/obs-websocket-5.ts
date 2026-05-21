@@ -1,6 +1,7 @@
 const { default: ObsWebSocket } = require("obs-websocket-js5");
 
 import { IObsWebSocket, IObsWebSocketConnectionProps } from "./interfaces";
+import { toggleAudioMuteV5 } from "./toggle-audio-mute";
 import {
   processObsBatchRequests,
   toggleSceneItemVisibilityV5,
@@ -38,6 +39,12 @@ export class ObsWebSocketV5 implements IObsWebSocket<any> {
           data
         ),
       onToggleVisibilityV4: async () => undefined,
+      onToggleAudioMuteV5: (data) =>
+        toggleAudioMuteV5(
+          (requestType, requestData) => this.obs.call(requestType, requestData),
+          data
+        ),
+      onToggleAudioMuteV4: async () => ({ inputMuted: false }),
       onBatchable: (batchable) =>
         this.obs.callBatch(batchable, { haltOnFailure: true }),
     });

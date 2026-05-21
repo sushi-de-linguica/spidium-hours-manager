@@ -8,6 +8,7 @@ import ObsWebSocket4 from "obs-websocket-js";
 
 import { handleParseEventsToOBSWS4 } from "./parse-events-to-obsws4";
 
+import { toggleAudioMuteV4 } from "./toggle-audio-mute";
 import {
   processObsBatchRequests,
   toggleSceneItemVisibilityV4,
@@ -58,6 +59,14 @@ export class ObsWebSocketV4 implements IObsWebSocket<ObsWebSocket4> {
         ),
 
       onToggleVisibilityV5: async () => undefined,
+
+      onToggleAudioMuteV4: (data) =>
+        toggleAudioMuteV4(
+          (requestType, requestData) => this.send(requestType, requestData),
+          data
+        ),
+
+      onToggleAudioMuteV5: async () => ({ inputMuted: false }),
 
       onBatchable: async (batchable) => {
         const parsed = handleParseEventsToOBSWS4(
