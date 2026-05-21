@@ -24,6 +24,7 @@ import { NightbotApiService } from "./nightbot-service";
 import { toast } from "react-toastify";
 import { TwitchApiService } from "./twitch-service";
 import fs from "fs";
+import { buildToggleAudioMuteBatchRequests } from "@/helpers/obs-toggle-audio-mute-batch";
 import { buildToggleSceneItemVisibilityBatchRequests } from "@/helpers/obs-toggle-visibility-batch";
 
 interface INightbotText {
@@ -175,6 +176,18 @@ class ActionRunnerService {
       );
     };
 
+    const handleToggleAudioMute = (action: IFileTagObsModule) => {
+      if (!action.resourceName) {
+        return;
+      }
+
+      batchRequests.push(
+        ...buildToggleAudioMuteBatchRequests({
+          inputName: action.resourceName.trim(),
+        })
+      );
+    };
+
     actions.forEach((act) => {
       switch (true) {
         case act.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE:
@@ -188,6 +201,10 @@ class ActionRunnerService {
         case act.component ===
           EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY:
           handleToggleElementVisibility(act);
+          break;
+
+        case act.component === EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE:
+          handleToggleAudioMute(act);
           break;
       }
     });
@@ -205,18 +222,30 @@ class ActionRunnerService {
         batchRequests
       );
 
-      if (
-        result &&
-        typeof result === "object" &&
-        "sceneItemEnabled" in result &&
-        typeof (result as { sceneItemEnabled: boolean }).sceneItemEnabled ===
-          "boolean"
-      ) {
-        const visible = (result as { sceneItemEnabled: boolean }).sceneItemEnabled;
-        toast.success(
-          `OBS: item ${visible ? "exibido" : "ocultado"} (toggle)`
-        );
-        return;
+      if (result && typeof result === "object") {
+        if (
+          "sceneItemEnabled" in result &&
+          typeof (result as { sceneItemEnabled: boolean }).sceneItemEnabled ===
+            "boolean"
+        ) {
+          const visible = (result as { sceneItemEnabled: boolean })
+            .sceneItemEnabled;
+          toast.success(
+            `OBS: item ${visible ? "exibido" : "ocultado"} (toggle)`
+          );
+          return;
+        }
+
+        if (
+          "inputMuted" in result &&
+          typeof (result as { inputMuted: boolean }).inputMuted === "boolean"
+        ) {
+          const muted = (result as { inputMuted: boolean }).inputMuted;
+          toast.success(
+            `OBS: áudio ${muted ? "mutado" : "desmutado"} (toggle)`
+          );
+          return;
+        }
       }
 
       toast.success("OBS: comandos executados com sucesso");

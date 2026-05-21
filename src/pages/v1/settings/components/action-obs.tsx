@@ -27,8 +27,15 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
   const component = action.module.component;
   const isBrowserSource =
     component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE;
+  const isChangeScene = component === EFileTagActionComponentsObs.CHANGE_SCENE;
   const isToggleVisibility =
     component === EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY;
+  const isToggleAudioMute =
+    component === EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE;
+
+  const showValueField = isBrowserSource || isChangeScene || isToggleVisibility;
+  const showResourceField =
+    isBrowserSource || isToggleVisibility || isToggleAudioMute;
 
   const handleChangeSwitch = (checked: boolean) => {
     action.isEnabled = checked;
@@ -70,6 +77,18 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
     ? "Default is multitwitch player"
     : "Enter scene name in OBS";
 
+  const resourceLabel = isBrowserSource
+    ? "Browser Source Name"
+    : isToggleAudioMute
+      ? "Audio Input Name"
+      : "Scene Item / Source Name";
+
+  const resourcePlaceholder = isBrowserSource
+    ? "Enter browser source name"
+    : isToggleAudioMute
+      ? "Enter audio source name in OBS"
+      : "Enter scene item name in OBS";
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -97,7 +116,7 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
           <RadioGroup
             value={component}
             onValueChange={handleChangeRadioButton}
-            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem
@@ -123,46 +142,56 @@ export const ActionObs = ({ action, index, fieldArray }: ActionObsProps) => {
               />
               <Label htmlFor={`obs-toggle-${index}`}>Toggle Visibility</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE}
+                id={`obs-mute-${index}`}
+                disabled={!action.isEnabled}
+              />
+              <Label htmlFor={`obs-mute-${index}`}>Toggle Mute</Label>
+            </div>
           </RadioGroup>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor={`obs-value-${index}`}>{valueLabel}</Label>
-          <Input
-            id={`obs-value-${index}`}
-            value={value}
-            onChange={handleChangeValue}
-            onBlur={handleBlurValue}
-            disabled={!action.isEnabled}
-            placeholder={valuePlaceholder}
-          />
-        </div>
-
-        {(isBrowserSource || isToggleVisibility) && (
+        {showValueField && (
           <div className="space-y-2">
-            <Label htmlFor={`obs-resource-${index}`}>
-              {isBrowserSource ? "Browser Source Name" : "Scene Item / Source Name"}
-            </Label>
+            <Label htmlFor={`obs-value-${index}`}>{valueLabel}</Label>
+            <Input
+              id={`obs-value-${index}`}
+              value={value}
+              onChange={handleChangeValue}
+              onBlur={handleBlurValue}
+              disabled={!action.isEnabled}
+              placeholder={valuePlaceholder}
+            />
+          </div>
+        )}
+
+        {showResourceField && (
+          <div className="space-y-2">
+            <Label htmlFor={`obs-resource-${index}`}>{resourceLabel}</Label>
             <Input
               id={`obs-resource-${index}`}
               value={resourceName}
               onChange={handleChangeResourceName}
               onBlur={handleBlurResourceName}
               disabled={!action.isEnabled}
-              placeholder={
-                isBrowserSource
-                  ? "Enter browser source name"
-                  : "Enter scene item name in OBS"
-              }
+              placeholder={resourcePlaceholder}
             />
           </div>
         )}
 
         {isToggleVisibility && (
           <p className="text-xs text-muted-foreground">
-            A cada execução, inverte a visibilidade atual do item no OBS (oculto ↔
-            visível). Use o nome exato da cena e do source. WebSocket versão 5 se o OBS
-            for recente.
+            A cada execução, inverte a visibilidade do item na cena (oculto ↔
+            visível). Cena + nome do source/item.
+          </p>
+        )}
+
+        {isToggleAudioMute && (
+          <p className="text-xs text-muted-foreground">
+            A cada execução, alterna mute/unmute do input de áudio no OBS (nome
+            global do source, ex.: microfone ou desktop audio).
           </p>
         )}
       </CardContent>
