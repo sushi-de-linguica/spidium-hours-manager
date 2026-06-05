@@ -19,7 +19,7 @@ import {
 
 import packageJson from "../../package.json";
 
-import HeaderImage from "/chronao.png?url";
+import HeaderImage from "/gl.png?url";
 
 const data = {
   navMain: [
