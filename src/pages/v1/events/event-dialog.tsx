@@ -32,6 +32,26 @@ import {
 
 const UNMAPPED_INDEX = -1;
 
+const DEFAULT_COLUMN_MAPPING: HoraroColumnMapping = {
+  runnersColumnIndex: UNMAPPED_INDEX,
+  gameColumnIndex: UNMAPPED_INDEX,
+  categoryColumnIndex: UNMAPPED_INDEX,
+  estimateColumnIndex: UNMAPPED_INDEX,
+  platformColumnIndex: UNMAPPED_INDEX,
+  yearColumnIndex: UNMAPPED_INDEX,
+  runnersSecondaryLinkColumnIndex: UNMAPPED_INDEX,
+};
+
+const DEFAULT_FORM_DATA: IEvent = {
+  name: "",
+  scheduleLink: "",
+  horaroHiddenKey: "",
+  runs: [],
+  created_at: new Date(),
+  updated_at: null,
+  deleted_at: null,
+};
+
 export interface HoraroColumnMapping {
   runnersColumnIndex: number;
   gameColumnIndex: number;
@@ -57,6 +77,8 @@ function suggestHoraroMapping(
       "category",
       "categories",
     ]),
+    // Estimate defaults to auto-detect: the Horaro API already provides the
+    // ISO 8601 duration (e.g. "PT2H") in each item's "length" field
     estimateColumnIndex: UNMAPPED_INDEX,
     platformColumnIndex: find([
       "plataforma",
@@ -85,15 +107,7 @@ export function EventDialog({
   onSave,
 }: EventDialogProps) {
   const { addMember, state } = useMemberStore();
-  const [formData, setFormData] = useState<IEvent>({
-    name: "",
-    scheduleLink: "",
-    horaroHiddenKey: "",
-    runs: [],
-    created_at: new Date(),
-    updated_at: null,
-    deleted_at: null,
-  });
+  const [formData, setFormData] = useState<IEvent>({ ...DEFAULT_FORM_DATA });
   const [importedRuns, setImportedRuns] = useState<IRun[]>([]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -104,16 +118,12 @@ export function EventDialog({
     useState<IHoraroEventDataResponse | null>(null);
   const [horaroMappingOpen, setHoraroMappingOpen] = useState(false);
   const [columnMapping, setColumnMapping] = useState<HoraroColumnMapping>({
-    runnersColumnIndex: UNMAPPED_INDEX,
-    gameColumnIndex: UNMAPPED_INDEX,
-    categoryColumnIndex: UNMAPPED_INDEX,
-    estimateColumnIndex: UNMAPPED_INDEX,
-    platformColumnIndex: UNMAPPED_INDEX,
-    yearColumnIndex: UNMAPPED_INDEX,
-    runnersSecondaryLinkColumnIndex: UNMAPPED_INDEX,
+    ...DEFAULT_COLUMN_MAPPING,
   });
 
   useEffect(() => {
+    // Always reset every field/button state when the dialog opens or closes,
+    // so a previous (canceled) session never leaks into the next one
     if (event) {
       setFormData({
         ...event,
@@ -121,17 +131,19 @@ export function EventDialog({
         horaroHiddenKey: event.horaroHiddenKey || "",
       });
     } else {
-      setFormData({
-        name: "",
-        scheduleLink: "",
-        horaroHiddenKey: "",
-        runs: [],
-        created_at: new Date(),
-        updated_at: null,
-        deleted_at: null,
-      });
+      setFormData({ ...DEFAULT_FORM_DATA, created_at: new Date() });
     }
+
     setErrors({});
+    setImportedRuns([]);
+    setLoadingImport(false);
+    setHoraroSchedule(null);
+    setHoraroMappingOpen(false);
+    setColumnMapping({ ...DEFAULT_COLUMN_MAPPING });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }, [event, isOpen]);
 
   const handleChange = (field: keyof IEvent, value: string) => {
@@ -259,6 +271,29 @@ export function EventDialog({
     return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
   };
 
+  const formatEstimateFromColumn = (value: string): string => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+
+    // ISO 8601 duration (PT1H30M) used by the Horaro API
+    if (/^PT/i.test(trimmed)) {
+      return formatTimeToHHMMSS(trimmed);
+    }
+
+    // H:MM or H:MM:SS -> normalize to HH:MM:SS
+    const match = trimmed.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+    if (match) {
+      const [, hours, minutes, seconds] = match;
+      return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${(
+        seconds ?? "0"
+      ).padStart(2, "0")}`;
+    }
+
+    return trimmed;
+  };
+
   const handleImportFromJson = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -317,7 +352,17 @@ export function EventDialog({
     const uniqueMembers = new Map<string, IMember>();
 
     return schedule.items.map((run: { length: string; data: string[] }) => {
-      const estimate = formatTimeToHHMMSS(run.length);
+      // When an estimate column is mapped, it takes priority; otherwise
+      // (auto-detect) we use the item's ISO 8601 "length" field when present
+      const estimateFromColumn =
+        mapping.estimateColumnIndex >= 0
+          ? formatEstimateFromColumn(
+              run.data[mapping.estimateColumnIndex] ?? "",
+            )
+          : "";
+      const estimate =
+        estimateFromColumn ||
+        (run.length ? formatTimeToHHMMSS(run.length) : "");
       const game =
         mapping.gameColumnIndex >= 0
           ? (run.data[mapping.gameColumnIndex] ?? "")
@@ -684,6 +729,32 @@ export function EventDialog({
                   <SelectContent>
                     <SelectItem value={String(UNMAPPED_INDEX)}>
                       Não mapear
+                    </SelectItem>
+                    {horaroSchedule.columns.map((col, i) => (
+                      <SelectItem key={i} value={String(i)}>
+                        {col}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Estimativa (estimate)</Label>
+                <Select
+                  value={String(columnMapping.estimateColumnIndex)}
+                  onValueChange={(v) =>
+                    setColumnMapping((prev) => ({
+                      ...prev,
+                      estimateColumnIndex: parseInt(v, 10),
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a coluna" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={String(UNMAPPED_INDEX)}>
+                      Auto detectar (length ISO 8601 do Horaro)
                     </SelectItem>
                     {horaroSchedule.columns.map((col, i) => (
                       <SelectItem key={i} value={String(i)}>
