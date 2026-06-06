@@ -51,6 +51,11 @@ export default defineConfig(({ command }) => {
             }
           },
           vite: {
+            resolve: {
+              alias: {
+                "@": path.join(__dirname, "src"),
+              },
+            },
             build: {
               sourcemap,
               minify: isBuild,

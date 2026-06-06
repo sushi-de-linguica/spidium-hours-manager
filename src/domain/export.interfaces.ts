@@ -46,6 +46,8 @@ export interface IFileTagObsModule {
   component: EFileTagActionComponentsObs;
   value: string;
   resourceName: string;
+  /** @deprecated Use SET_ELEMENT_VISIBLE / SET_ELEMENT_HIDDEN instead */
+  sceneItemEnabled?: boolean;
 }
 
 export interface IFileTagExportFilesModule {

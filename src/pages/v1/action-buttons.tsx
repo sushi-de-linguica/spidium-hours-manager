@@ -1,6 +1,5 @@
 import { useFileStore } from "@/stores";
-import { Box } from "@mui/material";
-import Icon from "@mui/icons-material/CheckOutlined";
+import { Check } from "lucide-react";
 import { IFileTag, IRun } from "@/domain";
 import { useMemo, useState } from "react";
 import { ActionRunnerService } from "@/services/action-runner";
@@ -52,7 +51,7 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
 
   return (
     <>
-      <Box display="flex" gap={1} flexWrap="wrap">
+      <div className="flex gap-2 flex-wrap">
         {tags.map((tag: IFileTag) => {
           const showByMembers = row.runners.length >= tag.minimumRunnersToShow;
           const showTagButton = tag.isShow;
@@ -79,12 +78,12 @@ const ActionButtons = ({ row }: IActionButtonsProps) => {
               }}
               key={`${tag.id}-${memorizedTagButtonActives.length}`}
             >
-              {isActivatedButton && <Icon />}
+              {isActivatedButton && <Check />}
               {tag.label}
             </Button>
           );
         })}
-      </Box>
+      </div>
 
       <ConfirmDialog
         isOpen={tagToHandler !== null}

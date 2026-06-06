@@ -25,6 +25,15 @@ const handleParseEventsToOBSWS4 = (
               "scene-name": requestData.sceneName,
             },
           };
+
+        case "ToggleInputMute":
+          return {
+            requestType: "ToggleMute",
+            requestData: {
+              source: requestData.inputName,
+            },
+          };
+
         default:
           return null;
       }

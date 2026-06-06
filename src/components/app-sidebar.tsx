@@ -103,7 +103,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     localStorage.setItem(
       "theme",
-      document.body.classList.contains("dark") ? "dark" : ""
+      document.body.classList.contains("dark") ? "dark" : "",
     );
   };
 
@@ -113,9 +113,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="flex w-full items-center justify-start gap-2">
           <img className="h-8 w-8" src={HeaderImage} />
           <div className="flex flex-col text-wrap group-data-[collapsible=icon]:hidden">
-            <strong>Spidium Hours Manager</strong>
+            <strong>Chronaaaaaaooooo</strong>
             <div className="flex flex-row gap-2 items-center justify-start">
-              <small>{packageJson?.version ? `v${packageJson.version}` : ''}</small>
+              <small>
+                {packageJson?.version ? `v${packageJson.version}` : ""}
+              </small>
               <Lightbulb
                 className="w-3 h-3 hover:cursor-pointer"
                 onClick={toggleTheme}

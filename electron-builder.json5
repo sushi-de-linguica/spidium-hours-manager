@@ -4,6 +4,7 @@
 {
   appId: "usinaSpidiumSHM",
   asar: true,
+  npmRebuild: false,
   protocols: {
     name: "shm",
     schemes: ["shm"],

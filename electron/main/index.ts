@@ -103,8 +103,49 @@ async function createWindow() {
   update(win);
 }
 
+const runObsBatch = async (args: unknown) => {
+  if (!websocket) {
+    throw new Error(
+      "OBS não está conectado. Abra Configurações → OBS e conecte o WebSocket."
+    );
+  }
+
+  console.info("[obs] sendBatch", args);
+  return websocket.sendBatch(args);
+};
+
+const registerObsIpcHandlers = () => {
+  ipcMain.removeHandler(EWsEvents.SEND_BATCH_EVENT_OBS);
+  ipcMain.handle(EWsEvents.SEND_BATCH_EVENT_OBS, async (_event, args: unknown) =>
+    runObsBatch(args)
+  );
+
+  ipcMain.removeAllListeners(EWsEvents.SEND_BATCH_EVENT_OBS);
+  ipcMain.on(EWsEvents.SEND_BATCH_EVENT_OBS, (_event, args: unknown) => {
+    void runObsBatch(args).catch((error) => {
+      console.error("[obs] batch error (ipc send)", error);
+    });
+  });
+
+  ipcMain.removeHandler(EWsEvents.CONNECT_OBS);
+  ipcMain.handle(EWsEvents.CONNECT_OBS, async (_event, args) => {
+    try {
+      console.info("[obs] connecting...");
+      await websocket?.connect(args);
+      return true;
+    } catch (error) {
+      console.log("[obs] Connection error", error);
+      throw error;
+    }
+  });
+
+  console.info("[obs] IPC handlers registered (CONNECT_OBS, SEND_BATCH_EVENT_OBS)");
+};
+
 const initElectron = () => {
   console.log("Starting electron main...");
+
+  registerObsIpcHandlers();
 
   ipcMain.handle(EIpcEvents.DATABASE_INIT, () => {
     return database;
@@ -222,21 +263,6 @@ const startCustomEvents = () => {
     }
   });
 
-  ipcMain.on(EWsEvents.SEND_BATCH_EVENT_OBS, (event, args: any) => {
-    websocket?.sendBatch(args);
-  });
-
-  ipcMain.handle(EWsEvents.CONNECT_OBS, async (event, args) => {
-    try {
-      console.info("[obs] connecting...");
-      await websocket?.connect(args);
-      return true;
-    } catch (error) {
-      console.log("[obs] Connection error", error);
-      throw error;
-    }
-  });
-
   ipcMain.on(EWsEvents.DISCONNECT_OBS, () => {
     websocket?.disconnect();
   });
@@ -305,6 +331,7 @@ const startCustomEvents = () => {
   });
 };
 
+registerObsIpcHandlers();
 initElectron();
 startAppEvents(app);
 startCustomEvents();

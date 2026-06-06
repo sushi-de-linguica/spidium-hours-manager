@@ -1,10 +1,11 @@
 import type React from "react";
 import { randomUUID } from "crypto";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowLeft,
   Clock,
   Gamepad,
+  Pencil,
   Plus,
   Save,
   Trash2,
@@ -33,9 +34,10 @@ import { toast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useParams } from "react-router";
 import { useEvents } from "@/hooks/use-events";
-import { IRun } from "@/domain";
+import { IMember, IRun } from "@/domain";
 import { useMembers } from "@/hooks/use-members";
 import { IFile } from "@/domain";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ImageUpload } from "@/components/image-upload";
 import { MAX_IMAGE_SIZE_BYTES, MAX_IMAGE_SIZE_MB } from "@/constants/file";
 
@@ -87,8 +89,35 @@ export default function AddRunPage() {
     },
   ]);
 
+  const initialRunsRef = useRef(JSON.stringify(runs));
+  const hasUnsavedChanges = () =>
+    JSON.stringify(runs) !== initialRunsRef.current;
+
+  const [pendingMemberEdit, setPendingMemberEdit] = useState<IMember | null>(
+    null,
+  );
+
   const onBackButtonClick = () => {
     navigate(`/events/${event.id}/runs`);
+  };
+
+  const goToMemberEdit = (member: IMember) => {
+    const returnTo = editRun
+      ? `/events/${event.id}/runs/${editRun.id}/edit`
+      : `/events/${event.id}/runs/add`;
+
+    navigate("/events/members", {
+      state: { editMemberId: member.id, returnTo },
+    });
+  };
+
+  const handleEditMemberClick = (member: IMember) => {
+    if (hasUnsavedChanges()) {
+      setPendingMemberEdit(member);
+      return;
+    }
+
+    goToMemberEdit(member);
   };
 
   const handleAddRun = () => {
@@ -111,10 +140,10 @@ export default function AddRunPage() {
 
   const handleAddImage = async (runId: string) => {
     // Create a hidden file input
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.style.display = 'none';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.style.display = "none";
 
     // Add it to the document
     document.body.appendChild(input);
@@ -165,14 +194,14 @@ export default function AddRunPage() {
                     ...(run.images || []),
                     {
                       id: randomUUID(),
-                      name: file.name.split('.')[0], // Use filename as default name
+                      name: file.name.split(".")[0], // Use filename as default name
                       file: newFile,
                     },
                   ],
                 };
               }
               return run;
-            })
+            }),
           );
         }
         document.body.removeChild(input);
@@ -230,7 +259,7 @@ export default function AddRunPage() {
           return { ...run, [field]: value };
         }
         return run;
-      })
+      }),
     );
   };
 
@@ -239,7 +268,7 @@ export default function AddRunPage() {
       runs.map((run) => {
         if (run.id === runId) {
           const newRunners = run.runners.filter(
-            (runner) => runner.id !== runnerId
+            (runner) => runner.id !== runnerId,
           );
 
           return {
@@ -248,7 +277,7 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
@@ -264,7 +293,7 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
@@ -273,7 +302,7 @@ export default function AddRunPage() {
       runs.map((run) => {
         if (run.id === runId) {
           const newComments = run.comments.filter(
-            (runner) => runner.id !== runnerId
+            (runner) => runner.id !== runnerId,
           );
 
           return {
@@ -282,7 +311,7 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
@@ -296,11 +325,15 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
-  const handleImageNameChange = (runId: string, imageId: string, name: string) => {
+  const handleImageNameChange = (
+    runId: string,
+    imageId: string,
+    name: string,
+  ) => {
     setRuns(
       runs.map((run) => {
         if (run.id === runId) {
@@ -315,11 +348,15 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
-  const handleImageUpload = (runId: string, imageId: string, file: IFile | null) => {
+  const handleImageUpload = (
+    runId: string,
+    imageId: string,
+    file: IFile | null,
+  ) => {
     setRuns(
       runs.map((run) => {
         if (run.id === runId) {
@@ -328,12 +365,13 @@ export default function AddRunPage() {
             images: run.images?.map((img) => {
               if (img.id === imageId) {
                 return {
-                  ...img, file: file || {
+                  ...img,
+                  file: file || {
                     type: "",
                     path: "",
                     lastModified: 0,
                     base64: "",
-                  }
+                  },
                 };
               }
               return img;
@@ -341,7 +379,7 @@ export default function AddRunPage() {
           };
         }
         return run;
-      })
+      }),
     );
   };
 
@@ -349,8 +387,7 @@ export default function AddRunPage() {
     e.preventDefault();
 
     const isValid = runs.every(
-      (run) =>
-        run.game && run.category && run.estimate
+      (run) => run.game && run.category && run.estimate,
     );
 
     console.log("Current runs", runs);
@@ -505,9 +542,7 @@ export default function AddRunPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Users className="h-4 w-4" />
-                    <Label htmlFor={`runners-${run.id}`}>
-                      Runners
-                    </Label>
+                    <Label htmlFor={`runners-${run.id}`}>Runners</Label>
                   </div>
                 </div>
 
@@ -520,6 +555,16 @@ export default function AddRunPage() {
                         className="flex items-center gap-1"
                       >
                         {runner.name}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 ml-1 hover:bg-transparent"
+                          title="Editar membro"
+                          onClick={() => handleEditMemberClick(runner)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
                         <Button
                           type="button"
                           variant="ghost"
@@ -540,7 +585,7 @@ export default function AddRunPage() {
                         !run.runners.map((runner) => runner.id).includes(value)
                       ) {
                         const runner = membersStore.members.find(
-                          (runner) => runner.id === value
+                          (runner) => runner.id === value,
                         );
                         if (!runner) return;
 
@@ -561,7 +606,7 @@ export default function AddRunPage() {
                           (runner) =>
                             !run.runners
                               .map((runner) => runner.id)
-                              .includes(runner.id)
+                              .includes(runner.id),
                         )
                         .map((runner) => (
                           <SelectItem key={runner.id} value={runner.id!}>
@@ -595,6 +640,16 @@ export default function AddRunPage() {
                           variant="ghost"
                           size="icon"
                           className="h-4 w-4 ml-1 hover:bg-transparent"
+                          title="Editar membro"
+                          onClick={() => handleEditMemberClick(runner)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 ml-1 hover:bg-transparent"
                           onClick={() => removeComment(run.id!, runner.id!)}
                         >
                           <X className="h-3 w-3" />
@@ -610,7 +665,7 @@ export default function AddRunPage() {
                         !run.comments.map((runner) => runner.id).includes(value)
                       ) {
                         const runner = membersStore.members.find(
-                          (runner) => runner.id === value
+                          (runner) => runner.id === value,
                         );
                         if (!runner) return;
 
@@ -631,7 +686,7 @@ export default function AddRunPage() {
                           (runner) =>
                             !run.comments
                               .map((runner) => runner.id)
-                              .includes(runner.id)
+                              .includes(runner.id),
                         )
                         .map((runner) => (
                           <SelectItem key={runner.id} value={runner.id!}>
@@ -665,6 +720,16 @@ export default function AddRunPage() {
                           variant="ghost"
                           size="icon"
                           className="h-4 w-4 ml-1 hover:bg-transparent"
+                          title="Editar membro"
+                          onClick={() => handleEditMemberClick(runner)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 ml-1 hover:bg-transparent"
                           onClick={() => removeHost(run.id!, runner.id!)}
                         >
                           <X className="h-3 w-3" />
@@ -680,7 +745,7 @@ export default function AddRunPage() {
                         !run.hosts.map((runner) => runner.id).includes(value)
                       ) {
                         const runner = membersStore.members.find(
-                          (runner) => runner.id === value
+                          (runner) => runner.id === value,
                         );
                         if (!runner) return;
 
@@ -701,7 +766,7 @@ export default function AddRunPage() {
                           (runner) =>
                             !run.hosts
                               .map((runner) => runner.id)
-                              .includes(runner.id)
+                              .includes(runner.id),
                         )
                         .map((runner) => (
                           <SelectItem key={runner.id} value={runner.id!}>
@@ -741,14 +806,21 @@ export default function AddRunPage() {
                           }
                         />
                         <div className="flex flex-row items-center gap-4 mb-2 w-full">
-                          <Label htmlFor={`image-name-${image.id}`} className="text-right">
+                          <Label
+                            htmlFor={`image-name-${image.id}`}
+                            className="text-right"
+                          >
                             Nome da imagem
                           </Label>
                           <Input
                             id={`image-name-${image.id}`}
                             value={image.name}
                             onChange={(e) =>
-                              handleImageNameChange(run.id!, image.id, e.target.value)
+                              handleImageNameChange(
+                                run.id!,
+                                image.id,
+                                e.target.value,
+                              )
                             }
                             className="col-span-3"
                             placeholder="Nome para exportação"
@@ -781,6 +853,24 @@ export default function AddRunPage() {
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        isOpen={pendingMemberEdit !== null}
+        data={pendingMemberEdit}
+        title="Alterações não salvas"
+        confirmText="ir mesmo assim"
+        cancelText="ficar nessa tela"
+        confirmColor="red"
+        handleConfirm={(member) => {
+          setPendingMemberEdit(null);
+          goToMemberEdit(member);
+        }}
+        handleCancel={() => setPendingMemberEdit(null)}
+      >
+        Você tem alterações não salvas nessa run. Se for para a edição do membro
+        [{pendingMemberEdit?.name}] agora, essas alterações serão perdidas.
+        Deseja continuar?
+      </ConfirmDialog>
     </div>
   );
 }

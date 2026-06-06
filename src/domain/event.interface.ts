@@ -4,6 +4,7 @@ export interface IEvent {
   id?: string;
   name?: string;
   scheduleLink?: string;
+  horaroHiddenKey?: string;
   runs: IRun[];
   created_at: Date;
   updated_at?: Date | null;

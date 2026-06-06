@@ -24,6 +24,11 @@ import { NightbotApiService } from "./nightbot-service";
 import { toast } from "react-toastify";
 import { TwitchApiService } from "./twitch-service";
 import fs from "fs";
+import { buildToggleAudioMuteBatchRequests } from "@/helpers/obs-toggle-audio-mute-batch";
+import {
+  buildSetSceneItemVisibilityBatchRequests,
+  buildToggleSceneItemVisibilityBatchRequests,
+} from "@/helpers/obs-toggle-visibility-batch";
 
 interface INightbotText {
   command: any;
@@ -161,6 +166,53 @@ class ActionRunnerService {
       });
     };
 
+    const pushSceneItemVisibility = (
+      action: IFileTagObsModule,
+      sceneItemEnabled?: boolean
+    ) => {
+      if (!action.value || !action.resourceName) {
+        return;
+      }
+
+      const data = {
+        sceneName: action.value.trim(),
+        sourceName: action.resourceName.trim(),
+      };
+
+      batchRequests.push(
+        ...(sceneItemEnabled === undefined
+          ? buildToggleSceneItemVisibilityBatchRequests(data)
+          : buildSetSceneItemVisibilityBatchRequests({
+              ...data,
+              sceneItemEnabled,
+            }))
+      );
+    };
+
+    const handleToggleElementVisibility = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action);
+    };
+
+    const handleSetElementVisible = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action, true);
+    };
+
+    const handleSetElementHidden = (action: IFileTagObsModule) => {
+      pushSceneItemVisibility(action, false);
+    };
+
+    const handleToggleAudioMute = (action: IFileTagObsModule) => {
+      if (!action.resourceName) {
+        return;
+      }
+
+      batchRequests.push(
+        ...buildToggleAudioMuteBatchRequests({
+          inputName: action.resourceName.trim(),
+        })
+      );
+    };
+
     actions.forEach((act) => {
       switch (true) {
         case act.component === EFileTagActionComponentsObs.SET_BROWSER_SOURCE:
@@ -170,12 +222,78 @@ class ActionRunnerService {
         case act.component === EFileTagActionComponentsObs.CHANGE_SCENE:
           handleChangeScene(act);
           break;
+
+        case act.component ===
+          EFileTagActionComponentsObs.TOGGLE_ELEMENT_VISIBILITY:
+          handleToggleElementVisibility(act);
+          break;
+
+        case act.component === EFileTagActionComponentsObs.SET_ELEMENT_VISIBLE:
+          handleSetElementVisible(act);
+          break;
+
+        case act.component === EFileTagActionComponentsObs.SET_ELEMENT_HIDDEN:
+          handleSetElementHidden(act);
+          break;
+
+        case act.component === EFileTagActionComponentsObs.TOGGLE_AUDIO_MUTE:
+          handleToggleAudioMute(act);
+          break;
       }
     });
 
     console.log("[OBS] batchRequests", batchRequests);
     if (batchRequests.length > 0) {
-      ipcRenderer.send(EWsEvents.SEND_BATCH_EVENT_OBS, batchRequests);
+      void this.sendObsBatch(batchRequests);
+    }
+  }
+
+  private async sendObsBatch(batchRequests: unknown[]) {
+    try {
+      const result = await ipcRenderer.invoke(
+        EWsEvents.SEND_BATCH_EVENT_OBS,
+        batchRequests
+      );
+
+      if (result && typeof result === "object") {
+        if (
+          "sceneItemEnabled" in result &&
+          typeof (result as { sceneItemEnabled: boolean }).sceneItemEnabled ===
+            "boolean"
+        ) {
+          const visible = (result as { sceneItemEnabled: boolean })
+            .sceneItemEnabled;
+          toast.success(`OBS: item ${visible ? "exibido" : "ocultado"}`);
+          return;
+        }
+
+        if (
+          "inputMuted" in result &&
+          typeof (result as { inputMuted: boolean }).inputMuted === "boolean"
+        ) {
+          const muted = (result as { inputMuted: boolean }).inputMuted;
+          toast.success(
+            `OBS: áudio ${muted ? "mutado" : "desmutado"} (toggle)`
+          );
+          return;
+        }
+      }
+
+      toast.success("OBS: comandos executados com sucesso");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (message.includes("No handler registered")) {
+        console.warn("[OBS] invoke failed, using ipc send — reinicie o Electron");
+        ipcRenderer.send(EWsEvents.SEND_BATCH_EVENT_OBS, batchRequests);
+        toast.warning(
+          "OBS: comando enviado. Reinicie o app (npm run dev) para ver erros e confirmações."
+        );
+        return;
+      }
+
+      console.error("[OBS] batch error", error);
+      toast.error(message.startsWith("OBS") ? message : `OBS: ${message}`);
     }
   }
 

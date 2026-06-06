@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IMember } from "@/domain";
@@ -8,14 +9,39 @@ import { MemberDialog } from "./member-dialog";
 import { useMembers } from "@/hooks/use-members";
 import { useToast } from "@/hooks/use-toast";
 
+interface IMembersPageLocationState {
+  editMemberId?: string;
+  returnTo?: string;
+}
+
 export const MembersPage = () => {
   const [members, setMembers] = useState<IMember[]>([]);
   const { membersStore, addMember, updateMember, removeMember } = useMembers();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = (location.state ?? null) as IMembersPageLocationState | null;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<IMember | null>(null);
+  const [hasOpenedFromState, setHasOpenedFromState] = useState(false);
+
+  // When coming from a run (add/edit), open the edit dialog for the requested member
+  useEffect(() => {
+    if (hasOpenedFromState || !locationState?.editMemberId) {
+      return;
+    }
+
+    const memberToEdit = membersStore?.members?.find(
+      (member) => member.id === locationState.editMemberId
+    );
+    if (memberToEdit) {
+      setCurrentMember(memberToEdit);
+      setIsDialogOpen(true);
+      setHasOpenedFromState(true);
+    }
+  }, [membersStore?.members, locationState?.editMemberId, hasOpenedFromState]);
 
   const filteredMembers = members.filter(
     (member) =>
@@ -71,6 +97,16 @@ export const MembersPage = () => {
   };
   return (
     <div className="container mx-auto gap-4 p-4 md:gap-8 md:p-8">
+      {locationState?.returnTo && (
+        <Button
+          variant="ghost"
+          onClick={() => navigate(locationState.returnTo!)}
+          className="mb-4"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para a run
+        </Button>
+      )}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h1 className="text-3xl font-bold">Membros</h1>
         <div className="flex w-full sm:w-auto gap-4">
